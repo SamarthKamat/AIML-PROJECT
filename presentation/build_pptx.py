@@ -274,8 +274,8 @@ bullets(s, ["bash run_all.sh: pinned, hash-verified downloads → data generatio
             "Experiment registry (run.json per experiment): dataset hash, seeds, features, split counts, class balance, hyper-parameters, metrics, timestamps.",
             "verify_results.py: 61/61 checks — confusion matrices sum to test size, metrics recomputed from predictions, prevalence, CRN integrity, impact components.",
             "pytest: 35 tests pass (leakage, metrics, policy, simulator, MILP, validation, 20 API end-to-end); API suite also passes on MySQL (MariaDB 10.11).",
-            "Browser check: all 12 pages rendered with live data and zero console errors (Playwright).",
-            "Not executed: the Gemini path of the assistant (no API key); its deterministic tool router is tested."], size=18)
+            "Browser check: all 12 pages rendered with live data and zero console errors (Playwright); deployed on Render.",
+            "Gemini function calling executed with a live key; free-tier throttling falls back to the tested deterministic router."], size=18)
 
 # 20 limitations
 s = slide("Limitations and future work")

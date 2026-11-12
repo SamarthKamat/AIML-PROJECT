@@ -37,7 +37,7 @@ def create_app(test_config: dict | None = None) -> Flask:
         AS_OF=os.environ.get("APP_AS_OF", "2025-12-01"),
         MAX_CONTENT_LENGTH=20 * 1024 * 1024,
         GEMINI_API_KEY=os.environ.get("GEMINI_API_KEY", ""),
-        GEMINI_MODEL=os.environ.get("GEMINI_MODEL", "gemini-2.0-flash"),
+        GEMINI_MODEL=os.environ.get("GEMINI_MODEL", "gemini-flash-latest"),
         AUTH_DISABLED=os.environ.get("AUTH_DISABLED", "0") == "1",
     )
     if test_config:

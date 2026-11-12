@@ -111,7 +111,7 @@ Two modelling defects were fixed and are documented: (a) an inventory cap that s
 They are illustrative assumptions, listed in `documentation/research/ECONOMIC_ASSUMPTIONS.md` and `experiments/scenario_assumptions.json` (e.g., 6 % alternate premium, 3× expedited freight, 24 %/yr holding, 15 % shortage penalty). They are not company figures; conclusions concern relative policy performance.
 
 **33. How does the AI assistant avoid hallucination?**
-The LLM (Gemini, when a key is configured) can only call nine tools: database queries, model inference, simulation and MILP. The answer is returned together with the raw tool outputs ("Show evidence"). Without a key, a deterministic intent router calls the same tools. The Gemini path was not executed in our environment; the router is covered by 7 parametrised tests.
+The LLM (Gemini, when a key is configured) can only call nine tools: database queries, model inference, simulation and MILP. The answer is returned together with the raw tool outputs ("Show evidence"). Without a key, a deterministic intent router calls the same tools. Gemini was executed with a live key (free tier, 5 requests/min); when throttled the app rotates models and then falls back to the router, which is covered by 7 parametrised tests.
 
 **34. How can someone reproduce your results?**
 Run `bash run_all.sh`. It performs pinned, hash-verified downloads, regenerates data (seed 42), runs all experiments, executes 61 verification checks, rebuilds every paper table and the number macros from result files, loads the database, and runs 35 tests (also passing on MySQL). A repository URL alone is not the claim; the executable pipeline is.

@@ -27,6 +27,8 @@ app-wide NaN-safe JSON provider).
 ## Data validation (`python -m backend.data_validation`)
 14 tables, 196 checks, all pass; report in `documentation/testing/data_quality_report.json`.
 
+## Gemini (executed)
+With a real key, `gemini-flash-latest` answered questions by calling the `supplier_failure_impact` and `explain_supplier_risk` tools; numbers matched the tool outputs. Free-tier quota (5 requests/min) and occasional 503s trigger model rotation, then the deterministic router (30 s budget).
+
 ## Not tested
-* Gemini function-calling path (no API key / outbound access in this environment).
 * Load/performance testing; no real-time claims are made.

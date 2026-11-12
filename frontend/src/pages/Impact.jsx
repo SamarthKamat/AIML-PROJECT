@@ -3,6 +3,15 @@ import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAx
 import { api, compactInr, num, pct } from '../api.js'
 import { Card, ErrorBox, Loader, PageHeader, tooltipStyle, useApi } from '../components/ui.jsx'
 
+const POLICY_LABEL = {
+  'oracle (perfect foresight, upper bound)': 'Oracle — perfect foresight (lower bound on cost)',
+  no_action_monitor_only: 'Monitor only (no action)',
+  'threshold_0.5_contingency': 'Contingency review if p ≥ 0.5',
+  'expected_cost_policy (calibrated)': 'Expected-cost policy — calibrated p',
+  'expected_cost_policy (uncalibrated)': 'Expected-cost policy — uncalibrated p',
+  contingency_review_for_all: 'Contingency review for every supplier',
+}
+
 export default function Impact() {
   const { data, error, loading } = useApi(() => api('/api/experiments'))
   const types = useApi(() => api('/api/simulation/impact-types'))
@@ -29,7 +38,7 @@ export default function Impact() {
         </Card>
         <Card title="Decision-policy business outcome (Exp 1 test split)" sub="Realised cost = action costs + unmitigated true-exposure losses of suppliers that were disrupted">
           <div className="table-wrap"><table><thead><tr><th>Policy</th><th className="num">Realised cost (simulated INR)</th></tr></thead>
-            <tbody>{Object.entries(bo).map(([k, v]) => <tr key={k}><td>{k}</td><td className="num">{compactInr(v)}</td></tr>)}</tbody></table></div>
+            <tbody>{Object.entries(bo).sort((x, y) => x[1] - y[1]).map(([k, v]) => <tr key={k}><td>{POLICY_LABEL[k] || k}</td><td className="num">{compactInr(v)}</td></tr>)}</tbody></table></div>
           <p className="note">Honest finding: with ~3–4 weeks of inventory cover, most single-supplier disruptions are absorbed, so the calibrated policy rarely escalates; value concentrates in network-level shocks (see Scenario Comparison).</p>
         </Card>
       </div>

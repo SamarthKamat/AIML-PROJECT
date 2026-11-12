@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  Activity, Bot, Boxes, Database, FileBarChart, GitBranch, LayoutDashboard, LogOut, Network, ShieldAlert, Sparkles, Wrench, Zap,
+  Activity, Bot, Boxes, Database, FileBarChart, GitBranch, LayoutDashboard, LogOut, Menu, Network, ShieldAlert, Sparkles, Wrench, X, Zap,
 } from 'lucide-react'
 import { getToken, getUser, setSession } from './api.js'
 import Login from './pages/Login.jsx'
@@ -28,9 +28,15 @@ const NAV = [
 function Shell({ onLogout }) {
   const loc = useLocation()
   const user = getUser()
+  const [open, setOpen] = useState(false)
+  useEffect(() => { setOpen(false) }, [loc.pathname])
   return (
     <div className="shell">
-      <aside className="sidebar">
+      <div className="mobile-bar">
+        <div className="brand" style={{ padding: 0 }}><div className="brand-logo"><span /></div><b style={{ fontSize: 14 }}>SUPPLY CHAIN BLACK BOX</b></div>
+        <button className="btn small" onClick={() => setOpen(!open)} aria-label="Toggle menu">{open ? <X size={16} /> : <Menu size={16} />}</button>
+      </div>
+      <aside className={`sidebar ${open ? 'open' : ''}`}>
         <div className="brand">
           <div className="brand-logo"><span /></div>
           <div><h1>SUPPLY CHAIN<br />BLACK BOX</h1><small>Control Tower</small></div>

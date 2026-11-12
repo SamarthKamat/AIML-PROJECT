@@ -17,7 +17,7 @@
 ## What the AI tool did NOT do
 * It did not fabricate data presented as real, invent results, or edit numbers by hand: all tables are produced by
   `ml/experiments/paper_tables.py` from saved outputs and checked by `ml/experiments/verify_results.py`.
-* It did not execute the Gemini path of the assistant (no API key/network); this is stated as implemented-not-tested.
+* The Gemini path of the assistant was executed with the team's API key (stored only as a Render secret, never in the repository).
 
 ## Compliance note on the 20 % AI-content rule
 The course template limits AI-generated content (text or code) to < 20 % as measured by Turnitin. **Most of the code and text in

@@ -8,8 +8,19 @@ const SUGGEST = ['Which supplier is most critical?', 'What happens if S0122 fail
   'What is the current inventory coverage?', 'Which alternative supplier is suitable for S0003?', 'Compare mild and severe disruption scenarios',
   'Why was S0122 classified this way?', 'What should we do about S0041?']
 
+// Minimal, safe markdown: **bold**, `code`, and "* " / "- " bullets (no HTML injection: React escapes text)
+function Md({ text }) {
+  const inline = (line, k) => line.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).map((part, i) =>
+    part.startsWith('**') && part.endsWith('**') ? <b key={k + '-' + i}>{part.slice(2, -2)}</b>
+      : part.startsWith('`') && part.endsWith('`') ? <code key={k + '-' + i} className="mono">{part.slice(1, -1)}</code> : part)
+  return <>{String(text).split('\n').map((ln, i) => {
+    const m = ln.match(/^\s*[*-]\s+(.*)/)
+    return m ? <div key={i} style={{ paddingLeft: 14, textIndent: -10 }}>• {inline(m[1], i)}</div> : <div key={i}>{inline(ln, i) || '\u00a0'}</div>
+  })}</>
+}
+
 export default function Assistant() {
-  const [msgs, setMsgs] = useState([{ role: 'bot', text: 'Hello — I am the Supply Chain Black Box analyst. I answer only from the database, the calibrated risk model, the cascade simulator and the recovery optimiser, and show the evidence behind every answer.' }])
+  const [msgs, setMsgs] = useState([{ role: 'bot', text: 'Hello — I am the Supply Chain Black Box analyst (Gemini with tool calling; a deterministic router answers if Gemini is busy). I answer only from the database, the calibrated risk model, the cascade simulator and the recovery optimiser, and show the evidence behind every answer.' }])
   const [q, setQ] = useState('')
   const [busy, setBusy] = useState(false)
   const end = useRef(null)
@@ -35,7 +46,7 @@ export default function Assistant() {
           <AnimatePresence initial={false}>
             {msgs.map((m, i) => (
               <motion.div key={i} className={`msg ${m.role}`} initial={{ opacity: 0, y: 10, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.3 }}>
-                {m.role === 'bot' && <Bot size={14} color="#22d3ee" style={{ verticalAlign: -2, marginRight: 6 }} />}{m.text}
+                {m.role === 'bot' && <Bot size={14} color="#22d3ee" style={{ verticalAlign: -2, marginRight: 6, float: 'left', marginTop: 4 }} />}{m.role === 'bot' ? <Md text={m.text} /> : m.text}
                 {m.engine && <div className="meta">engine: {m.engine} · tools: {(m.calls || []).map((c) => c.tool).join(', ') || 'none'}</div>}
                 {m.calls?.length > 0 && <details className="evidence"><summary>Show evidence (tool outputs)</summary><pre>{JSON.stringify(m.calls, null, 2)}</pre></details>}
               </motion.div>))}

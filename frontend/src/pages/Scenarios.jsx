@@ -70,7 +70,7 @@ export default function Scenarios() {
         <Card title={m[1]} sub="Mean with 95% percentile interval where available" className="span2"
           right={<select value={metric} onChange={(e) => setMetric(e.target.value)} style={{ width: 230 }}>{METRICS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>}>
           <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={g}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="severity" /><YAxis tick={{ fontSize: 10 }} tickFormatter={m[2]} />
+            <BarChart data={g}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="severity" /><YAxis width={78} tick={{ fontSize: 10 }} tickFormatter={m[2]} />
               <Tooltip {...tooltipStyle} formatter={(v) => (Array.isArray(v) ? '' : m[2](v))} /><Legend />
               {pols.map((p) => <Bar key={p} dataKey={p} fill={POLICY_COLORS[p]} radius={[6, 6, 0, 0]} animationDuration={1200}>
                 {g[0][p + '_err'] && <ErrorBar dataKey={p + '_err'} width={4} stroke="#e7eefb" strokeWidth={1} />}</Bar>)}
@@ -80,7 +80,7 @@ export default function Scenarios() {
         <Card title="Cost vs. risk" sub="Procurement spend vs. unmet demand (bubble = financial impact)">
           <ResponsiveContainer width="100%" height={320}>
             <ScatterChart><CartesianGrid strokeDasharray="3 3" /><XAxis type="number" dataKey="procurement_spend_inr" name="Procurement" tickFormatter={compactInr} tick={{ fontSize: 10 }} />
-              <YAxis type="number" dataKey="unmet_demand_units" name="Unmet" tickFormatter={(v) => num(v)} tick={{ fontSize: 10 }} />
+              <YAxis type="number" dataKey="unmet_demand_units" name="Unmet" width={70} tickFormatter={(v) => num(v)} tick={{ fontSize: 10 }} />
               <ZAxis type="number" dataKey="financial_impact_inr" range={[80, 900]} />
               <Tooltip {...tooltipStyle} content={({ payload }) => payload?.[0] ? <div className="card" style={{ padding: 10 }}><b>{payload[0].payload.scenario}</b> {payload[0].payload.severity} · {payload[0].payload.policy}<div className="small muted">impact {compactInr(payload[0].payload.financial_impact_inr)}</div></div> : null} />
               {pols.map((p) => <Scatter key={p} name={p} data={rows.filter((r) => r.policy === p)} fill={POLICY_COLORS[p]} fillOpacity={0.8} />)}
@@ -89,10 +89,10 @@ export default function Scenarios() {
           </ResponsiveContainer>
         </Card>
       </div>
-      <div className="grid g2">
+      <div className="grid" style={{ gridTemplateColumns: 'minmax(0,3fr) minmax(0,2fr)', gap: 18 }}>
         <Card title="Paired policy comparison" sub="Mean saving in financial impact (common random numbers), 95% CI">
-          <div className="table-wrap"><table><thead><tr><th>Severity</th><th>Comparison</th><th className="num">Mean saving</th><th className="num">95% CI</th><th className="num">Reps 2nd better</th></tr></thead>
-            <tbody>{data.paired.map((r, i) => <tr key={i}><td>{r.severity}</td><td className="small">{r.comparison}</td><td className="num"><b style={{ color: r.mean_saving_inr > 0 ? '#34d399' : r.mean_saving_inr < 0 ? '#f87171' : '' }}>{compactInr(r.mean_saving_inr)}</b></td>
+          <div className="table-wrap"><table><thead><tr><th>Severity</th><th>Saving of</th><th className="num">Mean saving</th><th className="num">95% CI</th><th className="num">Reps where 2nd is cheaper</th></tr></thead>
+            <tbody>{data.paired.map((r, i) => <tr key={i}><td>{r.severity}</td><td className="small">{r.comparison.replace(" minus ", " → ").replace("A: No intervention", "A").replace("B: Rule-based", "B").replace("C: Optimisation", "C")}</td><td className="num"><b style={{ color: r.mean_saving_inr > 0 ? '#34d399' : r.mean_saving_inr < 0 ? '#f87171' : '' }}>{compactInr(r.mean_saving_inr)}</b></td>
               <td className="num small">{compactInr(r.ci95_low)} – {compactInr(r.ci95_high)}</td><td className="num">{pct(r.share_reps_b_better, 0)}</td></tr>)}</tbody></table></div>
         </Card>
         <Card title="Economic assumptions (illustrative, INR)" sub={A.status}>

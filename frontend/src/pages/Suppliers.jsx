@@ -4,6 +4,8 @@ import { Search, X } from 'lucide-react'
 import { api, compactInr, num, pct } from '../api.js'
 import { Badge, Card, ErrorBox, Loader, PageHeader, RiskBar, useApi } from '../components/ui.jsx'
 
+const SHORT = { routine_monitoring: 'Monitor', enhanced_monitoring: 'Enhanced monitoring', contingency_review: 'Contingency review', escalate_recovery: 'Escalate' }
+
 export function SupplierDrawer({ id, onClose }) {
   const { data: d, error, loading } = useApi(() => api(`/api/suppliers/${id}`), [id])
   return (
@@ -66,14 +68,14 @@ export default function Suppliers() {
         {loading ? <Loader /> : data && <>
           <div className="table-wrap"><table>
             <thead><tr><th>ID</th><th>Supplier</th><th>Tier</th><th>Material</th><th>Region</th><th className="num">Reliability</th>
-              <th className="num">Utilisation</th><th>Calibrated p(30d)</th><th>Band</th><th className="num">Exposure</th><th>Action</th></tr></thead>
+              <th className="num">Util.</th><th>Calibrated p(30d)</th><th>Band</th><th className="num">Exposure</th><th>Action</th></tr></thead>
             <tbody>{data.items.map((s, i) => (
               <motion.tr key={s.supplier_id} className="clickable" onClick={() => setSel(s.supplier_id)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.015 }}>
                 <td className="mono dim">{s.supplier_id}</td><td><b>{s.supplier_name.replace(' (Synthetic)', '')}</b></td>
                 <td><span className="badge b-tier">T{s.tier}</span></td><td className="mono">{s.primary_material_id}</td><td>{s.region}</td>
                 <td className="num">{s.reliability_score.toFixed(3)}</td><td className="num">{pct(s.capacity_utilisation, 0)}</td>
-                <td><RiskBar p={s.probability_calibrated} />{pct(s.probability_calibrated)}</td><td><Badge band={s.risk_band} /></td>
-                <td className="num">{compactInr(s.exposure_inr)}</td><td className="small muted">{s.recommended_action?.replaceAll('_', ' ')}</td>
+                <td><RiskBar p={s.probability_calibrated} max={0.3} />{pct(s.probability_calibrated)}</td><td><Badge band={s.risk_band} /></td>
+                <td className="num">{compactInr(s.exposure_inr)}</td><td className="small">{SHORT[s.recommended_action] || s.recommended_action}</td>
               </motion.tr>))}</tbody>
           </table></div>
           <div className="row" style={{ justifyContent: 'space-between', marginTop: 14 }}>

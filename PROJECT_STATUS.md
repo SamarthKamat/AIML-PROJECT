@@ -16,7 +16,7 @@ Legend: **P** planned · **I** implemented · **T** tested · **V** experimental
 | 10 | Alternative-supplier optimisation | I T V D |
 | 11 | Flask backend (31 routes) | I T D |
 | 12 | React frontend (12 pages) | I T D — Playwright, zero console errors |
-| 13 | AI assistant | I T D (rule-based router); Gemini path **I only — not executed** (no key or network) |
+| 13 | AI assistant | I T D — Gemini tool calling executed with a live key; router fallback on free-tier throttling |
 | 14 | Testing and validation | T — 35/35 pytest on SQLite; 20/20 API tests on MySQL |
 | 15 | IEEE report and documentation | I — 5-page PDF, Overleaf package |
 | 16 | Presentation and viva | I — 22-slide PPTX, 35 viva Q&As |
@@ -36,8 +36,7 @@ SQLite datetime binding; MySQL reserved words; SPA deep links; NaN in JSON; simu
 recovery-time censoring (horizon 120 → 180 days).
 
 ## Known limitations
-Supplier-level results use synthetic data; economics are illustrative; GNNs did not help; the static MILP over-hedges for mild shocks; the Gemini path is
-untested; author details are placeholders; AI-generated content exceeds the course's 20 % guideline until the team rewrites it.
+Supplier-level results use synthetic data; economics are illustrative; GNNs did not help; the static MILP over-hedges for mild shocks; Gemini is rate-limited on the free tier; author details are placeholders; AI-generated content exceeds the course's 20 % guideline until the team rewrites it.
 
 ## Deadlines (template)
 Second review: 20 Nov 2026 · Final submission: 4 Dec 2026 (11:59 PM AoE).

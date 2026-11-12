@@ -113,7 +113,7 @@ def dashboard_summary() -> dict:
         risk_distribution=pred.band.value_counts().reindex(["Low", "Medium", "High", "Critical"]).fillna(0).astype(int).to_dict(),
         action_distribution=pred.recommended_action.value_counts().to_dict(),
         risk_histogram=np.histogram(pred.probability_calibrated, bins=np.linspace(0, max(0.5, pred.probability_calibrated.max()), 11))[0].tolist(),
-        top_risk_suppliers=top[["supplier_id", "supplier_name", "tier", "region", "probability_calibrated", "exposure_inr", "risk_category"]].round(4).to_dict(orient="records"),
+        top_risk_suppliers=top[["supplier_id", "supplier_name", "tier", "region", "probability_calibrated", "exposure_inr", "risk_category", "recommended_action"]].round(4).to_dict(orient="records"),
         critical_dependencies=[dict(material_id=k, material_name=mats.loc[k, "material_name"], hhi=round(v, 3),
                                     suppliers=int((t1.material_id == k).sum())) for k, v in crit.items()],
         inventory_exposure=[dict(material_id=k, material_name=mats.loc[k, "material_name"], days_of_cover=round(float(v), 1),

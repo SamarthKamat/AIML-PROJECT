@@ -281,6 +281,10 @@ HELP = ("I answer questions from the database, the calibrated risk model, the ca
 
 
 # ======================================================================= Gemini
+GEMINI_BUDGET_S = 30.0
+FALLBACK_MODELS = ["gemini-flash-latest", "gemini-2.5-flash", "gemini-flash-lite-latest", "gemini-2.5-flash-lite"]
+
+
 def _gemini(question: str):
     key = current_app.config["GEMINI_API_KEY"]
     model = current_app.config["GEMINI_MODEL"]
@@ -291,13 +295,41 @@ def _gemini(question: str):
                "Always call a tool to obtain numbers; never invent values. Supplier ids look like S0001, materials M01. Cite the numbers returned by "
                "tools, state that monetary values are simulated, and keep answers concise.")
     contents = [dict(role="user", parts=[dict(text=question)])]
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
     calls = []
-    for _ in range(4):
-        r = requests.post(url, params={"key": key}, timeout=40, json=dict(contents=contents, tools=[dict(function_declarations=decls)],
-                                                                          system_instruction=dict(parts=[dict(text=sys_txt)])))
-        r.raise_for_status()
-        cand = r.json()["candidates"][0]["content"]
+    models = [model] + [m for m in FALLBACK_MODELS if m != model]
+    import time as _t
+    deadline = _t.time() + GEMINI_BUDGET_S  # total time budget before falling back to the deterministic router
+
+    def post(body):
+        """Try each model; on quota (429) / overload (503) rotate models, then wait once for the server-suggested delay."""
+        import re as _re
+        import time as _time
+        last = None
+        for attempt in range(2):
+            wait = 0.0
+            for mdl in list(models):
+                left = deadline - _time.time()
+                if left < 3:
+                    raise TimeoutError("Gemini time budget exhausted")
+                r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{mdl}:generateContent",
+                                  headers={"x-goog-api-key": key}, timeout=min(20.0, left), json=body)
+                if r.ok:
+                    models[:] = [mdl] + [m for m in models if m != mdl]  # prefer the model that worked
+                    return r.json()
+                last = r
+                if r.status_code in (429, 500, 503) or (r.status_code in (400, 404) and "model" in r.text.lower()):
+                    m = _re.search(r"retry in ([0-9.]+)s", r.text)
+                    wait = max(wait, float(m.group(1)) if m else 3.0)
+                    continue
+                r.raise_for_status()
+            if attempt == 0:
+                _time.sleep(max(0.0, min(wait, 8.0, deadline - _time.time() - 5)))
+        last.raise_for_status()
+
+    for _ in range(5):
+        data = post(dict(contents=contents, tools=[dict(function_declarations=decls)],
+                         system_instruction=dict(parts=[dict(text=sys_txt)]), generation_config=dict(temperature=0.2)))
+        cand = data["candidates"][0]["content"]
         parts = cand.get("parts", [])
         fcs = [p["functionCall"] for p in parts if "functionCall" in p]
         if not fcs:
@@ -326,7 +358,7 @@ def query():
     if current_app.config["GEMINI_API_KEY"]:
         try:
             answer, calls = _gemini(question)
-            engine = f"gemini ({current_app.config['GEMINI_MODEL']}) + tools"
+            engine = "gemini + tools"
         except Exception as e:  # noqa: BLE001
             engine = f"rule-based router (Gemini unavailable: {type(e).__name__})"
     if answer is None:
