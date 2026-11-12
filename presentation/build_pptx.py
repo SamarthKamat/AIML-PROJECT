@@ -122,7 +122,7 @@ img(s, SS / "00_login.png", Inches(6.6), 0, h=H)
 text(s, Inches(0.6), Inches(1.0), Inches(6), Inches(2.0), ["Supply Chain", "Black Box"], 44, WHITE, True)
 text(s, Inches(0.6), Inches(2.9), Inches(6), Inches(2), "AI-powered hidden supplier dependency discovery, cascading risk prediction and intelligent supply chain recovery", 20, CYAN)
 text(s, Inches(0.6), Inches(4.4), Inches(6), Inches(2), ["Advanced Machine Learning for Business Transformation", "PGDM Big Data Analytics · Goa Institute of Management",
-                                                          "[Team member names · IDs]", "FMCG: chocolate & malt-based beverages"], 15, MUTED)
+                                                          "Shraddha Shete (B2026102) · Shirsodeep Biswas (B2026100) · Jayant Kumawat (B2026078)", "FMCG: chocolate & malt-based beverages"], 15, MUTED)
 
 # 2 problem
 s = slide("The business problem", "A manufacturer sees its Tier-1 suppliers — not the Tier-2/3 suppliers they quietly share")

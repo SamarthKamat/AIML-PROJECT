@@ -100,7 +100,7 @@ tests/          pytest suite (unit + API end-to-end)
 
 ## Team
 
-Team names, student IDs and e-mails are placeholders in the paper until confirmed by the team.
+Shraddha Shete (B2026102), Shirsodeep Biswas (B2026100), Jayant Kumawat (B2026078) — Goa Institute of Management, Big Data Analytics.
 
 ## AI use
 
