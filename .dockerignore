@@ -1,0 +1,13 @@
+.git
+**/node_modules
+frontend/dist
+backend/instance
+**/__pycache__
+*.pyc
+.pytest_cache
+dist_zip
+datasets/raw
+datasets/processed
+documentation
+presentation
+notebooks

@@ -1,0 +1,17 @@
+# Runtime-only dependencies for the web app (no PyTorch / PyG: the API serves saved link-prediction outputs)
+numpy>=2.0
+pandas==3.0.5
+scikit-learn==1.9.1
+xgboost==3.4.1
+shap==0.54.1
+networkx==3.7
+pulp==2.9.0
+joblib
+flask==3.1.3
+flask-cors==6.0.5
+pyjwt
+sqlalchemy==2.1.8
+pymysql
+openpyxl
+requests
+gunicorn==23.0.0

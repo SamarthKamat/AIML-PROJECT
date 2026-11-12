@@ -1,0 +1,16 @@
+# Render Blueprint: New + > Blueprint > select this repository and branch
+services:
+  - type: web
+    name: supply-chain-black-box
+    runtime: docker
+    plan: free               # measured ~200 MB RSS in the container; upgrade to starter to avoid free-tier spin-down
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: APP_AS_OF
+        value: "2025-12-01"
+      - key: GEMINI_API_KEY
+        sync: false          # optional: set in the dashboard to enable Gemini function calling
