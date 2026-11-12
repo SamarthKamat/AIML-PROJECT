@@ -1,0 +1,30 @@
+{
+  "dataco": {
+    "source": "datasets/raw/dataco/DataCoSupplyChainDataset.csv",
+    "sha256": "994b3c8d24049cc46bf20e8161fedece9a9b95376cc0dc929921d76cf6b9bc0d",
+    "raw_rows": 180519,
+    "raw_cols": 53,
+    "cancelled_removed": 7754,
+    "processed_rows": 172765,
+    "date_min": "2015-01-01 00:00:00",
+    "date_max": "2018-01-31 23:38:00",
+    "late_rate": 0.5729
+  },
+  "supplygraph": {
+    "source": "datasets/raw/supplygraph (CIOL-SUST/SupplyGraph @0e6d010)",
+    "nodes": 40,
+    "duplicate_nodes_removed": 1,
+    "days": 221,
+    "date_min": "2023-01-01",
+    "date_max": "2023-08-09",
+    "processed_rows": 5466,
+    "shortfall_rate": 0.2817,
+    "unique_edges": 684,
+    "edges_by_relation": {
+      "same_storage": 665,
+      "same_plant": 360,
+      "same_group": 179,
+      "same_subgroup": 48
+    }
+  }
+}

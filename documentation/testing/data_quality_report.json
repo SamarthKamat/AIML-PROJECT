@@ -1,0 +1,213 @@
+{
+  "suppliers": {
+    "table": "suppliers",
+    "rows": 500,
+    "columns": 20,
+    "errors": [],
+    "warnings": [],
+    "checks_passed": 19,
+    "checks_run": 19,
+    "missing_values": {},
+    "outliers_3iqr_investigated_not_removed": {
+      "latitude": 20,
+      "longitude": 72,
+      "size_index": 9,
+      "capacity_units_per_month": 20
+    },
+    "status": "pass"
+  },
+  "supplier_relationships": {
+    "table": "supplier_relationships",
+    "rows": 1500,
+    "columns": 10,
+    "errors": [],
+    "warnings": [],
+    "checks_passed": 15,
+    "checks_run": 15,
+    "missing_values": {},
+    "outliers_3iqr_investigated_not_removed": {
+      "lead_time_days": 102
+    },
+    "status": "pass"
+  },
+  "materials": {
+    "table": "materials",
+    "rows": 50,
+    "columns": 10,
+    "errors": [],
+    "warnings": [],
+    "checks_passed": 12,
+    "checks_run": 12,
+    "missing_values": {
+      "input_materials": 8
+    },
+    "outliers_3iqr_investigated_not_removed": {
+      "unit_price_inr": 4
+    },
+    "status": "pass"
+  },
+  "products": {
+    "table": "products",
+    "rows": 100,
+    "columns": 10,
+    "errors": [],
+    "warnings": [],
+    "checks_passed": 11,
+    "checks_run": 11,
+    "missing_values": {},
+    "outliers_3iqr_investigated_not_removed": {
+      "price_inr": 1,
+      "base_weekly_demand_units": 1
+    },
+    "status": "pass"
+  },
+  "inventory": {
+    "table": "inventory",
+    "rows": 5824,
+    "columns": 12,
+    "errors": [],
+    "warnings": [],
+    "checks_passed": 19,
+    "checks_run": 19,
+    "missing_values": {},
+    "outliers_3iqr_investigated_not_removed": {
+      "opening_qty": 505,
+      "receipts_qty": 626,
+      "consumption_qty": 478,
+      "required_qty": 480,
+      "closing_qty": 505
+    },
+    "status": "pass"
+  },
+  "shipments": {
+    "table": "shipments",
+    "rows": 9579,
+    "columns": 15,
+    "errors": [],
+    "warnings": [],
+    "checks_passed": 22,
+    "checks_run": 22,
+    "missing_values": {},
+    "outliers_3iqr_investigated_not_removed": {
+      "delay_days": 229,
+      "shipped_qty": 1010,
+      "delivered_qty": 1021,
+      "freight_cost_inr": 509
+    },
+    "status": "pass"
+  },
+  "disruptions": {
+    "table": "disruptions",
+    "rows": 1048,
+    "columns": 11,
+    "errors": [],
+    "warnings": [],
+    "checks_passed": 17,
+    "checks_run": 17,
+    "missing_values": {
+      "origin_supplier_id": 921
+    },
+    "outliers_3iqr_investigated_not_removed": {
+      "duration_days": 28
+    },
+    "status": "pass"
+  },
+  "procurement": {
+    "table": "procurement",
+    "rows": 4929,
+    "columns": 11,
+    "errors": [],
+    "warnings": [],
+    "checks_passed": 17,
+    "checks_run": 17,
+    "missing_values": {},
+    "outliers_3iqr_investigated_not_removed": {
+      "ordered_qty": 527,
+      "unit_price_inr": 200,
+      "po_value_inr": 190
+    },
+    "status": "pass"
+  },
+  "production": {
+    "table": "production",
+    "rows": 10400,
+    "columns": 8,
+    "errors": [],
+    "warnings": [],
+    "checks_passed": 13,
+    "checks_run": 13,
+    "missing_values": {},
+    "outliers_3iqr_investigated_not_removed": {
+      "planned_qty": 106,
+      "actual_qty": 108
+    },
+    "status": "pass"
+  },
+  "external_risks": {
+    "table": "external_risks",
+    "rows": 504,
+    "columns": 7,
+    "errors": [],
+    "warnings": [],
+    "checks_passed": 6,
+    "checks_run": 6,
+    "missing_values": {},
+    "outliers_3iqr_investigated_not_removed": {},
+    "status": "pass"
+  },
+  "warehouses": {
+    "table": "warehouses",
+    "rows": 4,
+    "columns": 10,
+    "errors": [],
+    "warnings": [],
+    "checks_passed": 6,
+    "checks_run": 6,
+    "missing_values": {},
+    "outliers_3iqr_investigated_not_removed": {},
+    "status": "pass"
+  },
+  "companies": {
+    "table": "companies",
+    "rows": 1,
+    "columns": 6,
+    "errors": [],
+    "warnings": [],
+    "checks_passed": 5,
+    "checks_run": 5,
+    "missing_values": {},
+    "outliers_3iqr_investigated_not_removed": {},
+    "status": "pass"
+  },
+  "bill_of_materials": {
+    "table": "bill_of_materials",
+    "rows": 960,
+    "columns": 3,
+    "errors": [],
+    "warnings": [],
+    "checks_passed": 8,
+    "checks_run": 8,
+    "missing_values": {},
+    "outliers_3iqr_investigated_not_removed": {
+      "qty_per_unit": 133
+    },
+    "status": "pass"
+  },
+  "material_substitutes": {
+    "table": "material_substitutes",
+    "rows": 10,
+    "columns": 5,
+    "errors": [],
+    "warnings": [],
+    "checks_passed": 6,
+    "checks_run": 6,
+    "missing_values": {},
+    "outliers_3iqr_investigated_not_removed": {},
+    "status": "pass"
+  },
+  "_cross_table": {
+    "relationship_tier_order_violations": 0,
+    "buyer_ids_unknown": 0,
+    "status": "pass"
+  }
+}

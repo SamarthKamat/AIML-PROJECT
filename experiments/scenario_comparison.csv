@@ -1,0 +1,10 @@
+severity,comparison,mean_saving_inr,ci95_low,ci95_high,share_reps_b_better
+Mild,A: No intervention minus B: Rule-based,0.0,0.0,0.0,0.0
+Mild,A: No intervention minus C: Optimisation,-66802.73286884937,-66895.34206580906,-66710.12367188968,0.0
+Mild,B: Rule-based minus C: Optimisation,-66802.73286884937,-66895.34206580906,-66710.12367188968,0.0
+Moderate,A: No intervention minus B: Rule-based,3250.422261108399,-1883.2602917069921,8384.10481392379,0.004
+Moderate,A: No intervention minus C: Optimisation,-1024545.8670233736,-1050971.5814150479,-998120.1526316993,0.046
+Moderate,B: Rule-based minus C: Optimisation,-1027796.289284482,-1053438.6865083624,-1002153.8920606017,0.042
+Severe,A: No intervention minus B: Rule-based,7098944.479375191,6776864.424337064,7421024.534413318,0.884
+Severe,A: No intervention minus C: Optimisation,28593748.866453685,26520683.94939321,30666813.78351416,0.826
+Severe,B: Rule-based minus C: Optimisation,21494804.387078494,19566634.26380983,23422974.510347158,0.744

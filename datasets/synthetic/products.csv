@@ -1,0 +1,101 @@
+product_id,product_name,family,pack_scale,price_inr,contribution_margin_pct,plant_id,base_weekly_demand_units,seasonality,data_label
+P001,Milk chocolate bar - Classic,Milk chocolate bar,0.5,19.88,0.351,W02,7861.0,festive_peak,synthetic
+P002,Milk chocolate bar - Lite,Milk chocolate bar,0.75,28.78,0.32,W01,10803.0,festive_peak,synthetic
+P003,Milk chocolate bar - Family,Milk chocolate bar,1.0,41.14,0.34,W01,7196.0,festive_peak,synthetic
+P004,Milk chocolate bar - Festive,Milk chocolate bar,1.0,39.48,0.352,W02,4406.0,festive_peak,synthetic
+P005,Milk chocolate bar - Value,Milk chocolate bar,1.25,51.61,0.347,W01,6977.0,festive_peak,synthetic
+P006,Milk chocolate bar - Premium,Milk chocolate bar,1.5,60.33,0.326,W01,4392.0,festive_peak,synthetic
+P007,Milk chocolate bar - Mega,Milk chocolate bar,2.0,81.05,0.337,W02,10473.0,festive_peak,synthetic
+P008,Milk chocolate bar - Kids,Milk chocolate bar,1.0,41.88,0.338,W01,4802.0,festive_peak,synthetic
+P009,Milk chocolate bar - Mini,Milk chocolate bar,0.8,31.02,0.348,W01,5449.0,festive_peak,synthetic
+P010,Milk chocolate bar - Gold,Milk chocolate bar,1.2,46.34,0.346,W02,8103.0,festive_peak,synthetic
+P011,Dark chocolate bar - Classic,Dark chocolate bar,0.5,49.72,0.392,W01,8293.0,festive_peak,synthetic
+P012,Dark chocolate bar - Lite,Dark chocolate bar,0.75,71.03,0.417,W01,1892.0,festive_peak,synthetic
+P013,Dark chocolate bar - Family,Dark chocolate bar,1.0,94.77,0.388,W02,2685.0,festive_peak,synthetic
+P014,Dark chocolate bar - Festive,Dark chocolate bar,1.0,94.4,0.408,W01,3935.0,festive_peak,synthetic
+P015,Dark chocolate bar - Value,Dark chocolate bar,1.25,122.37,0.402,W01,2038.0,festive_peak,synthetic
+P016,Dark chocolate bar - Premium,Dark chocolate bar,1.5,145.1,0.403,W02,3171.0,festive_peak,synthetic
+P017,Dark chocolate bar - Mega,Dark chocolate bar,2.0,180.64,0.404,W01,3991.0,festive_peak,synthetic
+P018,Dark chocolate bar - Kids,Dark chocolate bar,1.0,96.95,0.395,W01,3897.0,festive_peak,synthetic
+P019,Dark chocolate bar - Mini,Dark chocolate bar,0.8,76.52,0.396,W02,2246.0,festive_peak,synthetic
+P020,Dark chocolate bar - Gold,Dark chocolate bar,1.2,115.92,0.415,W01,6002.0,festive_peak,synthetic
+P021,Hazelnut chocolate - Classic,Hazelnut chocolate,0.5,56.46,0.382,W01,1058.0,festive_peak,synthetic
+P022,Hazelnut chocolate - Lite,Hazelnut chocolate,0.75,82.99,0.392,W02,3291.0,festive_peak,synthetic
+P023,Hazelnut chocolate - Family,Hazelnut chocolate,1.0,109.3,0.393,W01,2062.0,festive_peak,synthetic
+P024,Hazelnut chocolate - Festive,Hazelnut chocolate,1.0,113.89,0.363,W01,2231.0,festive_peak,synthetic
+P025,Hazelnut chocolate - Value,Hazelnut chocolate,1.25,134.49,0.382,W02,1550.0,festive_peak,synthetic
+P026,Hazelnut chocolate - Premium,Hazelnut chocolate,1.5,165.94,0.382,W01,3467.0,festive_peak,synthetic
+P027,Hazelnut chocolate - Mega,Hazelnut chocolate,2.0,217.94,0.387,W01,3356.0,festive_peak,synthetic
+P028,Hazelnut chocolate - Kids,Hazelnut chocolate,1.0,104.75,0.374,W02,1763.0,festive_peak,synthetic
+P029,Hazelnut chocolate - Mini,Hazelnut chocolate,0.8,87.66,0.373,W01,1350.0,festive_peak,synthetic
+P030,Hazelnut chocolate - Gold,Hazelnut chocolate,1.2,127.41,0.387,W01,2470.0,festive_peak,synthetic
+P031,Malt beverage powder 500g jar - Classic,Malt beverage powder 500g jar,0.5,130.92,0.294,W02,1421.0,winter_peak,synthetic
+P032,Malt beverage powder 500g jar - Lite,Malt beverage powder 500g jar,0.75,196.0,0.278,W01,979.0,winter_peak,synthetic
+P033,Malt beverage powder 500g jar - Family,Malt beverage powder 500g jar,1.0,277.24,0.306,W01,526.0,winter_peak,synthetic
+P034,Malt beverage powder 500g jar - Festive,Malt beverage powder 500g jar,1.0,258.8,0.319,W02,648.0,winter_peak,synthetic
+P035,Malt beverage powder 500g jar - Value,Malt beverage powder 500g jar,1.25,338.43,0.286,W01,853.0,winter_peak,synthetic
+P036,Malt beverage powder 500g jar - Premium,Malt beverage powder 500g jar,1.5,381.46,0.295,W01,919.0,winter_peak,synthetic
+P037,Malt beverage powder 500g jar - Mega,Malt beverage powder 500g jar,2.0,514.23,0.307,W02,1551.0,winter_peak,synthetic
+P038,Malt beverage powder 500g jar - Kids,Malt beverage powder 500g jar,1.0,256.43,0.278,W01,1147.0,winter_peak,synthetic
+P039,Malt beverage powder 500g jar - Mini,Malt beverage powder 500g jar,0.8,216.65,0.303,W01,1056.0,winter_peak,synthetic
+P040,Malt beverage powder 500g jar - Gold,Malt beverage powder 500g jar,1.2,320.67,0.296,W02,1030.0,winter_peak,synthetic
+P041,Malt beverage refill 1kg - Classic,Malt beverage refill 1kg,0.5,237.98,0.283,W01,337.0,winter_peak,synthetic
+P042,Malt beverage refill 1kg - Lite,Malt beverage refill 1kg,0.75,353.88,0.285,W01,1110.0,winter_peak,synthetic
+P043,Malt beverage refill 1kg - Family,Malt beverage refill 1kg,1.0,484.21,0.27,W02,1169.0,winter_peak,synthetic
+P044,Malt beverage refill 1kg - Festive,Malt beverage refill 1kg,1.0,483.89,0.259,W01,354.0,winter_peak,synthetic
+P045,Malt beverage refill 1kg - Value,Malt beverage refill 1kg,1.25,571.37,0.258,W01,773.0,winter_peak,synthetic
+P046,Malt beverage refill 1kg - Premium,Malt beverage refill 1kg,1.5,740.36,0.293,W02,339.0,winter_peak,synthetic
+P047,Malt beverage refill 1kg - Mega,Malt beverage refill 1kg,2.0,959.11,0.286,W01,1527.0,winter_peak,synthetic
+P048,Malt beverage refill 1kg - Kids,Malt beverage refill 1kg,1.0,478.73,0.284,W01,343.0,winter_peak,synthetic
+P049,Malt beverage refill 1kg - Mini,Malt beverage refill 1kg,0.8,384.79,0.271,W02,375.0,winter_peak,synthetic
+P050,Malt beverage refill 1kg - Gold,Malt beverage refill 1kg,1.2,594.79,0.282,W01,524.0,winter_peak,synthetic
+P051,Cocoa drink mix - Classic,Cocoa drink mix,0.5,105.57,0.285,W01,1188.0,winter_peak,synthetic
+P052,Cocoa drink mix - Lite,Cocoa drink mix,0.75,154.05,0.314,W02,1008.0,winter_peak,synthetic
+P053,Cocoa drink mix - Family,Cocoa drink mix,1.0,215.64,0.325,W01,3112.0,winter_peak,synthetic
+P054,Cocoa drink mix - Festive,Cocoa drink mix,1.0,204.33,0.296,W01,1002.0,winter_peak,synthetic
+P055,Cocoa drink mix - Value,Cocoa drink mix,1.25,259.11,0.298,W02,895.0,winter_peak,synthetic
+P056,Cocoa drink mix - Premium,Cocoa drink mix,1.5,309.24,0.324,W01,1955.0,winter_peak,synthetic
+P057,Cocoa drink mix - Mega,Cocoa drink mix,2.0,420.63,0.309,W01,1559.0,winter_peak,synthetic
+P058,Cocoa drink mix - Kids,Cocoa drink mix,1.0,202.96,0.303,W02,927.0,winter_peak,synthetic
+P059,Cocoa drink mix - Mini,Cocoa drink mix,0.8,176.27,0.313,W01,697.0,winter_peak,synthetic
+P060,Cocoa drink mix - Gold,Cocoa drink mix,1.2,261.85,0.308,W01,2832.0,winter_peak,synthetic
+P061,Chocolate spread jar - Classic,Chocolate spread jar,0.5,161.96,0.333,W02,944.0,festive_peak,synthetic
+P062,Chocolate spread jar - Lite,Chocolate spread jar,0.75,244.37,0.336,W01,666.0,festive_peak,synthetic
+P063,Chocolate spread jar - Family,Chocolate spread jar,1.0,322.16,0.312,W01,1763.0,festive_peak,synthetic
+P064,Chocolate spread jar - Festive,Chocolate spread jar,1.0,317.55,0.356,W02,413.0,festive_peak,synthetic
+P065,Chocolate spread jar - Value,Chocolate spread jar,1.25,399.27,0.352,W01,748.0,festive_peak,synthetic
+P066,Chocolate spread jar - Premium,Chocolate spread jar,1.5,485.61,0.34,W01,470.0,festive_peak,synthetic
+P067,Chocolate spread jar - Mega,Chocolate spread jar,2.0,660.05,0.328,W02,672.0,festive_peak,synthetic
+P068,Chocolate spread jar - Kids,Chocolate spread jar,1.0,321.08,0.331,W01,969.0,festive_peak,synthetic
+P069,Chocolate spread jar - Mini,Chocolate spread jar,0.8,254.02,0.329,W01,1129.0,festive_peak,synthetic
+P070,Chocolate spread jar - Gold,Chocolate spread jar,1.2,399.21,0.317,W02,537.0,festive_peak,synthetic
+P071,Chocolate-coated biscuit - Classic,Chocolate-coated biscuit,0.5,15.32,0.24,W01,7615.0,festive_peak,synthetic
+P072,Chocolate-coated biscuit - Lite,Chocolate-coated biscuit,0.75,21.65,0.267,W01,9139.0,festive_peak,synthetic
+P073,Chocolate-coated biscuit - Family,Chocolate-coated biscuit,1.0,29.4,0.275,W02,7065.0,festive_peak,synthetic
+P074,Chocolate-coated biscuit - Festive,Chocolate-coated biscuit,1.0,31.37,0.258,W01,11779.0,festive_peak,synthetic
+P075,Chocolate-coated biscuit - Value,Chocolate-coated biscuit,1.25,35.72,0.264,W01,6355.0,festive_peak,synthetic
+P076,Chocolate-coated biscuit - Premium,Chocolate-coated biscuit,1.5,43.23,0.261,W02,9831.0,festive_peak,synthetic
+P077,Chocolate-coated biscuit - Mega,Chocolate-coated biscuit,2.0,62.8,0.288,W01,10088.0,festive_peak,synthetic
+P078,Chocolate-coated biscuit - Kids,Chocolate-coated biscuit,1.0,30.91,0.238,W01,5874.0,festive_peak,synthetic
+P079,Chocolate-coated biscuit - Mini,Chocolate-coated biscuit,0.8,22.84,0.278,W02,6698.0,festive_peak,synthetic
+P080,Chocolate-coated biscuit - Gold,Chocolate-coated biscuit,1.2,37.07,0.228,W01,6251.0,festive_peak,synthetic
+P081,Malted milk biscuit - Classic,Malted milk biscuit,0.5,12.63,0.232,W01,9956.0,winter_peak,synthetic
+P082,Malted milk biscuit - Lite,Malted milk biscuit,0.75,19.03,0.214,W02,6967.0,winter_peak,synthetic
+P083,Malted milk biscuit - Family,Malted milk biscuit,1.0,24.37,0.221,W01,5186.0,winter_peak,synthetic
+P084,Malted milk biscuit - Festive,Malted milk biscuit,1.0,25.79,0.284,W01,6241.0,winter_peak,synthetic
+P085,Malted milk biscuit - Value,Malted milk biscuit,1.25,31.55,0.245,W02,6012.0,winter_peak,synthetic
+P086,Malted milk biscuit - Premium,Malted milk biscuit,1.5,36.79,0.236,W01,25633.0,winter_peak,synthetic
+P087,Malted milk biscuit - Mega,Malted milk biscuit,2.0,48.33,0.234,W01,15930.0,winter_peak,synthetic
+P088,Malted milk biscuit - Kids,Malted milk biscuit,1.0,24.04,0.236,W02,10101.0,winter_peak,synthetic
+P089,Malted milk biscuit - Mini,Malted milk biscuit,0.8,19.35,0.232,W01,9453.0,winter_peak,synthetic
+P090,Malted milk biscuit - Gold,Malted milk biscuit,1.2,30.54,0.242,W01,13672.0,winter_peak,synthetic
+P091,Almond chocolate bar - Classic,Almond chocolate bar,0.5,60.03,0.37,W02,2683.0,festive_peak,synthetic
+P092,Almond chocolate bar - Lite,Almond chocolate bar,0.75,85.89,0.369,W01,1569.0,festive_peak,synthetic
+P093,Almond chocolate bar - Family,Almond chocolate bar,1.0,120.85,0.376,W01,6408.0,festive_peak,synthetic
+P094,Almond chocolate bar - Festive,Almond chocolate bar,1.0,118.48,0.374,W02,1536.0,festive_peak,synthetic
+P095,Almond chocolate bar - Value,Almond chocolate bar,1.25,155.0,0.374,W01,1290.0,festive_peak,synthetic
+P096,Almond chocolate bar - Premium,Almond chocolate bar,1.5,172.78,0.384,W01,2861.0,festive_peak,synthetic
+P097,Almond chocolate bar - Mega,Almond chocolate bar,2.0,251.51,0.363,W02,2824.0,festive_peak,synthetic
+P098,Almond chocolate bar - Kids,Almond chocolate bar,1.0,121.71,0.366,W01,2567.0,festive_peak,synthetic
+P099,Almond chocolate bar - Mini,Almond chocolate bar,0.8,96.35,0.372,W01,2137.0,festive_peak,synthetic
+P100,Almond chocolate bar - Gold,Almond chocolate bar,1.2,143.46,0.366,W02,4696.0,festive_peak,synthetic

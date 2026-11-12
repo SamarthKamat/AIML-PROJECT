@@ -1,0 +1,98 @@
+# Supply Chain Black Box
+
+**AI-powered hidden supplier dependency discovery, cascading risk prediction and intelligent supply chain recovery**
+AIMLBT project · PGDM Big Data Analytics · Goa Institute of Management · FMCG (chocolate & malt-based beverages)
+
+> **Data notice.** The supplier network, disruptions, inventory, BOMs and all INR amounts of the demonstration company
+> *Cocoa & Malt Foods Ltd* are **synthetic** (fictional). Two **real** public datasets are used in separate experiments:
+> DataCo Smart Supply Chain (shipment delays) and SupplyGraph (real FMCG product graph). Simulated money is never an observed company loss.
+> Predicted supplier links are **candidates**, never confirmed relationships.
+
+## What is in this repository
+
+| Area | Location | Status |
+|---|---|---|
+| Synthetic FMCG ecosystem generator (14 tables, seed 42) | `ml/data_generation/` | implemented · tested |
+| Real data processing (DataCo, SupplyGraph) | `ml/data_engineering/process_real.py` | implemented · verified |
+| Exp 1 supplier disruption prediction + calibration + decision policy | `ml/experiments/exp1_supplier_risk.py` | experimentally validated |
+| Exp 2A link prediction (CN, AA, PA, Node2Vec, MLP, GCN, GraphSAGE, GAT) | `ml/experiments/exp2a_link_prediction.py` | experimentally validated |
+| Exp 2B graph vs tabular risk classification (synthetic + real SupplyGraph) | `ml/experiments/exp2b_graph_risk.py` | experimentally validated |
+| Exp 3 shipment delay classification & regression (real DataCo) | `ml/experiments/exp3_delivery_delay.py` | experimentally validated |
+| Exp 4 cascading-disruption simulator (Monte Carlo) | `ml/simulation/cascade.py` | implemented · tested |
+| Exp 5 recovery MILP + nine-scenario evaluation | `ml/optimisation/recovery.py`, `ml/simulation/scenarios.py` | experimentally validated |
+| Business decision engine (13-step workflow) | `ml/decision/engine.py` | implemented · tested via API |
+| Flask REST API (JWT, 30+ endpoints) + MySQL schema | `backend/` | implemented · tested |
+| React control tower (12 pages) | `frontend/` | implemented · built · screenshotted |
+| AI assistant (Gemini function calling + deterministic fallback) | `backend/app/assistant.py` | fallback tested; Gemini path implemented but **not executed here** (no API key / network) |
+| Independent result verification | `ml/experiments/verify_results.py` → `experiments/VERIFICATION_REPORT.md` | executed |
+| IEEE paper (6 pages) | `documentation/final_report/` | compiled PDF |
+
+## Quick start
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+```bash
+bash run_all.sh
+```
+
+`run_all.sh` downloads the real datasets (pinned commits, SHA-256 verified), regenerates the synthetic data, runs every experiment,
+verifies results, rebuilds figures, loads the database and runs the test suite.
+
+### Run the application
+
+```bash
+python -m backend.database_setup --drop && python -m backend.data_import
+```
+
+```bash
+python -m backend.run
+```
+
+```bash
+cd frontend && npm install && npm run dev
+```
+
+Open http://localhost:5173, create an account, and explore. For a single-port deployment run `npm run build` in `frontend/`;
+Flask then serves `frontend/dist` at http://localhost:5000.
+
+**MySQL.** Set `DATABASE_URL=mysql+pymysql://user:pass@localhost:3306/supply_chain_black_box` (see `.env.example`). The DDL is in
+`backend/database_schema.sql` (generated from `backend/app/db.py`). Without `DATABASE_URL` the app uses SQLite. Both were tested
+(MariaDB 10.11 and SQLite).
+
+**Gemini.** Set `GEMINI_API_KEY` to enable LLM function calling; the assistant may only phrase answers from tool outputs
+(database queries, model inference, simulation, optimisation) and returns the tool evidence to the UI.
+
+## Key conventions (leakage control)
+
+* Prediction timestamp *t* = 00:00 on the first day of a month; features use disruption records with `reported_date < t`,
+  shipments with `actual_delivery_date < t`, and only `visibility = observed` relationships.
+* Label: qualifying disruption (≥ 25 % capacity loss for ≥ 3 days) starting in (t, t + 30 d].
+* Chronological split: train 2024-04…2025-02 · embargo 2025-03 · calibration 2025-04…06 · test 2025-07…12.
+* Calibrators (Platt / isotonic) are fitted on the calibration split only; method chosen by 5-fold CV Brier within that split.
+* Link prediction: test edges are removed from the message-passing graph; hidden edges are never used for training.
+* Nine scenarios: identical network, demand, inventory and economics for every policy; replication *r* uses seed `base_seed + r`
+  for all policies (common random numbers), 500 replications.
+
+## Repository map
+
+```
+backend/        Flask API, schema, import, validation
+frontend/       React + Vite control tower
+ml/             data generation, features, experiments, graph, simulation, optimisation, decision engine
+datasets/       raw/ (as downloaded) · synthetic/ · processed/ · experiment/ · data_dictionary/
+models/         trained artefacts (joblib, torch state dicts)
+experiments/    run.json per experiment, predictions, scenario results, VERIFICATION_REPORT.md
+documentation/  research (catalog, provenance, assumptions), diagrams, testing, final_report (IEEE LaTeX + PDF)
+presentation/   PPTX + viva questions
+tests/          pytest suite (unit + API end-to-end)
+```
+
+## Team
+
+Team names, student IDs and e-mails are placeholders in the paper until confirmed by the team.
+
+## AI use
+
+See `documentation/final_report/AI_USE_DECLARATION.md`. The team must review, verify and take responsibility for all content.

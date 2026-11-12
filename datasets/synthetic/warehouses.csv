@@ -1,0 +1,5 @@
+site_id,site_name,site_type,region,city,latitude,longitude,company_id,storage_capacity_tonnes,data_label
+W01,Plant P1 - Pune (synthetic),plant,Maharashtra,Pune,18.52,73.86,C001,8000,synthetic
+W02,Plant P2 - Kolkata (synthetic),plant,West Bengal,Kolkata,22.57,88.36,C001,6000,synthetic
+W03,Distribution centre DC-West (synthetic),distribution_centre,Maharashtra,Bhiwandi,19.3,73.06,C001,12000,synthetic
+W04,Distribution centre DC-East (synthetic),distribution_centre,West Bengal,Howrah,22.59,88.26,C001,9000,synthetic

@@ -1,0 +1,8 @@
+{"experiment_id": "exp1_supplier_disruption", "execution_timestamp": "2026-11-12T15:12:10+00:00", "summary": {"xgb_test_pr_auc": 0.121553, "xgb_test_brier": 0.067966}}
+{"experiment_id": "exp2a_link_prediction", "execution_timestamp": "2026-11-12T15:34:36+00:00", "summary": {"A2_GraphSAGE_AP": 0.1672, "A2_base_rate": 0.1172}}
+{"experiment_id": "exp2a_link_prediction", "execution_timestamp": "2026-11-12T15:35:50+00:00", "summary": {"candidate_model": "MLP", "A2_selected_AP": 0.227, "A2_base_rate": 0.1172}}
+{"experiment_id": "exp2b_graph_risk_classification", "execution_timestamp": "2026-11-12T15:48:00+00:00", "summary": {"synthetic_best": "XGBoost (tabular)", "real_best": "Logistic Regression"}}
+{"experiment_id": "exp4_5_scenarios", "execution_timestamp": "2026-11-12T15:51:11+00:00", "summary": {"severe_A_impact": 37289788.33092963, "severe_C_impact": 37462364.28623419}}
+{"experiment_id": "exp4_5_scenarios", "execution_timestamp": "2026-11-12T15:56:14+00:00", "summary": {"severe_A_impact": 37299779.468157575, "severe_C_impact": 8706030.601703903}}
+{"experiment_id": "exp3_delivery_delay_dataco", "execution_timestamp": "2026-11-12T15:57:02+00:00", "summary": {"xgb_test_pr_auc": 0.858494, "xgb_mae": 0.991916}}
+{"experiment_id": "exp3_delivery_delay_dataco", "execution_timestamp": "2026-11-12T15:59:59+00:00", "summary": {"xgb_test_pr_auc": 0.858494, "xgb_mae": 0.991916}}

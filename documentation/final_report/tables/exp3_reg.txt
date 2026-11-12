@@ -1,0 +1,1 @@
+training mean: 1.202/-0.000 ; shipping-mode mean: 0.978/0.280 ; Linear Regression: 0.990/0.279 ; Random Forest: 0.978/0.269 ; XGBoost: 0.992/0.270

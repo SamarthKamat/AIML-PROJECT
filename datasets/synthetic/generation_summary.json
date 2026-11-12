@@ -1,0 +1,21 @@
+{
+  "companies": 1,
+  "suppliers": 500,
+  "supplier_relationships": 1500,
+  "materials": 50,
+  "products": 100,
+  "bill_of_materials": 960,
+  "inventory": 5824,
+  "shipments": 9579,
+  "disruptions": 1048,
+  "procurement": 4929,
+  "external_risks": 504,
+  "warehouses": 4,
+  "production": 10400,
+  "material_substitutes": 10,
+  "hazard_base_rate": 0.0006571087216248508,
+  "observed_edges": 461,
+  "hidden_edges": 1039,
+  "qualifying_disruptions": 782,
+  "seed": 42
+}

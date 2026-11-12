@@ -1,0 +1,51 @@
+material_id,material_name,category,bom_level,unit,unit_price_inr,criticality,input_materials,typical_regions,data_label
+M01,Cocoa powder (natural),Cocoa,1,kg,520.0,A,M29,Kerala;Karnataka;Indonesia;Malaysia;Ghana,synthetic
+M02,Cocoa powder (alkalised),Cocoa,1,kg,610.0,A,M29,Kerala;Indonesia;Malaysia;Netherlands,synthetic
+M03,Cocoa butter,Cocoa,1,kg,1450.0,A,M29,Indonesia;Malaysia;Cote d'Ivoire;Ghana;Netherlands,synthetic
+M04,Cocoa liquor,Cocoa,1,kg,780.0,A,M29,Kerala;Karnataka;Cote d'Ivoire;Ghana,synthetic
+M05,Whole milk powder,Dairy,1,kg,360.0,A,M30,Gujarat;Punjab;Uttar Pradesh;New Zealand,synthetic
+M06,Skimmed milk powder,Dairy,1,kg,310.0,A,M30,Gujarat;Maharashtra;Punjab;New Zealand,synthetic
+M07,Whey powder,Dairy,1,kg,190.0,B,M30,Gujarat;Netherlands;New Zealand,synthetic
+M08,Malt extract,Malt,1,kg,140.0,A,M31,Haryana;Punjab;Uttar Pradesh;Australia,synthetic
+M09,Malted barley flour,Malt,1,kg,95.0,A,M31,Haryana;Punjab;Madhya Pradesh,synthetic
+M10,Refined sugar,Sweetener,1,kg,42.0,A,M32,Maharashtra;Uttar Pradesh;Karnataka;Tamil Nadu,synthetic
+M11,Liquid glucose,Sweetener,1,kg,48.0,B,M33,Maharashtra;Gujarat;Karnataka,synthetic
+M12,Maltodextrin,Sweetener,1,kg,62.0,B,M33,Maharashtra;Gujarat;Uttar Pradesh,synthetic
+M13,Vegetable fat (palm-based),Fat,1,kg,135.0,A,M34,Gujarat;Andhra Pradesh;Malaysia;Indonesia,synthetic
+M14,Soy lecithin,Emulsifier,1,kg,210.0,B,M35,Madhya Pradesh;Maharashtra,synthetic
+M15,PGPR emulsifier,Emulsifier,1,kg,640.0,B,M34,Malaysia;Netherlands,synthetic
+M16,Vanilla flavour,Flavour,1,kg,2900.0,C,M33,Maharashtra;Karnataka;Netherlands,synthetic
+M17,Chocolate flavour,Flavour,1,kg,2400.0,C,M33,Maharashtra;Netherlands,synthetic
+M18,Vitamin-mineral premix,Fortificant,1,kg,3800.0,A,M33,Maharashtra;Gujarat;Netherlands,synthetic
+M19,Hazelnut paste,Nuts,1,kg,980.0,B,M36,Maharashtra;China,synthetic
+M20,Almond pieces,Nuts,1,kg,860.0,C,M36,Punjab;Australia,synthetic
+M21,Wheat flour,Cereal,1,kg,34.0,B,M37,Punjab;Haryana;Madhya Pradesh;Uttar Pradesh,synthetic
+M22,Aluminium foil laminate,Packaging,1,kg,420.0,A,M38;M39,Maharashtra;Gujarat;Odisha,synthetic
+M23,Flexible laminate film,Packaging,1,kg,260.0,A,M39,Gujarat;Maharashtra;Haryana,synthetic
+M24,PET jars,Packaging,1,unit,9.0,A,M39,Gujarat;Maharashtra;Tamil Nadu,synthetic
+M25,Glass jars,Packaging,1,unit,14.0,B,M40,Uttar Pradesh;Gujarat,synthetic
+M26,Printed cartons,Packaging,1,unit,6.0,B,M41,Maharashtra;Tamil Nadu;West Bengal;Goa,synthetic
+M27,Corrugated shipper boxes,Packaging,1,unit,18.0,B,M42,Maharashtra;Gujarat;West Bengal;Goa,synthetic
+M28,Labels and caps,Packaging,1,unit,1.2,C,M41;M39,Maharashtra;Gujarat;Goa,synthetic
+M29,Cocoa beans,Agri commodity,2,kg,380.0,A,M43,Cote d'Ivoire;Ghana;Kerala;Karnataka;Andhra Pradesh;Indonesia,synthetic
+M30,Raw milk,Agri commodity,2,litre,38.0,A,M44,Gujarat;Punjab;Uttar Pradesh;Maharashtra;Haryana,synthetic
+M31,Malting barley,Agri commodity,2,kg,26.0,A,M43;M45,Haryana;Punjab;Uttar Pradesh;Australia,synthetic
+M32,Sugarcane,Agri commodity,2,tonne,3400.0,A,M43,Maharashtra;Uttar Pradesh;Karnataka;Tamil Nadu,synthetic
+M33,Maize starch,Agri processed,2,kg,36.0,B,M45,Maharashtra;Gujarat;Karnataka;Madhya Pradesh,synthetic
+M34,Crude palm oil,Agri commodity,2,kg,92.0,A,M43,Malaysia;Indonesia;Andhra Pradesh,synthetic
+M35,Soybean,Agri commodity,2,kg,46.0,B,M45,Madhya Pradesh;Maharashtra,synthetic
+M36,Raw tree nuts,Agri commodity,2,kg,620.0,C,M43,Australia;China;Punjab,synthetic
+M37,Wheat,Agri commodity,2,kg,24.0,B,M43;M45,Punjab;Haryana;Madhya Pradesh;Uttar Pradesh,synthetic
+M38,Aluminium ingot,Metal,2,kg,230.0,A,M46;M50,Odisha;Madhya Pradesh;China,synthetic
+M39,Polymer resin (PE/PET),Petrochemical,2,kg,115.0,A,M47,Gujarat;Maharashtra;China,synthetic
+M40,Glass batch (sand and cullet),Mineral,2,kg,12.0,B,M49;M50,Uttar Pradesh;Gujarat,synthetic
+M41,Paper board,Paper,2,kg,78.0,B,M48,Tamil Nadu;Maharashtra;West Bengal;Odisha,synthetic
+M42,Kraft paper,Paper,2,kg,41.0,B,M48,Gujarat;Maharashtra;West Bengal;Uttar Pradesh,synthetic
+M43,Fertiliser and agro-chemicals,Agri input,3,kg,28.0,B,,Gujarat;Uttar Pradesh;Odisha;Andhra Pradesh;China;Cote d'Ivoire,synthetic
+M44,Cattle feed,Agri input,3,kg,22.0,B,,Gujarat;Punjab;Haryana;Uttar Pradesh;Maharashtra,synthetic
+M45,Certified seeds,Agri input,3,kg,160.0,C,,Punjab;Madhya Pradesh;Karnataka;Australia,synthetic
+M46,Alumina,Mineral,3,kg,38.0,B,,Odisha;Andhra Pradesh;Australia,synthetic
+M47,Naphtha feedstock,Petrochemical,3,kg,62.0,A,,Gujarat;Maharashtra;Malaysia,synthetic
+M48,Wood pulp,Forest product,3,kg,55.0,B,,Tamil Nadu;Odisha;West Bengal;Indonesia,synthetic
+M49,Soda ash,Chemical,3,kg,31.0,B,,Gujarat;Tamil Nadu,synthetic
+M50,Industrial fuel (coal/gas),Energy,3,kg,9.0,B,,Odisha;West Bengal;Madhya Pradesh;Gujarat,synthetic

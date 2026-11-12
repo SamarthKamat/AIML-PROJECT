@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+backend/instance/
+frontend/node_modules/
+frontend/dist/
+*.log
+.DS_Store
+documentation/final_report/*.aux
+documentation/final_report/*.log
+documentation/final_report/*.out
+documentation/final_report/*.bbl
+documentation/final_report/*.blg
+dist_zip/
+datasets/raw/dataco/DataCoSupplyChainDataset.csv
+datasets/processed/dataco_shipments.csv

@@ -1,0 +1,468 @@
+{
+  "dataset": "datasets/experiment/exp1_supplier_snapshots.csv (derived from SYNTHETIC tables)",
+  "dataset_hash": "1b14e595666379c1",
+  "data_label": "synthetic",
+  "target": "disruption_next_30_days",
+  "target_definition": "qualifying disruption (capacity loss >= 25% and duration >= 3 days) starting in (t, t+30d]",
+  "prediction_timestamp": "00:00 on the 1st of each month; features use records with reported/delivery date < t",
+  "features": [
+    "tier",
+    "reliability_score",
+    "financial_risk_score",
+    "capacity_utilisation",
+    "geo_risk_index",
+    "weather_risk_forecast",
+    "port_congestion_index",
+    "material_criticality",
+    "max_dependency_pct",
+    "n_buyers_observed",
+    "n_sources_observed",
+    "single_sourced_input",
+    "alt_supplier_count",
+    "disruptions_90d",
+    "disruptions_365d",
+    "days_since_last_disruption",
+    "max_severity_365d",
+    "currently_disrupted_reported",
+    "upstream_disruptions_90d",
+    "upstream_disrupted_now_share",
+    "has_shipment_history",
+    "delay_rate_90d",
+    "mean_delay_days_90d",
+    "fill_rate_90d",
+    "import_supplier"
+  ],
+  "splits": {
+    "train": {
+      "rows": 5500,
+      "positives": 359,
+      "prevalence": 0.0653,
+      "snapshots": [
+        "2024-04-01",
+        "2025-02-01"
+      ]
+    },
+    "calibration": {
+      "rows": 1500,
+      "positives": 87,
+      "prevalence": 0.058,
+      "snapshots": [
+        "2025-04-01",
+        "2025-06-01"
+      ]
+    },
+    "test": {
+      "rows": 3000,
+      "positives": 223,
+      "prevalence": 0.0743,
+      "snapshots": [
+        "2025-07-01",
+        "2025-12-01"
+      ]
+    }
+  },
+  "embargo_snapshot": "2025-03-01",
+  "random_seed": 42,
+  "hyperparameters": {
+    "Logistic Regression": "Pipeline(steps=[('simpleimputer',\n                 SimpleImputer(add_indicator=True, strategy='median')),\n                ('standardscaler', StandardScaler()),\n                ('logisticregression',\n                 LogisticRegression(C=0.5, max_iter=3000))])",
+    "Decision Tree": "Pipeline(steps=[('simpleimputer',\n                 SimpleImputer(add_indicator=True, strategy='median')),\n                ('decisiontreeclassifier',\n                 DecisionTreeClassifier(max_depth=5, min_samples_leaf=40,\n                                        random_state=42))])",
+    "Random Forest": "Pipeline(steps=[('simpleimputer',\n                 SimpleImputer(add_indicator=True, strategy='median')),\n                ('randomforestclassifier',\n                 RandomForestClassifier(min_samples_leaf=10, n_estimators=500,\n                                        n_jobs=-1, random_state=42))])",
+    "XGBoost": "XGBClassifier(base_score=None, booster=None, callbacks=None,\n              colsample_bylevel=None, colsample_bynode=None,\n              colsample_bytree=0.8, device=None, early_stopping_rounds=None,\n              enable_categorical=True, eval_metric='logloss',\n              feature_types=None, feature_weights=None, gamma=None,\n              grow_policy=None, importance_type=None,\n              interaction_constraints=None, learning_rate=0.03, max_bin=None,\n              max_cat_threshold=None, max_cat_to_onehot=None,\n              max_delta_step=None, max_depth=4, max_leaves=None,\n              min_child_weight=5, missing=nan, monotone_constraints=None,\n              multi_strategy=None, n_estimators=400, n_jobs=4,\n              num_parallel_tree=None, ...)"
+  },
+  "calibration": {
+    "fit_on": "calibration split only",
+    "selection": {
+      "Logistic Regression": {
+        "selected": "platt",
+        "cv_brier_on_calibration_split": {
+          "none": 0.05423624264626468,
+          "platt": 0.05406274292553485,
+          "isotonic": 0.05462364270289917
+        }
+      },
+      "Decision Tree": {
+        "selected": "platt",
+        "cv_brier_on_calibration_split": {
+          "none": 0.055187740501548066,
+          "platt": 0.05409187229465823,
+          "isotonic": 0.05442369881139383
+        }
+      },
+      "Random Forest": {
+        "selected": "platt",
+        "cv_brier_on_calibration_split": {
+          "none": 0.054482466521017826,
+          "platt": 0.054154121703194336,
+          "isotonic": 0.05529105067655393
+        }
+      },
+      "XGBoost": {
+        "selected": "platt",
+        "cv_brier_on_calibration_split": {
+          "none": 0.05518428465061026,
+          "platt": 0.054353522545858936,
+          "isotonic": 0.055671170475977416
+        }
+      }
+    },
+    "ece_binning": "10 equal-width bins (also 10 equal-mass bins reported)"
+  },
+  "results": {
+    "Logistic Regression": {
+      "none": {
+        "threshold": 0.5,
+        "n": 3000,
+        "prevalence": 0.074333,
+        "tp": 0,
+        "fp": 0,
+        "tn": 2777,
+        "fn": 223,
+        "accuracy": 0.925667,
+        "precision": 0.0,
+        "recall": 0.0,
+        "specificity": 1.0,
+        "f1": 0.0,
+        "alerts": 0,
+        "roc_auc": 0.66551,
+        "pr_auc": 0.150026,
+        "brier": 0.066855,
+        "ece_uniform10": 0.006581,
+        "ece_quantile10": 0.009369,
+        "log_loss": 0.251809
+      },
+      "platt": {
+        "threshold": 0.5,
+        "n": 3000,
+        "prevalence": 0.074333,
+        "tp": 0,
+        "fp": 0,
+        "tn": 2777,
+        "fn": 223,
+        "accuracy": 0.925667,
+        "precision": 0.0,
+        "recall": 0.0,
+        "specificity": 1.0,
+        "f1": 0.0,
+        "alerts": 0,
+        "roc_auc": 0.66551,
+        "pr_auc": 0.150026,
+        "brier": 0.06702,
+        "ece_uniform10": 0.005892,
+        "ece_quantile10": 0.011402,
+        "log_loss": 0.252485
+      },
+      "isotonic": {
+        "threshold": 0.5,
+        "n": 3000,
+        "prevalence": 0.074333,
+        "tp": 1,
+        "fp": 6,
+        "tn": 2771,
+        "fn": 222,
+        "accuracy": 0.924,
+        "precision": 0.142857,
+        "recall": 0.004484,
+        "specificity": 0.997839,
+        "f1": 0.008696,
+        "alerts": 7,
+        "roc_auc": 0.658674,
+        "pr_auc": 0.12573,
+        "brier": 0.068709,
+        "ece_uniform10": 0.007002,
+        "ece_quantile10": 0.010188,
+        "log_loss": 0.275431
+      }
+    },
+    "Decision Tree": {
+      "none": {
+        "threshold": 0.5,
+        "n": 3000,
+        "prevalence": 0.074333,
+        "tp": 0,
+        "fp": 0,
+        "tn": 2777,
+        "fn": 223,
+        "accuracy": 0.925667,
+        "precision": 0.0,
+        "recall": 0.0,
+        "specificity": 1.0,
+        "f1": 0.0,
+        "alerts": 0,
+        "roc_auc": 0.570993,
+        "pr_auc": 0.098079,
+        "brier": 0.070448,
+        "ece_uniform10": 0.036596,
+        "ece_quantile10": 0.035946,
+        "log_loss": 0.337709
+      },
+      "platt": {
+        "threshold": 0.5,
+        "n": 3000,
+        "prevalence": 0.074333,
+        "tp": 0,
+        "fp": 0,
+        "tn": 2777,
+        "fn": 223,
+        "accuracy": 0.925667,
+        "precision": 0.0,
+        "recall": 0.0,
+        "specificity": 1.0,
+        "f1": 0.0,
+        "alerts": 0,
+        "roc_auc": 0.570993,
+        "pr_auc": 0.098079,
+        "brier": 0.068859,
+        "ece_uniform10": 0.011129,
+        "ece_quantile10": 0.014729,
+        "log_loss": 0.289732
+      },
+      "isotonic": {
+        "threshold": 0.5,
+        "n": 3000,
+        "prevalence": 0.074333,
+        "tp": 0,
+        "fp": 0,
+        "tn": 2777,
+        "fn": 223,
+        "accuracy": 0.925667,
+        "precision": 0.0,
+        "recall": 0.0,
+        "specificity": 1.0,
+        "f1": 0.0,
+        "alerts": 0,
+        "roc_auc": 0.569328,
+        "pr_auc": 0.093831,
+        "brier": 0.06895,
+        "ece_uniform10": 0.012402,
+        "ece_quantile10": 0.012763,
+        "log_loss": 0.331066
+      }
+    },
+    "Random Forest": {
+      "none": {
+        "threshold": 0.5,
+        "n": 3000,
+        "prevalence": 0.074333,
+        "tp": 0,
+        "fp": 0,
+        "tn": 2777,
+        "fn": 223,
+        "accuracy": 0.925667,
+        "precision": 0.0,
+        "recall": 0.0,
+        "specificity": 1.0,
+        "f1": 0.0,
+        "alerts": 0,
+        "roc_auc": 0.657354,
+        "pr_auc": 0.139947,
+        "brier": 0.067187,
+        "ece_uniform10": 0.00465,
+        "ece_quantile10": 0.011954,
+        "log_loss": 0.253057
+      },
+      "platt": {
+        "threshold": 0.5,
+        "n": 3000,
+        "prevalence": 0.074333,
+        "tp": 0,
+        "fp": 0,
+        "tn": 2777,
+        "fn": 223,
+        "accuracy": 0.925667,
+        "precision": 0.0,
+        "recall": 0.0,
+        "specificity": 1.0,
+        "f1": 0.0,
+        "alerts": 0,
+        "roc_auc": 0.657354,
+        "pr_auc": 0.139947,
+        "brier": 0.067479,
+        "ece_uniform10": 0.008142,
+        "ece_quantile10": 0.017195,
+        "log_loss": 0.254591
+      },
+      "isotonic": {
+        "threshold": 0.5,
+        "n": 3000,
+        "prevalence": 0.074333,
+        "tp": 0,
+        "fp": 0,
+        "tn": 2777,
+        "fn": 223,
+        "accuracy": 0.925667,
+        "precision": 0.0,
+        "recall": 0.0,
+        "specificity": 1.0,
+        "f1": 0.0,
+        "alerts": 0,
+        "roc_auc": 0.655432,
+        "pr_auc": 0.123666,
+        "brier": 0.067258,
+        "ece_uniform10": 0.006339,
+        "ece_quantile10": 0.015693,
+        "log_loss": 0.256504
+      }
+    },
+    "XGBoost": {
+      "none": {
+        "threshold": 0.5,
+        "n": 3000,
+        "prevalence": 0.074333,
+        "tp": 0,
+        "fp": 4,
+        "tn": 2773,
+        "fn": 223,
+        "accuracy": 0.924333,
+        "precision": 0.0,
+        "recall": 0.0,
+        "specificity": 0.99856,
+        "f1": 0.0,
+        "alerts": 4,
+        "roc_auc": 0.626022,
+        "pr_auc": 0.121553,
+        "brier": 0.068926,
+        "ece_uniform10": 0.019686,
+        "ece_quantile10": 0.024275,
+        "log_loss": 0.26375
+      },
+      "platt": {
+        "threshold": 0.5,
+        "n": 3000,
+        "prevalence": 0.074333,
+        "tp": 0,
+        "fp": 0,
+        "tn": 2777,
+        "fn": 223,
+        "accuracy": 0.925667,
+        "precision": 0.0,
+        "recall": 0.0,
+        "specificity": 1.0,
+        "f1": 0.0,
+        "alerts": 0,
+        "roc_auc": 0.626022,
+        "pr_auc": 0.121553,
+        "brier": 0.067966,
+        "ece_uniform10": 0.010442,
+        "ece_quantile10": 0.012769,
+        "log_loss": 0.25874
+      },
+      "isotonic": {
+        "threshold": 0.5,
+        "n": 3000,
+        "prevalence": 0.074333,
+        "tp": 5,
+        "fp": 14,
+        "tn": 2763,
+        "fn": 218,
+        "accuracy": 0.922667,
+        "precision": 0.263158,
+        "recall": 0.022422,
+        "specificity": 0.994959,
+        "f1": 0.041322,
+        "alerts": 19,
+        "roc_auc": 0.619973,
+        "pr_auc": 0.113218,
+        "brier": 0.06807,
+        "ece_uniform10": 0.010882,
+        "ece_quantile10": 0.011438,
+        "log_loss": 0.258645
+      }
+    }
+  },
+  "primary_model": "XGBoost",
+  "primary_calibration": "platt",
+  "decision_policy": {
+    "actions": {
+      "routine_monitoring": {
+        "risk_category": "Low",
+        "cost_inr": 0.0,
+        "mitigation": 0.0,
+        "description": "Routine monitoring of supplier KPIs"
+      },
+      "enhanced_monitoring": {
+        "risk_category": "Medium",
+        "cost_inr": 5000.0,
+        "mitigation": 0.15,
+        "description": "Weekly supplier check-in, early-warning tracking, order-status verification"
+      },
+      "contingency_review": {
+        "risk_category": "High",
+        "cost_inr": 20000.0,
+        "mitigation": 0.45,
+        "description": "Contingency review: confirm alternates, raise safety stock, split next PO"
+      },
+      "escalate_recovery": {
+        "risk_category": "Critical",
+        "cost_inr": 60000.0,
+        "mitigation": 0.7,
+        "description": "Run recovery simulation & optimisation, pre-book alternate capacity, escalate"
+      }
+    },
+    "rule": "argmin_a cost_a + p_cal * (1 - mitigation_a) * exposure_obs",
+    "alert_definition": "action in {contingency_review, escalate_recovery}",
+    "policy_confusion": {
+      "n": 3000,
+      "prevalence": 0.074333,
+      "tp": 0,
+      "fp": 5,
+      "tn": 2772,
+      "fn": 223,
+      "accuracy": 0.924,
+      "precision": 0.0,
+      "recall": 0.0,
+      "specificity": 0.998199,
+      "f1": 0.0,
+      "alerts": 5
+    },
+    "action_counts": {
+      "routine_monitoring": 2986,
+      "enhanced_monitoring": 9,
+      "contingency_review": 5,
+      "escalate_recovery": 0
+    },
+    "observed_disruption_rate_by_action": {
+      "contingency_review": 0.0,
+      "enhanced_monitoring": 0.0,
+      "routine_monitoring": 0.0747
+    }
+  },
+  "business_outcome_test_inr": {
+    "no_action_monitor_only": 11689468.0,
+    "contingency_review_for_all": 66429207.0,
+    "threshold_0.5_contingency": 11689468.0,
+    "expected_cost_policy (calibrated)": 11834468.0,
+    "expected_cost_policy (uncalibrated)": 12040334.0,
+    "oracle (perfect foresight, upper bound)": 8212187.0
+  },
+  "exposure_summary": {
+    "observed_graph_mean_by_tier": {
+      "1": 105255.0,
+      "2": 17200.0,
+      "3": 2318.0
+    },
+    "true_graph_mean_by_tier": {
+      "1": 105255.0,
+      "2": 35935.0,
+      "3": 25121.0
+    }
+  },
+  "shap_top10": {
+    "capacity_utilisation": 0.3545700013637543,
+    "weather_risk_forecast": 0.3291400074958801,
+    "financial_risk_score": 0.26148998737335205,
+    "reliability_score": 0.14357000589370728,
+    "port_congestion_index": 0.13210999965667725,
+    "max_dependency_pct": 0.1255200058221817,
+    "days_since_last_disruption": 0.0851999968290329,
+    "max_severity_365d": 0.07558000087738037,
+    "alt_supplier_count": 0.06612999737262726,
+    "delay_rate_90d": 0.059209998697042465
+  },
+  "summary": {
+    "xgb_test_pr_auc": 0.121553,
+    "xgb_test_brier": 0.067966
+  },
+  "experiment_id": "exp1_supplier_disruption",
+  "execution_timestamp": "2026-11-12T15:12:10+00:00",
+  "python": "3.13.18"
+}

@@ -1,0 +1,219 @@
+{
+  "data_label": "synthetic + simulated outcomes",
+  "disrupted_suppliers": [
+    "S0135",
+    "S0142",
+    "S0122",
+    "S0136",
+    "S0123"
+  ],
+  "disrupted_names": [
+    "Summit Agro Traders (Synthetic)",
+    "Indus Agro Traders (Synthetic)",
+    "Atlas Agro Traders (Synthetic)",
+    "Sahyadri Agro Traders (Synthetic)",
+    "Coromandel Agro Traders (Synthetic)"
+  ],
+  "hub_edges": {
+    "observed": 19,
+    "hidden": 25
+  },
+  "assumptions": {
+    "currency": "INR",
+    "status": "ILLUSTRATIVE ASSUMPTIONS for a synthetic demonstration - not verified company or market figures",
+    "base_material_prices": "materials.csv unit_price_inr (illustrative)",
+    "alt_price_premium_existing_supplier": 0.06,
+    "alt_price_premium_substitute_supplier": 0.1,
+    "onboarding_fixed_cost_inr": 150000,
+    "substitute_qualification_days": 7,
+    "freight_rate_standard_road": 0.025,
+    "freight_rate_standard_sea": 0.04,
+    "expedite_freight_multiplier": 3.0,
+    "expedite_lead_time_factor": 0.5,
+    "holding_cost_annual_rate": 0.24,
+    "shortage_penalty_pct_of_price": 0.15,
+    "production_interruption_cost_per_plant_day_inr": 75000,
+    "production_interruption_fill_threshold": 0.9,
+    "recovery_management_cost_per_day_inr": 25000,
+    "risk_limit_calibrated_p30": 0.35,
+    "max_allocation_share": 0.6,
+    "detection_day": 2,
+    "nominal_disruption_duration_days": 60,
+    "horizon_days": 120,
+    "reactive_trigger_cover_days": 10,
+    "safety_cover_days": 7,
+    "replications": 500,
+    "base_seed": 20250701,
+    "scenario_start_date": "2025-07-01"
+  },
+  "replications": 500,
+  "crn": "replication r uses np.random.default_rng(base_seed + r) for all scenarios",
+  "mc_convergence_final_relative_se": 0.028298384723896598,
+  "exp4_cases": {
+    "top_t1": "S0013",
+    "top_t2": "S0122",
+    "top_t3": "S0326",
+    "imports": 54,
+    "kerala": 10,
+    "top_risk": [
+      "S0058",
+      "S0232",
+      "S0224"
+    ]
+  },
+  "scenario_summary": [
+    {
+      "scenario": "S1",
+      "severity": "Mild",
+      "policy": "A: No intervention",
+      "financial_impact_inr": 2360692.0453731697,
+      "unmet_demand_units": 0.0,
+      "recovery_time_days": 93.476
+    },
+    {
+      "scenario": "S2",
+      "severity": "Mild",
+      "policy": "B: Rule-based",
+      "financial_impact_inr": 2360692.0453731697,
+      "unmet_demand_units": 0.0,
+      "recovery_time_days": 93.476
+    },
+    {
+      "scenario": "S3",
+      "severity": "Mild",
+      "policy": "C: Optimisation",
+      "financial_impact_inr": 2427494.778242019,
+      "unmet_demand_units": 0.0,
+      "recovery_time_days": 93.476
+    },
+    {
+      "scenario": "S4",
+      "severity": "Moderate",
+      "policy": "A: No intervention",
+      "financial_impact_inr": 2925459.848911067,
+      "unmet_demand_units": 1112.7966744684109,
+      "recovery_time_days": 113.53
+    },
+    {
+      "scenario": "S5",
+      "severity": "Moderate",
+      "policy": "B: Rule-based",
+      "financial_impact_inr": 2922209.426649959,
+      "unmet_demand_units": 1050.2697736117427,
+      "recovery_time_days": 113.53
+    },
+    {
+      "scenario": "S6",
+      "severity": "Moderate",
+      "policy": "C: Optimisation",
+      "financial_impact_inr": 3950005.7159344405,
+      "unmet_demand_units": 0.0,
+      "recovery_time_days": 113.394
+    },
+    {
+      "scenario": "S7",
+      "severity": "Severe",
+      "policy": "A: No intervention",
+      "financial_impact_inr": 37299779.468157575,
+      "unmet_demand_units": 586185.4412943895,
+      "recovery_time_days": 115.334
+    },
+    {
+      "scenario": "S8",
+      "severity": "Severe",
+      "policy": "B: Rule-based",
+      "financial_impact_inr": 30200834.988782395,
+      "unmet_demand_units": 462460.4829758842,
+      "recovery_time_days": 114.926
+    },
+    {
+      "scenario": "S9",
+      "severity": "Severe",
+      "policy": "C: Optimisation",
+      "financial_impact_inr": 8706030.601703903,
+      "unmet_demand_units": 0.0,
+      "recovery_time_days": 114.63
+    }
+  ],
+  "paired": [
+    {
+      "severity": "Mild",
+      "comparison": "A: No intervention minus B: Rule-based",
+      "mean_saving_inr": 0.0,
+      "ci95_low": 0.0,
+      "ci95_high": 0.0,
+      "share_reps_b_better": 0.0
+    },
+    {
+      "severity": "Mild",
+      "comparison": "A: No intervention minus C: Optimisation",
+      "mean_saving_inr": -66802.73286884937,
+      "ci95_low": -66895.34206580906,
+      "ci95_high": -66710.12367188968,
+      "share_reps_b_better": 0.0
+    },
+    {
+      "severity": "Mild",
+      "comparison": "B: Rule-based minus C: Optimisation",
+      "mean_saving_inr": -66802.73286884937,
+      "ci95_low": -66895.34206580906,
+      "ci95_high": -66710.12367188968,
+      "share_reps_b_better": 0.0
+    },
+    {
+      "severity": "Moderate",
+      "comparison": "A: No intervention minus B: Rule-based",
+      "mean_saving_inr": 3250.422261108399,
+      "ci95_low": -1883.2602917069921,
+      "ci95_high": 8384.10481392379,
+      "share_reps_b_better": 0.004
+    },
+    {
+      "severity": "Moderate",
+      "comparison": "A: No intervention minus C: Optimisation",
+      "mean_saving_inr": -1024545.8670233736,
+      "ci95_low": -1050971.5814150479,
+      "ci95_high": -998120.1526316993,
+      "share_reps_b_better": 0.046
+    },
+    {
+      "severity": "Moderate",
+      "comparison": "B: Rule-based minus C: Optimisation",
+      "mean_saving_inr": -1027796.289284482,
+      "ci95_low": -1053438.6865083624,
+      "ci95_high": -1002153.8920606017,
+      "share_reps_b_better": 0.042
+    },
+    {
+      "severity": "Severe",
+      "comparison": "A: No intervention minus B: Rule-based",
+      "mean_saving_inr": 7098944.479375191,
+      "ci95_low": 6776864.424337064,
+      "ci95_high": 7421024.534413318,
+      "share_reps_b_better": 0.884
+    },
+    {
+      "severity": "Severe",
+      "comparison": "A: No intervention minus C: Optimisation",
+      "mean_saving_inr": 28593748.866453685,
+      "ci95_low": 26520683.94939321,
+      "ci95_high": 30666813.78351416,
+      "share_reps_b_better": 0.826
+    },
+    {
+      "severity": "Severe",
+      "comparison": "B: Rule-based minus C: Optimisation",
+      "mean_saving_inr": 21494804.387078494,
+      "ci95_low": 19566634.26380983,
+      "ci95_high": 23422974.510347158,
+      "share_reps_b_better": 0.744
+    }
+  ],
+  "summary": {
+    "severe_A_impact": 37299779.468157575,
+    "severe_C_impact": 8706030.601703903
+  },
+  "experiment_id": "exp4_5_scenarios",
+  "execution_timestamp": "2026-11-12T15:56:14+00:00",
+  "python": "3.13.18"
+}

@@ -1,0 +1,273 @@
+{
+  "dataset": "datasets/processed/dataco_shipments.csv (REAL: DataCo, Mendeley Data V5, CC BY 4.0)",
+  "dataset_hash": "864e1fb3a5b3aeed",
+  "data_label": "real",
+  "random_seed": 42,
+  "prediction_timestamp": "order timestamp; only order-time attributes used",
+  "excluded_leakage_columns": [
+    "Days for shipping (real)",
+    "Delivery Status",
+    "shipping date (DateOrders)",
+    "Order Status",
+    "Late_delivery_risk",
+    "Benefit per order",
+    "Order Profit Per Order"
+  ],
+  "features": [
+    "Type",
+    "Shipping Mode",
+    "Market",
+    "Order Region",
+    "Customer Segment",
+    "Department Name",
+    "Category Name",
+    "Days for shipment (scheduled)",
+    "Order Item Quantity",
+    "Order Item Product Price",
+    "Order Item Discount Rate",
+    "Sales",
+    "Latitude",
+    "Longitude",
+    "order_month",
+    "order_dow",
+    "order_hour"
+  ],
+  "splits": {
+    "train": {
+      "rows": 103657,
+      "start": "2015-01-01 00:00:00",
+      "end": "2016-09-24 16:37:00",
+      "late_rate": 0.574
+    },
+    "validation": {
+      "rows": 34554,
+      "start": "2016-09-24 16:59:00",
+      "end": "2017-04-22 03:22:00",
+      "late_rate": 0.5696
+    },
+    "test": {
+      "rows": 34554,
+      "start": "2017-04-22 03:43:00",
+      "end": "2018-01-31 23:38:00",
+      "late_rate": 0.5729
+    }
+  },
+  "classification": {
+    "Logistic Regression": {
+      "none": {
+        "threshold": 0.5,
+        "n": 34554,
+        "prevalence": 0.572871,
+        "tp": 10957,
+        "fp": 1369,
+        "tn": 13390,
+        "fn": 8838,
+        "accuracy": 0.704607,
+        "precision": 0.888934,
+        "recall": 0.553524,
+        "specificity": 0.907243,
+        "f1": 0.682233,
+        "alerts": 12326,
+        "roc_auc": 0.748546,
+        "pr_auc": 0.838823,
+        "brier": 0.187804,
+        "ece_uniform10": 0.026365,
+        "ece_quantile10": 0.034182,
+        "log_loss": 0.537143
+      },
+      "isotonic": {
+        "threshold": 0.5,
+        "n": 34554,
+        "prevalence": 0.572871,
+        "tp": 11633,
+        "fp": 1705,
+        "tn": 13054,
+        "fn": 8162,
+        "accuracy": 0.714447,
+        "precision": 0.87217,
+        "recall": 0.587674,
+        "specificity": 0.884477,
+        "f1": 0.7022,
+        "alerts": 13338,
+        "roc_auc": 0.752239,
+        "pr_auc": 0.793844,
+        "brier": 0.18447,
+        "ece_uniform10": 0.010514,
+        "ece_quantile10": 0.007737,
+        "log_loss": 0.552713
+      }
+    },
+    "Random Forest": {
+      "none": {
+        "threshold": 0.5,
+        "n": 34554,
+        "prevalence": 0.572871,
+        "tp": 11649,
+        "fp": 1371,
+        "tn": 13388,
+        "fn": 8146,
+        "accuracy": 0.724576,
+        "precision": 0.8947,
+        "recall": 0.588482,
+        "specificity": 0.907108,
+        "f1": 0.70998,
+        "alerts": 13020,
+        "roc_auc": 0.776994,
+        "pr_auc": 0.855152,
+        "brier": 0.176847,
+        "ece_uniform10": 0.021184,
+        "ece_quantile10": 0.017891,
+        "log_loss": 0.513989
+      },
+      "isotonic": {
+        "threshold": 0.5,
+        "n": 34554,
+        "prevalence": 0.572871,
+        "tp": 11699,
+        "fp": 1456,
+        "tn": 13303,
+        "fn": 8096,
+        "accuracy": 0.723563,
+        "precision": 0.88932,
+        "recall": 0.591008,
+        "specificity": 0.901348,
+        "f1": 0.710106,
+        "alerts": 13155,
+        "roc_auc": 0.776872,
+        "pr_auc": 0.833293,
+        "brier": 0.175523,
+        "ece_uniform10": 0.004702,
+        "ece_quantile10": 0.005994,
+        "log_loss": 0.50707
+      }
+    },
+    "XGBoost": {
+      "none": {
+        "threshold": 0.5,
+        "n": 34554,
+        "prevalence": 0.572871,
+        "tp": 12151,
+        "fp": 2136,
+        "tn": 12623,
+        "fn": 7644,
+        "accuracy": 0.716965,
+        "precision": 0.850493,
+        "recall": 0.613842,
+        "specificity": 0.855275,
+        "f1": 0.713045,
+        "alerts": 14287,
+        "roc_auc": 0.779549,
+        "pr_auc": 0.858494,
+        "brier": 0.176845,
+        "ece_uniform10": 0.031346,
+        "ece_quantile10": 0.025875,
+        "log_loss": 0.505761
+      },
+      "isotonic": {
+        "threshold": 0.5,
+        "n": 34554,
+        "prevalence": 0.572871,
+        "tp": 11607,
+        "fp": 1393,
+        "tn": 13366,
+        "fn": 8188,
+        "accuracy": 0.722724,
+        "precision": 0.892846,
+        "recall": 0.58636,
+        "specificity": 0.905617,
+        "f1": 0.707852,
+        "alerts": 13000,
+        "roc_auc": 0.776981,
+        "pr_auc": 0.824662,
+        "brier": 0.175032,
+        "ece_uniform10": 0.004634,
+        "ece_quantile10": 0.004737,
+        "log_loss": 0.501284
+      }
+    },
+    "Baseline: shipping-mode late rate": {
+      "none": {
+        "threshold": 0.5,
+        "n": 34554,
+        "prevalence": 0.572871,
+        "tp": 10653,
+        "fp": 1362,
+        "tn": 13397,
+        "fn": 9142,
+        "accuracy": 0.696012,
+        "precision": 0.886642,
+        "recall": 0.538166,
+        "specificity": 0.907717,
+        "f1": 0.669789,
+        "alerts": 12015,
+        "roc_auc": 0.744126,
+        "pr_auc": 0.785179,
+        "brier": 0.188059,
+        "ece_uniform10": 0.00666,
+        "ece_quantile10": 0.001531,
+        "log_loss": 0.537279
+      }
+    }
+  },
+  "regression": {
+    "Baseline: training mean": {
+      "n": 34554,
+      "mae": 1.201834,
+      "rmse": 1.49062,
+      "r2": -7.3e-05
+    },
+    "Baseline: shipping-mode mean": {
+      "n": 34554,
+      "mae": 0.977788,
+      "rmse": 1.26442,
+      "r2": 0.280418
+    },
+    "Linear Regression": {
+      "n": 34554,
+      "mae": 0.990052,
+      "rmse": 1.265255,
+      "r2": 0.279468
+    },
+    "Random Forest": {
+      "n": 34554,
+      "mae": 0.978013,
+      "rmse": 1.274162,
+      "r2": 0.269287
+    },
+    "XGBoost": {
+      "n": 34554,
+      "mae": 0.991916,
+      "rmse": 1.273393,
+      "r2": 0.270169
+    }
+  },
+  "late_rate_by_mode_train": {
+    "First Class": {
+      "late_rate": 1.0,
+      "mean_delay": 1.0,
+      "n": 15959
+    },
+    "Same Day": {
+      "late_rate": 0.4636,
+      "mean_delay": 0.4636,
+      "n": 5550
+    },
+    "Second Class": {
+      "late_rate": 0.8008,
+      "mean_delay": 1.9988,
+      "n": 20424
+    },
+    "Standard Class": {
+      "late_rate": 0.3987,
+      "mean_delay": -0.0046,
+      "n": 61724
+    }
+  },
+  "summary": {
+    "xgb_test_pr_auc": 0.858494,
+    "xgb_mae": 0.991916
+  },
+  "experiment_id": "exp3_delivery_delay_dataco",
+  "execution_timestamp": "2026-11-12T15:59:59+00:00",
+  "python": "3.13.18"
+}

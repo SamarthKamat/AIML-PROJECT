@@ -1,0 +1,11 @@
+material_id,substitute_material_id,compatibility_score,note,data_label
+M01,M02,0.9,Spec approval needed (alkalisation changes colour),synthetic
+M02,M01,0.9,Spec approval needed,synthetic
+M05,M06,0.7,Fat re-balancing with vegetable fat,synthetic
+M06,M05,0.8,Reformulation for fat content,synthetic
+M11,M12,0.8,Viscosity adjustment,synthetic
+M12,M11,0.8,Moisture adjustment,synthetic
+M22,M23,0.6,Lower barrier; shelf life reduced,synthetic
+M24,M25,0.7,Heavier pack; line changeover,synthetic
+M25,M24,0.9,Line changeover,synthetic
+M19,M20,0.5,Different SKU taste profile,synthetic
