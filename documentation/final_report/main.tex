@@ -7,7 +7,11 @@
 \usepackage{url}
 \usepackage{cite}
 \usepackage{balance}
-\graphicspath{{figures/}{../diagrams/}}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\pmark}{$\circ$}
+\definecolor{navy}{HTML}{1B2A4A}
+\graphicspath{{figures/}}
 \input{tables/numbers}
 \begin{document}
 
@@ -21,16 +25,16 @@ Student IDs: \{B2026102, B2026100, B2026078\}\\
 \maketitle
 
 \begin{abstract}
-A chocolate and malt-beverage manufacturer sees its Tier-1 suppliers but not the Tier-2/3 suppliers they share, so one hidden
-trader can starve several ``independent'' cocoa processors at once. We build and evaluate an end-to-end decision system that (i)~predicts
-30-day supplier disruption with calibrated probabilities using point-in-time features, (ii)~ranks candidate hidden relationships by link
-prediction, (iii)~propagates disruptions through a daily material-flow simulator, and (iv)~converts predictions into cost-minimising actions
-and a mixed-integer recovery plan. Supplier-level experiments use a documented synthetic FMCG ecosystem (500 suppliers, 1,500 relationships,
-of which 69\,\% are hidden); two real public datasets test transferable components (DataCo, 172,765 shipments; SupplyGraph, a real FMCG graph).
-Platt scaling halves XGBoost's expected calibration error (\XgbRaw$\rightarrow$\XgbCal); the observed network understates Tier-2 and Tier-3
-exposure by \GapTwo$\times$ and \GapThree$\times$; GNNs did \emph{not} outperform feature-based models on either synthetic or real data. In a
-predefined nine-scenario evaluation (\Reps{} common-random-number replications), optimisation-based recovery reduces the simulated impact of a
-severe cocoa-trader outage from \textrm{INR}~\SevA{} to \SevC{} crore (\SevRed\,\% lower) and is also cheapest under a moderate shock, but over-hedges when the shock is mild.
+A chocolate and malt-beverage manufacturer sees its Tier-1 suppliers but not the Tier-2/3 suppliers they share, so a single hidden
+trader can starve several ``independent'' cocoa processors at once. We build, evaluate and deploy an end-to-end decision system that
+(i)~predicts 30-day supplier disruption with calibrated probabilities from point-in-time features, (ii)~ranks candidate hidden relationships by
+link prediction, (iii)~propagates disruptions through a daily material-flow simulator and (iv)~converts predictions into cost-minimising
+actions and a mixed-integer recovery plan. Supplier-level experiments use a documented synthetic FMCG ecosystem (500 suppliers, 1,500 links,
+69\,\% hidden); two real public datasets test transferable components (DataCo, 172,765 shipments; SupplyGraph, a real FMCG graph). Platt
+scaling halves XGBoost's calibration error (\XgbRaw$\rightarrow$\XgbCal); the observed network understates Tier-2 and Tier-3 exposure
+\GapTwo$\times$ and \GapThree$\times$; graph neural networks did \emph{not} beat feature-based models. In a predefined nine-scenario
+evaluation (\Reps{} common-random-number replications) optimisation-based recovery cuts the simulated impact of a severe cocoa-trader outage
+from INR~\SevA{} to \SevC{} crore (\SevRed\,\%), saving \SaveAC{} crore (95\,\% CI \SaveACl--\SaveACh), while over-hedging under mild shocks.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -38,178 +42,192 @@ supply chain risk, link prediction, graph neural networks, probability calibrati
 \end{IEEEkeywords}
 
 \section{Introduction}
-\subsection{Business Problem}
-Disruptions are costly: firms announcing supply chain disruptions experienced significantly lower long-run stock returns and higher equity
-risk~\cite{hendricks2005}. In FMCG the exposure is structural: a malt-beverage jar needs malt extract, milk powder, cocoa, sugar, vitamin premix
-and PET jars, and each Tier-1 input depends on Tier-2 commodity traders that procurement rarely maps. Disruptions therefore ``ripple''
-through invisible links~\cite{ivanov2019}. The business decision we support is concrete: \emph{for each supplier, each month, which
-mitigation action should procurement take, and if a shock occurs, which alternative suppliers should receive which quantities by which
-transport mode?}
+\subsection{Business Problem and Relevance}
+Announced supply chain disruptions are followed by significantly lower long-run stock returns and higher equity risk~\cite{hendricks2005}.
+In FMCG the exposure is structural: a malt-beverage jar needs malt extract, milk powder, cocoa, sugar, vitamin premix and PET jars, and each
+Tier-1 input depends on Tier-2 commodity traders that procurement rarely maps, so disruptions ``ripple'' through invisible
+links~\cite{ivanov2019}. We support two executable decisions: \emph{(1) each month, which mitigation action should procurement take for each
+supplier; (2) when a shock is reported, which alternative suppliers should receive which quantities, by which transport mode?}
 
-\subsection{Scope, Objectives and Contributions}
-Objectives: discover candidate hidden dependencies; predict calibrated disruption probabilities; quantify cascading inventory, production and
-financial exposure; and optimise recovery. Contributions: (1)~an integrated, executable pipeline in which every recommendation is traceable to a
-model output, an exposure calculation and a solver result; (2)~a leakage-audited evaluation (prediction timestamp, embargoed chronological
-splits, calibration fitted only on a calibration split, test edges removed from message passing); (3)~a quantification of the
-``black-box gap'' between observed and true network exposure; (4)~a predefined nine-scenario policy comparison with explicit economics;
-(5)~a tested React/Flask/MySQL application. We do not claim novelty for GNNs, calibration or MILP individually.
+\subsection{Research Questions and Contributions}
+\textbf{RQ1} Can point-in-time features yield \emph{calibrated} 30-day disruption probabilities? \textbf{RQ2} How much exposure is hidden in
+unobserved links, and can link prediction recover them? \textbf{RQ3} Does graph structure improve risk classification over tabular models?
+\textbf{RQ4} Does network-aware optimisation outperform rule-based recovery across disruption severities? Contributions: (1)~an integrated,
+deployed pipeline in which every recommendation is traceable to a model output, an exposure calculation and a solver result; (2)~a
+leakage-audited protocol (prediction timestamp, embargoed chronological splits, calibration-only split, test edges removed from message
+passing); (3)~a quantification of the \emph{black-box gap}; (4)~a predefined nine-scenario policy evaluation with explicit economics and paired
+statistics. We do not claim novelty for GNNs, calibration or MILP individually.
 
 \section{Related Work}
-\textbf{Risk prediction.} AI for supply chain risk management is dominated by risk identification and assessment, with comparatively few
-studies closing the loop to response decisions~\cite{baryannis2019}. Gradient boosting~\cite{chen2016} is a strong tabular baseline. Because
-actions are triggered by probabilities, calibration matters: Platt scaling~\cite{platt1999}, isotonic regression~\cite{zadrozny2002} and
-their comparison across learners~\cite{niculescu2005}. \textbf{Graph-based intelligence.} Brintrup \emph{et al.}~\cite{brintrup2018} framed
-hidden-link discovery as link prediction on a real automotive network; Kosasih and Brintrup~\cite{kosasih2022} used GNNs for the same task.
-Classical heuristics~\cite{libennowell2007}, node2vec~\cite{grover2016} and message-passing models GCN~\cite{kipf2017}, GraphSAGE~\cite{hamilton2017}
-and GAT~\cite{velickovic2018} are our comparators; SupplyGraph~\cite{wasi2024} provides a real FMCG benchmark. \textbf{Cascades and recovery.}
-OR/MS research models disruptions with inventory, sourcing and contracting decisions~\cite{snyder2016}, and the ripple-effect literature
-studies propagation~\cite{ivanov2019}. \textbf{Gap.} Prior work treats discovery, prediction and recovery separately and rarely reports
-calibrated, leakage-controlled, policy-level business outcomes; we evaluate their combination with explicit economics.
+\textbf{Risk prediction.} AI for supply chain risk management concentrates on identification and assessment, with few studies closing the
+loop to response~\cite{baryannis2019}. Gradient boosting~\cite{chen2016} is a strong tabular baseline; because actions are triggered by
+probabilities, calibration matters: Platt scaling~\cite{platt1999}, isotonic regression~\cite{zadrozny2002} and their comparison across
+learners~\cite{niculescu2005}. \textbf{Graph intelligence.} Brintrup \emph{et al.}~\cite{brintrup2018} framed hidden-dependency discovery as link
+prediction on a real automotive network; Kosasih and Brintrup~\cite{kosasih2022} applied GNNs to the same task. Heuristics~\cite{libennowell2007},
+node2vec~\cite{grover2016}, GCN~\cite{kipf2017}, GraphSAGE~\cite{hamilton2017} and GAT~\cite{velickovic2018} are our comparators;
+SupplyGraph~\cite{wasi2024} is a real FMCG benchmark. \textbf{Cascades and recovery.} OR/MS research models disruption mitigation through inventory,
+sourcing and contracts~\cite{snyder2016}; the ripple-effect literature studies propagation~\cite{ivanov2019}. Table~\ref{tab:prior} shows that prior
+work addresses these stages separately; our contribution is their leakage-controlled integration with a measured business outcome.
+
+\begin{table}[t]\centering\caption{Scope of related work (\cmark{} primary focus, \pmark{} partial / review).}\label{tab:prior}
+\scriptsize\setlength{\tabcolsep}{2.2pt}\begin{tabular}{lcccccc}\toprule
+Work & Hidden & Risk & Calib- & Cas- & Recovery & Policy\\
+ & links & pred. & ration & cade & opt. & eval.\\\midrule
+Brintrup \emph{et al.}~\cite{brintrup2018} & \cmark & & & & & \\
+Kosasih \& Brintrup~\cite{kosasih2022} & \cmark & & & & & \\
+Wasi \emph{et al.}~\cite{wasi2024} & & \cmark & & & & \\
+Baryannis \emph{et al.}~\cite{baryannis2019} & & \pmark & & & \pmark & \\
+Snyder \emph{et al.}~\cite{snyder2016} & & & & \pmark & \cmark & \pmark\\
+Ivanov \emph{et al.}~\cite{ivanov2019} & & \pmark & & \cmark & & \\
+\rowcolor{gray!15}\textbf{This work} & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark\\
+\bottomrule\end{tabular}\end{table}
+
+\begin{figure*}[t]\centering\includegraphics[width=\textwidth]{fig_architecture.pdf}
+\caption{System architecture. Real and synthetic data feed point-in-time features; calibrated risk, link discovery, delay and cascade models feed
+an exposure model, a cost-optimal action rule and a recovery MILP; results are served by a Flask API, a React control tower and a tool-calling
+Gemini assistant, deployed on Render.}\label{fig:arch}\end{figure*}
 
 \section{Methodology}
-\begin{figure}[t]\centering\includegraphics[width=\columnwidth]{01_system_architecture.pdf}
-\caption{System architecture: data layer, point-in-time features, prediction and link models, exposure model, cascade simulator, decision
-engine with MILP, Flask API, React control tower and tool-calling assistant.}\label{fig:arch}\end{figure}
-
 \subsection{Data and Provenance}
-\textbf{Synthetic FMCG ecosystem} (fictional ``Cocoa \& Malt Foods'', seed 42): 120/200/180 Tier-1/2/3 suppliers, 50 materials over three
-BOM levels, 100 products, two plants, 1,048 disruptions (782 qualifying) over 2024--2025, 4,929 POs, 9,579 shipments, 5,824 weekly inventory
-records. A buyer needing material $m$ picks $k\!\in\!\{2..6\}$ sources with probability $\propto$ size$^{1.6}e^{-d/2500\,\mathrm{km}}$;
-Tier-2 and Tier-3 edges are observed with probability 0.45 and 0.15, so 461 of 1,500 relationships are visible. Daily disruption hazard
-combines latent financial risk, utilisation, regional geo-risk, monsoon/cyclone seasonality, an unobserved frailty and contagion from
-disrupted upstream suppliers over the \emph{true} network. Every row carries a synthetic label; hidden edges are used only as simulator
-ground truth and for evaluation. \textbf{DataCo}~\cite{constante2019} (CC~BY~4.0; GitHub mirror, SHA-256 recorded): 180,519 order lines,
-7,754 cancelled removed. \textbf{SupplyGraph}~\cite{wasi2024}: 40 products (one duplicated node removed), 684 product-pair edges, 221 days. Real
-and synthetic identities are never merged. All tables pass 196 validation checks (keys, FKs, dates, ranges, logical rules).
+\textbf{Synthetic FMCG ecosystem} (fictional ``Cocoa \& Malt Foods'', seed 42): 120/200/180 Tier-1/2/3 suppliers, 50 materials over three BOM
+levels, 100 products, two plants, 1,048 disruptions (782 qualifying) in 2024--2025, 4,929 POs, 9,579 shipments and 5,824 weekly inventory records. A
+buyer needing material $m$ picks $k\in\{2..6\}$ sources with probability $\propto$ size$^{1.6}e^{-d/2500\,\mathrm{km}}$; Tier-2 and Tier-3 links are
+visible with probability 0.45 and 0.15 (461 of 1,500 observed). The daily disruption hazard combines latent financial risk, utilisation, regional
+geo-risk, monsoon/cyclone seasonality, an unobserved frailty and contagion from disrupted upstream suppliers over the \emph{true} network; hidden
+links are used only as simulator ground truth and for evaluation. \textbf{DataCo}~\cite{constante2019} (CC~BY~4.0, SHA-256 recorded): 180,519 order
+lines, 7,754 cancelled removed. \textbf{SupplyGraph}~\cite{wasi2024}: 40 products (one duplicated node removed), 684 edges, 221 days. Real and
+synthetic identities are never merged; all tables pass 196 validation checks (keys, foreign keys, dates, ranges, logical rules).
 
-\subsection{Disruption Prediction and Leakage Control}
+\subsection{Disruption Prediction and Leakage Control (RQ1)}
 The prediction timestamp $t$ is 00:00 on the first of each month. For supplier $i$,
 \begin{equation}
 y_i(t)=\mathbb{1}\big[\exists e:\ s_e\in(t,t+30\mathrm{d}],\ \ell_e\ge0.25,\ d_e\ge3\big],
 \end{equation}
-with start $s_e$, capacity loss $\ell_e$ and duration $d_e$. The 25 features $x_i(t)$ use only disruptions with reported date $<t$, deliveries
-completed before $t$, the monthly risk forecast for $t$ and \emph{observed} edges (e.g., upstream disruptions, single sourcing, delay and fill rate
-over 90 days). Splits: train 2024-04..2025-02 (5,500 rows), one-month embargo, calibration 2025-04..06 (1,500), test 2025-07..12
-(\TestRows). Logistic regression, a depth-5 tree, random forest and XGBoost are fitted on train only.
+with start $s_e$, capacity loss $\ell_e$ and duration $d_e$. The 25 features use only disruptions reported before $t$, deliveries completed before
+$t$, the monthly risk forecast and \emph{observed} links. Splits: train 2024-04..2025-02 (5,500 rows), one-month embargo, calibration 2025-04..06
+(1,500), test 2025-07..12 (\TestRows). Platt scaling $q=\sigma(a\,\mathrm{logit}\,\hat p+b)$ and isotonic regression are fitted on the calibration split
+only and chosen by 5-fold CV Brier score; we report Brier and $\mathrm{ECE}=\sum_b\frac{n_b}{N}|\bar y_b-\bar q_b|$ (10 equal-width bins).
 
-\subsection{Probability Calibration}
-Platt scaling fits $q=\sigma(a\,\mathrm{logit}(\hat p)+b)$ and isotonic regression a monotone map, both on the calibration split; the method
-is chosen by 5-fold CV Brier score within that split. We report Brier $=\frac1N\sum(q_i-y_i)^2$~\cite{niculescu2005} and
-$\mathrm{ECE}=\sum_b \frac{n_b}{N}\,|\bar y_b-\bar q_b|$ with 10 equal-width bins.
-
-\subsection{Graph Learning}
-$G=(V,E)$ has 501 nodes (suppliers and manufacturer) with 131 observable attributes (tier, output and input materials, region,
-size, reliability, financial risk, utilisation). GraphSAGE updates $h_v^{(l+1)}=\mathrm{ReLU}(W_1h_v^{(l)}+W_2\,\mathrm{mean}_{u\in N(v)}h_u^{(l)})$;
-a pair decoder scores $\sigma(\mathrm{MLP}[z_u\odot z_v,|z_u-z_v|])$. \textbf{A1}: observed edges split 70/10/20, test edges removed from the
-message-passing graph, negatives random or \emph{material-compatible}. \textbf{A2}: train on all observed edges and rank all
-\LinkCand{} compatible unobserved pairs against \LinkHid{} hidden edges. The model used downstream is selected by validation AP only.
-\textbf{Exp.~2B} feeds Exp.~1 features through GCN/GraphSAGE/GAT on observed, observed+top-500 predicted, and oracle graphs, and on
-SupplyGraph predicts a 7-day service shortfall (deliveries $<80\,\%$ of orders) with a 7-day-embargoed 60/20/20 date split.
+\subsection{Graph Learning (RQ2, RQ3)}
+$G=(V,E)$ has 501 nodes with 131 observable attributes. GraphSAGE updates $h_v^{(l+1)}=\mathrm{ReLU}(W_1h_v^{(l)}+W_2\,\mathrm{mean}_{u\in N(v)}h_u^{(l)})$
+and a decoder scores $\sigma(\mathrm{MLP}[z_u\odot z_v,|z_u-z_v|])$. \textbf{A1}: observed links split 70/10/20 with test links removed from message
+passing; negatives are random or \emph{material-compatible}. \textbf{A2}: train on all observed links and rank all \LinkCand{} compatible unobserved
+pairs against \LinkHid{} hidden links; the downstream model is chosen by validation AP only. \textbf{Exp.~2B} feeds Exp.~1 features through
+GCN/GraphSAGE/GAT on observed, observed+top-500 predicted and oracle graphs, and predicts a 7-day service shortfall on SupplyGraph.
 
 \subsection{Exposure, Cascade Simulation and Decision Rule}
-Dependency concentration of material $m$ is $\mathrm{HHI}_m=\sum_s w_{sm}^2$. Supplier $i$'s reach $r_{im}$ multiplies dependency shares along paths
-to the manufacturer (divided by the buyer's number of inputs). Exposure is
+Supplier $i$'s reach $r_{im}$ multiplies dependency shares along paths to the manufacturer; concentration is $\mathrm{HHI}_m=\sum_s w_{sm}^2$ and
 \begin{equation}
-E_i=\sum_m r_{im}\,\mathrm{CM}_m\,\mathbb{E}\big[S\max(0,D-c_m-10(\tau_i-1))\big],
+E_i=\textstyle\sum_m r_{im}\,\mathrm{CM}_m\,\mathbb{E}\big[S\max(0,D-c_m-10(\tau_i-1))\big],
 \end{equation}
-with daily contribution margin $\mathrm{CM}_m$ of products using $m$, cover $c_m$ (days), tier $\tau_i$ and empirical severity/duration
-$(S,D)$. The simulator propagates availability daily over the true network:
+with daily contribution margin $\mathrm{CM}_m$, cover $c_m$, tier $\tau_i$ and empirical severity/duration $(S,D)$. The simulator propagates
+availability daily over the true network, $a_b(t)=\min\big(1-\ell_b(t),\min_i\min(1,A_{bi}(t))\big)$ with $A_{bi}(t)=I_{bi}(t)+\sum_u w_{ub}a_u(t-L_{ub})$,
+10-day buffers, lead times $L_{ub}$ and BOM-bottleneck production. The executable action is
 \begin{equation}
-a_b(t)=\min\!\big(1-\ell_b(t),\ \min_i \min(1,\,A_{bi}(t))\big),
+a^*=\arg\min_a\ C_a+q_i(1-\rho_a)E_i,
 \end{equation}
-where $A_{bi}(t)=I_{bi}(t)+\sum_u w_{ub}\,a_u(t-L_{ub})$ is the available input $i$ in days of need,
-10-day input buffers $I_{bi}$, lead times $L_{ub}$ and a BOM-bottleneck production rule at the plants; unmet demand is
-$D_p(1-\min_{m\in\mathrm{BOM}(p)}\mathrm{fill}_m)$. With calibrated $q_i$, the executable action is
-\begin{equation}
-a^*=\arg\min_{a}\ C_a+q_i(1-\rho_a)E_i,
-\end{equation}
-over monitoring, enhanced monitoring, contingency review and escalation ($C_a$=0/5k/20k/60k~INR, mitigation $\rho_a$=0/0.15/0.45/0.70),
-which is Bayes-optimal under calibration and yields cost-derived thresholds $q^*=\Delta C/(E_i\Delta\rho)$.
+over four actions ($C_a$=0/5k/20k/60k INR, $\rho_a$=0/0.15/0.45/0.70), Bayes-optimal under calibration with thresholds $q^*=\Delta C/(E_i\Delta\rho)$.
 
-\subsection{Recovery Optimisation and Nine-Scenario Design}
-For deficits $\delta_m$, the MILP (PuLP/CBC) chooses quantities $x_{jk}$ from candidate $j$ (approved or substitute supplier, compatibility
-$\kappa_j$) by mode $k$ (standard/expedited), onboarding $z_j\in\{0,1\}$ and shortage $s_m$:
+\subsection{Recovery Optimisation and Nine-Scenario Design (RQ4)}
+For deficits $\delta_m$ the MILP (PuLP/CBC) chooses quantities $x_{jk}$ from candidate $j$ by mode $k$, onboarding $z_j$ and shortage $s_m$:
 \begin{align}
-\min\ &\textstyle\sum_{jk}p_j(1+f_{jk}+hW/2)x_{jk}+\sum_jFz_j+\sum_m\pi_m s_m\\
+\min\ &\textstyle\sum_{jk}p_j(1+f_{jk}+hW/2)x_{jk}+\sum_jFz_j+\sum_m\pi_ms_m\\
 \text{s.t. }&\textstyle\sum_{jk}\rho_j(1-q_j)\kappa_j\alpha_jx_{jk}+s_m\ge\delta_m,\nonumber\\
-&x_{jk}\le u_j(W-L_{jk})^+,\ \ \textstyle\sum_k x_{jk}\le0.6\,\delta_m,\nonumber\\
+&x_{jk}\le u_j(W-L_{jk})^+,\ \ \textstyle\sum_kx_{jk}\le0.6\,\delta_m,\nonumber\\
 &x_{jk}=0\ \text{if}\ q_j>0.35,\ \ \textstyle\sum_kx_{jk}\le Mz_j,\nonumber
 \end{align}
-with spare capacity $u_j$, deadline $W$, freight $f_{jk}$, holding rate $h$, shortage penalty $\pi_m$ and availability $\alpha_j$ derated by the
-candidate's estimated dependency on the disrupted suppliers. The shock disrupts the five largest Tier-2 cocoa-bean traders (\HubObs{}
-observed and \HubHid{} hidden outgoing links) by 25/50/100\,\% for a nominal 60 days. Policies: A none; B rule-based (observed graph,
-same-material alternates by reliability, standard freight, reactive trigger at 10 days of cover); C optimisation (observed+predicted graph,
-MILP at detection plus the same reactive trigger). All policies share network, demand, inventory and economics; replication $r$ uses seed
-$s_0+r$ for every policy (common random numbers) over 180 days. Illustrative economics (INR): premium 6\,\% (10\,\% substitute), onboarding
-1.5~lakh, freight 2.5/4\,\% (expedited $3\times$), holding 24\,\%/yr, shortage penalty 15\,\% of price, interruption 75k per plant-day,
-recovery management 25k/day. Impact is the sum of lost contribution margin, penalties, procurement premium, transport, holding, onboarding,
-interruption and management costs.
+with compatibility $\kappa_j$, spare capacity $u_j$, deadline $W$, freight $f_{jk}$, holding rate $h$, penalty $\pi_m$ and availability $\alpha_j$
+derated by estimated dependency on the disrupted suppliers. The shock hits the five largest Tier-2 cocoa-bean traders (\HubObs{} observed,
+\HubHid{} hidden links) with 25/50/100\,\% capacity loss for a nominal 60 days. Policies: \textbf{A} none; \textbf{B} rule-based (observed graph,
+same-material alternates by reliability, reactive at 10 days of cover); \textbf{C} optimisation (observed+predicted graph, MILP at detection plus the
+same trigger). All policies share network, demand, inventory and economics, and replication $r$ uses seed $s_0+r$ for every policy (common random
+numbers, 180 days). Illustrative economics (INR): premium 6\,\% (10\,\% substitutes), onboarding 1.5\,L, freight 2.5/4\,\% (expedited $3\times$),
+holding 24\,\%/yr, shortage penalty 15\,\% of price, interruption 75k per plant-day, recovery management 25k/day.
 
 \section{Results}
-\input{tables/exp1}
-\subsection{Disruption Prediction and Calibration}
-Table~\ref{tab:exp1}: discrimination is modest, as expected for rare, partly contagion-driven events (prevalence \TestPrev\,\%); logistic
-regression ranks best (ROC-AUC \LrAUC, PR-AUC \LrPR) and the deployed XGBoost reaches \XgbAUC/\XgbPR. Calibration matters for decisions: Platt
-reduces ECE from \XgbRaw{} to \XgbCal{} for XGBoost and from \DtRaw{} to \DtCal{} for the tree (Fig.~\ref{fig:rel}). SHAP attributes most signal
-to utilisation, the weather forecast and financial risk. On the test months the cost-based policy issued \PolAlerts{} contingency alerts
-(\PolTP{} true positives); realised cost was \BizCal{} lakh versus \BizNone{} (monitor only), \BizUncal{} (uncalibrated) and \BizAll{}
-(review all), with a perfect-foresight bound of \BizOracle{}. Because 3--4 weeks of inventory absorb most single-supplier events, per-supplier
-exposures rarely justify action---an honest negative result that motivates network-level response.
+\begin{figure*}[t]\centering\includegraphics[width=\textwidth]{fig_exp1.pdf}
+\caption{Exp.~1 on the untouched test split (3,000 supplier-months): (a) ROC and (b) precision--recall of the four calibrated models,
+(c) XGBoost reliability before/after Platt scaling fitted on the calibration split, (d) global SHAP attributions.}\label{fig:exp1}\end{figure*}
 
-\begin{figure}[t]\centering\includegraphics[width=0.92\columnwidth]{exp1_reliability.pdf}
-\caption{XGBoost reliability on the test split before and after calibration (calibrators fitted on the calibration split).}\label{fig:rel}\end{figure}
+\input{tables/exp1}
+\subsection{Calibrated Disruption Prediction (RQ1)}
+Discrimination is modest, as expected for rare, partly contagion-driven events (prevalence \TestPrev\,\%; Table~\ref{tab:exp1}, Fig.~\ref{fig:exp1}):
+logistic regression ranks best (ROC-AUC \LrAUC, PR-AUC \LrPR, twice the base rate) and the deployed XGBoost reaches \XgbAUC/\XgbPR. Calibration
+is decisive for decisions: Platt reduces ECE from \XgbRaw{} to \XgbCal{} (XGBoost) and from \DtRaw{} to \DtCal{} (tree). On the test months the
+cost-based policy raised \PolAlerts{} contingency alerts; realised cost was \BizCal{} lakh vs.\ \BizNone{} (monitor only), \BizUncal{}
+(uncalibrated) and \BizAll{} (review all), with a perfect-foresight bound of \BizOracle{}. Because 3--4 weeks of inventory absorb most
+single-supplier events, value shifts to network-level response---a finding that motivates RQ2--RQ4.
+
+\begin{figure*}[t]\centering\includegraphics[width=\textwidth]{fig_blackbox.pdf}
+\caption{The black-box gap (synthetic ground truth): (a) cocoa sub-network around the five largest Tier-2 traders---dashed links are invisible to
+the buyer; (b) mean exposure on the observed vs.\ true network; (c) share of links invisible by supplier tier.}\label{fig:gap}\end{figure*}
+
+\subsection{The Black-Box Gap and Hidden-Link Discovery (RQ2, RQ3)}
+Using only observed links understates Tier-2 and Tier-3 exposure \GapTwo$\times$ and \GapThree$\times$ (Fig.~\ref{fig:gap}). For discovery
+(Table~\ref{tab:exp2a}), common neighbours and Adamic--Adar are uninformative on the layered network (no shared neighbours); the
+validation-selected \LinkSel{} pair model attains AP \LinkSelAP{} against a base rate of \LinkBase{} (P@100 = \LinkSelP), whereas GraphSAGE reaches
+\LinkSAGEAP. Graph structure did not improve risk classification (Table~\ref{tab:exp2b})---not even with the oracle graph---and on real SupplyGraph
+logistic regression is best. Predicted links are therefore treated as \emph{verification leads}, never as confirmed relationships.
 
 \input{tables/exp2a}
-\subsection{Graph Learning and the Black-Box Gap}
-With only observed links, mean exposure of Tier-2 and Tier-3 suppliers is understated \GapTwo$\times$ and \GapThree$\times$ relative to the true
-network. For discovery (Table~\ref{tab:exp2a}), common neighbours and Adamic--Adar are uninformative on the layered network (no shared
-neighbours); the validation-selected \LinkSel{} pair model attains AP \LinkSelAP{} against a base rate of \LinkBase{} (P@100 = \LinkSelP),
-whereas GraphSAGE reaches \LinkSAGEAP. Table~\ref{tab:exp2b} shows that GNNs did not improve risk classification over tabular models on the
-synthetic network---even with the oracle graph---or on real SupplyGraph, where logistic regression is best. We therefore treat candidate
-links as verification leads, not as confirmed relationships.
-
 \input{tables/exp2b}
 \input{tables/exp3}
-\subsection{Real-Data Shipment Delay (DataCo)}
-On \DcTest{} chronologically held-out order lines, XGBoost reaches ROC-AUC \DcXgbAUC{} (PR-AUC \DcXgbPR) versus \DcBaseAUC{} for a
-shipping-mode baseline (Table~\ref{tab:exp3}); delay-days regression adds nothing over the mode mean ($R^2$ \DcRegR{} vs.\ \DcBaseR).
+\subsection{Transfer to Real Shipment Data (DataCo)}
+On \DcTest{} chronologically held-out order lines XGBoost reaches ROC-AUC \DcXgbAUC{} (PR-AUC \DcXgbPR) vs.\ \DcBaseAUC{} for a shipping-mode
+baseline (Table~\ref{tab:exp3}); delay-days regression adds nothing over the mode mean ($R^2$ \DcRegR{} vs.\ \DcBaseR).
+
+\input{tables/decision}
+\subsection{Executable Decision Example}
+Table~\ref{tab:decision} traces one recommendation end to end: the calibrated probability, network exposure and break-even thresholds select a
+contingency review as the minimum expected-cost action, and the recovery MILP returns an optimal standby allocation. Every value is reproduced by
+\texttt{POST /api/decision/evaluate} and stored in the audit trail.
 
 \input{tables/scenarios}
-\begin{figure*}[t]\centering\includegraphics[width=\textwidth]{scenarios_nine.pdf}
-\caption{Nine-scenario outcomes (means and 95\,\% percentile intervals over \Reps{} replications; simulated INR on synthetic data).}\label{fig:scen}\end{figure*}
+\begin{figure*}[t]\centering\includegraphics[width=\textwidth]{fig_scenarios.pdf}
+\caption{Nine-scenario outcomes over \Reps{} common-random-number replications (simulated INR on synthetic data): (a) mean financial impact,
+(b) unmet demand, (c) minimum service level, (d) share of replications in which each policy is cheapest.}\label{fig:scen}\end{figure*}
 
-\subsection{Nine-Scenario Business Evaluation}
-Table~\ref{tab:scen} and Fig.~\ref{fig:scen} report all thirteen required outcomes. Mild shocks are absorbed by buffers for every policy. Under the moderate shock, impacts are \ModA{} (A), \ModB{} (B) and \ModC{} lakh (C). Under the severe shock, no intervention leaves \SevUnmetA{}k units unmet (minimum service \SevSvcA\,\%,
-impact \SevA{} crore); the rule-based policy reduces this to \SevUnmetB{}k (\SevB{} crore); it can exclude only processors with \emph{observed} links to the failed
-traders and orders reactively, once cover has fallen. Optimisation pre-books de-rated alternates and expedited freight, cutting unmet demand to \SevUnmetC{}k units with full recovery in
-\FullRecC\,\% of replications (\SevC{} crore; recovery procurement spend \SevSpendC{} crore). The paired CRN saving of C over A is \SaveAC{} crore
-(95\,\% CI \SaveACl--\SaveACh) and over B \SaveBC{} crore. In the moderate case optimisation saves \ModSaveAC{} lakh on average over no intervention, but this is tail protection: no intervention is cheapest in \ModAWins\,\% of moderate replications, whereas optimisation is cheapest in \SevCWins\,\% of severe ones. It is not free: in the mild case, where buffers suffice, it
-over-hedges and costs \MildExtraC{} lakh more than doing nothing. The relative standard error of the severe no-intervention mean after \Reps{} replications is \McSE\,\%, and recovery time is censored at the horizon in at most \Censored\,\% of replications.
+\subsection{Nine-Scenario Business Evaluation (RQ4)}
+Table~\ref{tab:scen} and Fig.~\ref{fig:scen} report all thirteen outcomes. Mild shocks are absorbed by buffers for every policy. Under the moderate
+shock impacts are \ModA{} (A), \ModB{} (B) and \ModC{} lakh (C). Under the severe shock, no intervention leaves \SevUnmetA{}k units unmet
+(minimum service \SevSvcA\,\%, \SevA{} crore); the rule-based policy reaches \SevUnmetB{}k (\SevB{} crore) because it can exclude only processors
+with \emph{observed} links to the failed traders and reacts after cover falls. Optimisation pre-books de-rated alternates and expedited freight,
+cutting unmet demand to \SevUnmetC{}k units with full recovery in \FullRecC\,\% of replications (\SevC{} crore). Paired CRN savings of C are
+\SaveAC{} crore over A (95\,\% CI \SaveACl--\SaveACh) and \SaveBC{} crore over B; C is cheapest in \SevCWins\,\% of severe replications, whereas
+no intervention is cheapest in \ModAWins\,\% of moderate ones and C over-hedges by \MildExtraC{} lakh under mild shocks. The relative standard
+error of the severe mean is \McSE\,\% and recovery time is censored in at most \Censored\,\% of replications.
+
+\begin{figure*}[t]\centering\includegraphics[width=\textwidth]{fig_app.pdf}
+\caption{Deployed application (React control tower, Flask API, MySQL/SQLite, Gemini tool-calling assistant; 35 automated tests pass, all pages
+browser-tested): (a) executive dashboard, (b) network explorer with predicted links, (c) disruption simulator, (d) evidence-backed assistant.}\label{fig:app}\end{figure*}
 
 \section{Discussion}
-\textbf{Relevance and significance.} The system turns predictions into an auditable action and allocation for a real FMCG procurement decision; the
-value is concentrated in rare, severe network-level shocks, which supports a tiered policy: monitor routinely, escalate to optimisation when the
-reported shock is large. \textbf{Originality.} The contribution is the leakage-controlled integration and the measurement of what hidden links
-cost, not a new learner; our negative GNN findings are informative for practitioners with sparse supplier maps. \textbf{Limitations.}
-Supplier-level results rest on synthetic data whose generator we designed; performance on real supplier networks is not established. Economic
-parameters are illustrative. Policy C uses predicted links whose quality is moderate. The assistant's Gemini function-calling path was executed with live tool calls but is throttled on the free tier (5 requests/min), so a deterministic tool router answers when Gemini is busy. No real-time deployment is claimed.
+\textbf{Relevance.} The system answers a concrete FMCG procurement question with an auditable action and allocation (Table~\ref{tab:decision},
+Fig.~\ref{fig:app}). \textbf{Significance.} Value concentrates in rare, severe network shocks: a 75\,\% reduction in simulated impact, with
+explicit economics and confidence intervals, supporting a tiered policy---monitor routinely, optimise when the reported shock is large.
+\textbf{Originality.} The contribution is the leakage-controlled integration and the measurement of what hidden links cost
+(Table~\ref{tab:prior}); the negative GNN findings, including the oracle-graph ablation, are informative for firms with sparse supplier maps.
+\textbf{Technical quality and validity.} Labels follow a fixed timestamp; splits are chronological with an embargo; calibrators never see test
+labels; link models are selected on validation data; policies share common random numbers; 61 automated checks recompute every reported metric.
+\textbf{Limitations.} Supplier-level results rest on synthetic data whose generator we designed; real-network performance is not established;
+economics are illustrative; predicted-link quality is moderate; the static MILP over-hedges for mild shocks; Gemini's free tier is
+rate-limited, so a deterministic tool router answers when it is busy.
 
 \section{Reproducibility}
-Code, synthetic data, processed SupplyGraph data, configurations and logged runs: \url{https://github.com/SamarthKamat/AIML-PROJECT}
-(branch \texttt{claude/exciting-euler-5v1r2l}). \texttt{bash run\_all.sh} downloads DataCo and SupplyGraph at pinned commits with hash checks,
-regenerates data (seed 42), runs Exps.~1--5 (GNN seeds 0--4), verifies 61 reconciliation checks (confusion matrices, split counts, prevalence,
-recomputed metrics, CRN integrity, impact components), rebuilds every table of this paper from result files, and runs 35 tests (unit and API,
-on SQLite and MySQL). Software: Python 3.13, scikit-learn 1.9, XGBoost 3.4, PyTorch 2.15, PyG 2.8, PuLP 2.9.
-\textbf{AI use declaration.} Claude Code (Anthropic) was used as a programming assistant for code scaffolding, debugging and test
-generation, and for language editing and checking of bibliographic details. Google Gemini is used only at run time inside the application's
-assistant, where it may phrase answers solely from tool outputs. All research design choices, experiments, results and interpretations were
-reviewed and verified by the authors, who take full responsibility for the content of this paper.
+Code, data, configurations and logged runs: \url{https://github.com/SamarthKamat/AIML-PROJECT} (branch \texttt{claude/exciting-euler-5v1r2l});
+live demo: \url{https://supply-chain-black-box.onrender.com}. \texttt{bash run\_all.sh} downloads DataCo and SupplyGraph at pinned commits with hash
+checks, regenerates data (seed 42), runs Exps.~1--5 (GNN seeds 0--4), runs 61 reconciliation checks (confusion matrices, split counts, prevalence,
+recomputed metrics, CRN integrity, impact components), rebuilds every table, figure and quoted number of this paper from result files, and runs
+35 tests on SQLite and MySQL. Software: Python 3.13, scikit-learn 1.9, XGBoost 3.4, PyTorch 2.15, PyG 2.8, PuLP 2.9, React 18, Flask 3.
+\textbf{AI use declaration.} Claude Code (Anthropic) was used as a programming assistant for code scaffolding, debugging and test generation,
+and for language editing and checking of bibliographic details. Google Gemini is used only at run time inside the application's assistant, where
+it may phrase answers solely from tool outputs. All research design choices, experiments, results and interpretations were reviewed and verified
+by the authors, who take full responsibility for the content of this paper.
 
 \section{Conclusion and Future Work}
-Calibrated prediction alone rarely justifies action at supplier level when inventory buffers are healthy; the decisive value lies in exposing hidden
-dependencies and optimising recovery for severe shocks, where simulated impact fell by \SevRed\,\%. Future work: validate on real
-supplier maps (e.g., bills of lading or UN Comtrade cocoa flows), learn risk-aware policies that avoid over-hedging, and integrate verified link
-feedback into training.
+Calibrated prediction alone rarely justifies supplier-level action when buffers are healthy; the decisive value lies in exposing hidden
+dependencies and optimising recovery for severe shocks, where simulated impact fell by \SevRed\,\%. Future work: validate on real supplier maps
+(bills of lading, UN Comtrade cocoa flows), learn risk-aware rolling-horizon policies that avoid over-hedging, and feed verified links back into training.
 
 \balance
 \begin{thebibliography}{99}\footnotesize

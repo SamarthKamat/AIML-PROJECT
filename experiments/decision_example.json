@@ -1,0 +1,148 @@
+{
+  "supplier_id": "S0065",
+  "supplier_name": "Meridian Food Chemicals (Synthetic)",
+  "tier": 1,
+  "prediction_timestamp": "2025-12-01T00:00:00",
+  "information_cutoff": "records with reported/delivery date < prediction timestamp",
+  "model_version": "exp1_xgboost.joblib",
+  "calibration_method": "platt",
+  "disruption_probability": 0.4077,
+  "calibrated_probability": 0.1518,
+  "risk_category": "High",
+  "recommended_action": "contingency_review",
+  "action_description": "Contingency review: confirm alternates, raise safety stock, split next PO",
+  "expected_cost_by_action_inr": {
+    "routine_monitoring": 66930.9,
+    "enhanced_monitoring": 61891.27,
+    "contingency_review": 56812.0,
+    "escalate_recovery": 80079.27
+  },
+  "break_even_probabilities": {
+    "routine_monitoring->enhanced_monitoring": 0.075597,
+    "enhanced_monitoring->contingency_review": 0.113395,
+    "contingency_review->escalate_recovery": 0.362865
+  },
+  "network_exposure_inr": 440935.0,
+  "exposure_graph": "observed + predicted candidate links",
+  "material_exposure": [
+    {
+      "material_id": "M14",
+      "material_name": "Soy lecithin",
+      "criticality": "B",
+      "reach": 0.4497,
+      "cover_days": 24.2,
+      "cm_day_inr": 873779.0,
+      "expected_loss_inr": 440935.0
+    }
+  ],
+  "top_feature_contributions": [
+    {
+      "feature": "capacity_utilisation",
+      "value": 0.8051,
+      "shap_log_odds": 0.672
+    },
+    {
+      "feature": "mean_delay_days_90d",
+      "value": 0.6,
+      "shap_log_odds": 0.4076
+    },
+    {
+      "feature": "max_dependency_pct",
+      "value": 0.4497,
+      "shap_log_odds": 0.2974
+    },
+    {
+      "feature": "days_since_last_disruption",
+      "value": 187.0,
+      "shap_log_odds": 0.2921
+    },
+    {
+      "feature": "financial_risk_score",
+      "value": 0.4433,
+      "shap_log_odds": 0.2335
+    },
+    {
+      "feature": "fill_rate_90d",
+      "value": 0.9852948498780103,
+      "shap_log_odds": 0.2162
+    }
+  ],
+  "data_label": "SYNTHETIC demonstration data; INR values are simulated, not company losses",
+  "inventory_coverage_days": {
+    "M14": 23.7
+  },
+  "consequence_simulation": {
+    "assumed_disruption": "100% capacity loss for 30 days, no intervention",
+    "expected_material_shortage_units": {},
+    "unmet_demand_units": 0.0,
+    "lost_contribution_margin_inr": 0.0,
+    "affected_suppliers": 1,
+    "min_service_level": 1.0
+  },
+  "alternative_suppliers": [
+    {
+      "material_id": "M14",
+      "supplier_id": "S0064",
+      "supplier_name": "Aravali Food Chemicals (Synthetic)",
+      "supplies_material": "M14",
+      "compatibility": 1.0,
+      "spare_capacity_per_day": 1.3,
+      "unit_price_inr": 222.6,
+      "lead_time_days": 10,
+      "reliability": 0.9237,
+      "calibrated_risk_p30": 0.0332,
+      "onboarding_required": false
+    },
+    {
+      "material_id": "M14",
+      "supplier_id": "S0063",
+      "supplier_name": "Malabar Food Chemicals (Synthetic)",
+      "supplies_material": "M14",
+      "compatibility": 1.0,
+      "spare_capacity_per_day": 2.1,
+      "unit_price_inr": 222.6,
+      "lead_time_days": 10,
+      "reliability": 0.9245,
+      "calibrated_risk_p30": 0.0504,
+      "onboarding_required": false
+    }
+  ],
+  "recovery_plan": {
+    "solver": {
+      "status": "Optimal",
+      "objective": 15357.225942520767,
+      "expected_shortage": {
+        "M14": 0.0
+      },
+      "n_variables": 5,
+      "n_constraints": 5
+    },
+    "deficits_units": {
+      "M14": 58.8
+    },
+    "allocation": [
+      {
+        "supplier_id": "S0063",
+        "material_id": "M14",
+        "supplies_material": "M14",
+        "qty": 28.1,
+        "mode": "standard",
+        "lead_days": 10,
+        "cost_inr": 6420.0
+      },
+      {
+        "supplier_id": "S0064",
+        "material_id": "M14",
+        "supplies_material": "M14",
+        "qty": 38.2,
+        "mode": "standard",
+        "lead_days": 10,
+        "cost_inr": 8719.0
+      }
+    ],
+    "estimated_recovery_cost_inr": 15139.0
+  },
+  "decision_rationale": "Calibrated 30-day disruption probability 15.2% (raw 40.8%). Network exposure if disrupted: INR 440,935 via 1 Tier-1 material(s). Expected-cost minimisation selects 'contingency_review' (High). Main drivers: capacity_utilisation (+0.672), mean_delay_days_90d (+0.4076), max_dependency_pct (+0.2974). A 30-day full outage would leave 0 units unmet (no intervention). Recovery MILP status Optimal, cost INR 15,139.",
+  "assumptions_ref": "experiments/scenario_assumptions.json",
+  "decided_at": "2026-11-12T21:14:01+00:00"
+}

@@ -167,8 +167,34 @@ def macros():
     (OUT / "numbers.tex").write_text("\n".join(f"\\newcommand{{\\{k}}}{{{v}}}" for k, v in m.items()) + "\n")
 
 
+def decision():
+    """Worked decision example from experiments/decision_example.json (output of ml.decision.engine.evaluate)."""
+    d = json.loads((EXPERIMENTS / "decision_example.json").read_text())
+    names = {"routine_monitoring": "Routine monitoring", "enhanced_monitoring": "Enhanced monitoring",
+             "contingency_review": "Contingency review", "escalate_recovery": "Escalate \\& recover"}
+    cost = d["expected_cost_by_action_inr"]
+    rows = [f"{names[k]} & {v / 1e3:.1f}{' $\\leftarrow$' if k == d['recommended_action'] else ''}\\\\" for k, v in cost.items()]
+    be = list(d["break_even_probabilities"].values())
+    drivers = ", ".join(f"{c['feature'].replace('_', ' ').replace('mean delay days 90d', 'mean delay (90 d)').replace('max dependency pct', 'dependency share')} ({c['shap_log_odds']:+.2f})" for c in d["top_feature_contributions"][:3])
+    rp = d.get("recovery_plan") or {}
+    tex = (r"""\begin{table}[t]\centering\caption{Worked decision for supplier """ + d["supplier_id"] + r""" (Tier-""" + str(d["tier"]) +
+           r""", synthetic) at $t$=""" + d["prediction_timestamp"][:10] + r""", produced end-to-end by the decision engine.}\label{tab:decision}
+\scriptsize\setlength{\tabcolsep}{3pt}\begin{tabular}{@{}p{0.47\columnwidth}p{0.47\columnwidth}@{}}\toprule
+\multicolumn{2}{@{}p{0.97\columnwidth}@{}}{Raw / calibrated 30-day risk: """ + f"{100 * d['disruption_probability']:.1f}\\,\\% / \\textbf{{{100 * d['calibrated_probability']:.1f}\\,\\%}}" +
+           r""" \quad Exposure $E_i$: INR """ + f"{d['network_exposure_inr'] / 1e5:.2f}" + r""" lakh}\\
+\multicolumn{2}{@{}p{0.97\columnwidth}@{}}{Break-even $q^*$: """ + " / ".join(f"{100 * b:.1f}\\,\\%" for b in be) + r""" \quad Cover: """ +
+           ", ".join(f"{v:.0f} d" for v in d["inventory_coverage_days"].values()) + r"""}\\
+\multicolumn{2}{@{}p{0.97\columnwidth}@{}}{SHAP drivers: """ + drivers + r"""}\\\midrule
+Action & Expected cost (INR '000)\\\midrule
+""" + "\n".join(rows) + r"""
+\midrule\multicolumn{2}{@{}p{0.97\columnwidth}@{}}{Recovery MILP: """ + f"{rp.get('solver', {}).get('status', 'n/a')}, cost INR {rp.get('estimated_recovery_cost_inr', 0) / 1e3:.1f}k" + r"""}\\
+\bottomrule\end{tabular}\end{table}""")
+    (OUT / "decision.tex").write_text(tex)
+
+
 if __name__ == "__main__":
     macros()
+    decision()
     exp1()
     graph()
     exp3()
