@@ -48,7 +48,7 @@ export default function Simulator() {
             <label className="field">Capacity reduction: <b style={{ color: 'var(--text)' }}>{pct(f.capacity_reduction, 0)}</b>
               <input type="range" min={0.05} max={1} step={0.05} value={f.capacity_reduction} onChange={(e) => setF({ ...f, capacity_reduction: +e.target.value })} /></label>
             <label className="field">Duration: <b style={{ color: 'var(--text)' }}>{f.duration_days} days</b>
-              <input type="range" min={5} max={110} step={5} value={f.duration_days} onChange={(e) => setF({ ...f, duration_days: +e.target.value })} /></label>
+              <input type="range" min={5} max={150} step={5} value={f.duration_days} onChange={(e) => setF({ ...f, duration_days: +e.target.value })} /></label>
             <label className="field">Response policy<div className="seg">{[['A', 'None'], ['B', 'Rule-based'], ['C', 'Optimised']].map(([k, l]) =>
               <button key={k} className={f.policy === k ? 'on' : ''} onClick={() => setF({ ...f, policy: k })}>{l}</button>)}</div></label>
             <label className="field">Replications: <b style={{ color: 'var(--text)' }}>{f.replications}</b>

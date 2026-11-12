@@ -45,7 +45,7 @@ DEFAULT_ASSUMPTIONS = {
     "max_allocation_share": 0.60,
     "detection_day": 2,
     "nominal_disruption_duration_days": 60,
-    "horizon_days": 120,
+    "horizon_days": 180,
     "reactive_trigger_cover_days": 10,
     "safety_cover_days": 7,
     "replications": 500,

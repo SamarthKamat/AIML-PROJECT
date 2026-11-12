@@ -6,3 +6,4 @@
 {"experiment_id": "exp4_5_scenarios", "execution_timestamp": "2026-11-12T15:56:14+00:00", "summary": {"severe_A_impact": 37299779.468157575, "severe_C_impact": 8706030.601703903}}
 {"experiment_id": "exp3_delivery_delay_dataco", "execution_timestamp": "2026-11-12T15:57:02+00:00", "summary": {"xgb_test_pr_auc": 0.858494, "xgb_mae": 0.991916}}
 {"experiment_id": "exp3_delivery_delay_dataco", "execution_timestamp": "2026-11-12T15:59:59+00:00", "summary": {"xgb_test_pr_auc": 0.858494, "xgb_mae": 0.991916}}
+{"experiment_id": "exp4_5_scenarios", "execution_timestamp": "2026-11-12T16:13:31+00:00", "summary": {"severe_A_impact": 47209441.53281335, "severe_C_impact": 11594009.276139928}}

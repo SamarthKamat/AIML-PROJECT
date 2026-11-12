@@ -39,7 +39,7 @@
     "max_allocation_share": 0.6,
     "detection_day": 2,
     "nominal_disruption_duration_days": 60,
-    "horizon_days": 120,
+    "horizon_days": 180,
     "reactive_trigger_cover_days": 10,
     "safety_cover_days": 7,
     "replications": 500,
@@ -48,7 +48,7 @@
   },
   "replications": 500,
   "crn": "replication r uses np.random.default_rng(base_seed + r) for all scenarios",
-  "mc_convergence_final_relative_se": 0.028298384723896598,
+  "mc_convergence_final_relative_se": 0.03860269939292286,
   "exp4_cases": {
     "top_t1": "S0013",
     "top_t2": "S0122",
@@ -66,154 +66,154 @@
       "scenario": "S1",
       "severity": "Mild",
       "policy": "A: No intervention",
-      "financial_impact_inr": 2360692.0453731697,
+      "financial_impact_inr": 2565813.2697120574,
       "unmet_demand_units": 0.0,
-      "recovery_time_days": 93.476
+      "recovery_time_days": 101.146
     },
     {
       "scenario": "S2",
       "severity": "Mild",
       "policy": "B: Rule-based",
-      "financial_impact_inr": 2360692.0453731697,
+      "financial_impact_inr": 2565947.416527169,
       "unmet_demand_units": 0.0,
-      "recovery_time_days": 93.476
+      "recovery_time_days": 101.146
     },
     {
       "scenario": "S3",
       "severity": "Mild",
       "policy": "C: Optimisation",
-      "financial_impact_inr": 2427494.778242019,
+      "financial_impact_inr": 2647864.040478093,
       "unmet_demand_units": 0.0,
-      "recovery_time_days": 93.476
+      "recovery_time_days": 101.146
     },
     {
       "scenario": "S4",
       "severity": "Moderate",
       "policy": "A: No intervention",
-      "financial_impact_inr": 2925459.848911067,
-      "unmet_demand_units": 1112.7966744684109,
-      "recovery_time_days": 113.53
+      "financial_impact_inr": 6148642.000997141,
+      "unmet_demand_units": 47582.74716217864,
+      "recovery_time_days": 123.026
     },
     {
       "scenario": "S5",
       "severity": "Moderate",
       "policy": "B: Rule-based",
-      "financial_impact_inr": 2922209.426649959,
-      "unmet_demand_units": 1050.2697736117427,
-      "recovery_time_days": 113.53
+      "financial_impact_inr": 5051167.962394529,
+      "unmet_demand_units": 29799.073364177097,
+      "recovery_time_days": 122.944
     },
     {
       "scenario": "S6",
       "severity": "Moderate",
       "policy": "C: Optimisation",
-      "financial_impact_inr": 3950005.7159344405,
-      "unmet_demand_units": 0.0,
-      "recovery_time_days": 113.394
+      "financial_impact_inr": 4478248.287653609,
+      "unmet_demand_units": 2591.2047930145545,
+      "recovery_time_days": 122.784
     },
     {
       "scenario": "S7",
       "severity": "Severe",
       "policy": "A: No intervention",
-      "financial_impact_inr": 37299779.468157575,
-      "unmet_demand_units": 586185.4412943895,
-      "recovery_time_days": 115.334
+      "financial_impact_inr": 47209441.53281335,
+      "unmet_demand_units": 734086.6100970858,
+      "recovery_time_days": 127.03
     },
     {
       "scenario": "S8",
       "severity": "Severe",
       "policy": "B: Rule-based",
-      "financial_impact_inr": 30200834.988782395,
-      "unmet_demand_units": 462460.4829758842,
-      "recovery_time_days": 114.926
+      "financial_impact_inr": 39797809.64190922,
+      "unmet_demand_units": 605270.8941475921,
+      "recovery_time_days": 126.332
     },
     {
       "scenario": "S9",
       "severity": "Severe",
       "policy": "C: Optimisation",
-      "financial_impact_inr": 8706030.601703903,
-      "unmet_demand_units": 0.0,
-      "recovery_time_days": 114.63
+      "financial_impact_inr": 11594009.276139928,
+      "unmet_demand_units": 39186.304794577074,
+      "recovery_time_days": 124.64
     }
   ],
   "paired": [
     {
       "severity": "Mild",
       "comparison": "A: No intervention minus B: Rule-based",
-      "mean_saving_inr": 0.0,
-      "ci95_low": 0.0,
-      "ci95_high": 0.0,
+      "mean_saving_inr": -134.14681511133537,
+      "ci95_low": -299.01954735768584,
+      "ci95_high": 30.725917135015067,
       "share_reps_b_better": 0.0
     },
     {
       "severity": "Mild",
       "comparison": "A: No intervention minus C: Optimisation",
-      "mean_saving_inr": -66802.73286884937,
-      "ci95_low": -66895.34206580906,
-      "ci95_high": -66710.12367188968,
+      "mean_saving_inr": -82050.77076603501,
+      "ci95_low": -82333.8010167115,
+      "ci95_high": -81767.74051535853,
       "share_reps_b_better": 0.0
     },
     {
       "severity": "Mild",
       "comparison": "B: Rule-based minus C: Optimisation",
-      "mean_saving_inr": -66802.73286884937,
-      "ci95_low": -66895.34206580906,
-      "ci95_high": -66710.12367188968,
+      "mean_saving_inr": -81916.62395092369,
+      "ci95_low": -82232.043738281,
+      "ci95_high": -81601.20416356638,
       "share_reps_b_better": 0.0
     },
     {
       "severity": "Moderate",
       "comparison": "A: No intervention minus B: Rule-based",
-      "mean_saving_inr": 3250.422261108399,
-      "ci95_low": -1883.2602917069921,
-      "ci95_high": 8384.10481392379,
-      "share_reps_b_better": 0.004
+      "mean_saving_inr": 1097474.038602611,
+      "ci95_low": 865699.7749730474,
+      "ci95_high": 1329248.3022321747,
+      "share_reps_b_better": 0.176
     },
     {
       "severity": "Moderate",
       "comparison": "A: No intervention minus C: Optimisation",
-      "mean_saving_inr": -1024545.8670233736,
-      "ci95_low": -1050971.5814150479,
-      "ci95_high": -998120.1526316993,
-      "share_reps_b_better": 0.046
+      "mean_saving_inr": 1670393.7133435311,
+      "ci95_low": 912144.5982526256,
+      "ci95_high": 2428642.8284344366,
+      "share_reps_b_better": 0.168
     },
     {
       "severity": "Moderate",
       "comparison": "B: Rule-based minus C: Optimisation",
-      "mean_saving_inr": -1027796.289284482,
-      "ci95_low": -1053438.6865083624,
-      "ci95_high": -1002153.8920606017,
-      "share_reps_b_better": 0.042
+      "mean_saving_inr": 572919.6747409202,
+      "ci95_low": 1522.7295319098048,
+      "ci95_high": 1144316.6199499306,
+      "share_reps_b_better": 0.104
     },
     {
       "severity": "Severe",
       "comparison": "A: No intervention minus B: Rule-based",
-      "mean_saving_inr": 7098944.479375191,
-      "ci95_low": 6776864.424337064,
-      "ci95_high": 7421024.534413318,
-      "share_reps_b_better": 0.884
+      "mean_saving_inr": 7411631.890904123,
+      "ci95_low": 7064133.021964636,
+      "ci95_high": 7759130.75984361,
+      "share_reps_b_better": 0.83
     },
     {
       "severity": "Severe",
       "comparison": "A: No intervention minus C: Optimisation",
-      "mean_saving_inr": 28593748.866453685,
-      "ci95_low": 26520683.94939321,
-      "ci95_high": 30666813.78351416,
-      "share_reps_b_better": 0.826
+      "mean_saving_inr": 35615432.25667342,
+      "ci95_low": 32486710.065435328,
+      "ci95_high": 38744154.44791151,
+      "share_reps_b_better": 0.8
     },
     {
       "severity": "Severe",
       "comparison": "B: Rule-based minus C: Optimisation",
-      "mean_saving_inr": 21494804.387078494,
-      "ci95_low": 19566634.26380983,
-      "ci95_high": 23422974.510347158,
-      "share_reps_b_better": 0.744
+      "mean_saving_inr": 28203800.36576929,
+      "ci95_low": 25269746.552311692,
+      "ci95_high": 31137854.179226886,
+      "share_reps_b_better": 0.726
     }
   ],
   "summary": {
-    "severe_A_impact": 37299779.468157575,
-    "severe_C_impact": 8706030.601703903
+    "severe_A_impact": 47209441.53281335,
+    "severe_C_impact": 11594009.276139928
   },
   "experiment_id": "exp4_5_scenarios",
-  "execution_timestamp": "2026-11-12T15:56:14+00:00",
+  "execution_timestamp": "2026-11-12T16:13:31+00:00",
   "python": "3.13.18"
 }

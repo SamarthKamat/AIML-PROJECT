@@ -105,7 +105,7 @@ def delivery_delay():
 
 # ------------------------------------------------------------------ simulation
 @lru_cache(maxsize=2)
-def _sim(start="2025-07-01", horizon=120):
+def _sim(start="2025-07-01", horizon=180):
     from ml.simulation.cascade import CascadeSimulator, load_network
     net = load_network(start=start)
     return net, CascadeSimulator(net, horizon=horizon)
@@ -142,8 +142,8 @@ def simulation_run():
     if not 0 < loss <= 1:
         raise ValueError("capacity_reduction must be in (0, 1]")
     dur = int(d.get("duration_days", 30))
-    if not 1 <= dur <= 110:
-        raise ValueError("duration_days must be 1..110")
+    if not 1 <= dur <= 150:
+        raise ValueError("duration_days must be 1..150")
     reps = int(d.get("replications", 20))
     reps = max(1, min(100, reps))
     pol = {"A": "A: No intervention", "B": "B: Rule-based", "C": "C: Optimisation"}[d.get("policy", "A")]

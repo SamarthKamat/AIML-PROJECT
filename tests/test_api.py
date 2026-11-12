@@ -76,7 +76,7 @@ def test_delivery_delay(client):
 
 def test_simulation_run_and_validation(client):
     r = client.post("/api/simulation/run", json=dict(supplier_id="S0122", capacity_reduction=1.0, duration_days=60, policy="B", replications=3)).json
-    assert r["summary"]["affected_suppliers"] >= 1 and len(r["series"]["service_level"]) == 120 and r["run_id"] >= 1
+    assert r["summary"]["affected_suppliers"] >= 1 and len(r["series"]["service_level"]) == 180 and r["run_id"] >= 1
     w = client.post("/api/simulation/run", json=dict(region="Kerala", disruption_type="weather", capacity_reduction=0.7, duration_days=21, replications=2)).json
     assert len(w["parameters"]["targets"]) > 1
     assert client.post("/api/simulation/run", json=dict(supplier_id="S0122", capacity_reduction=1.5)).status_code == 400
