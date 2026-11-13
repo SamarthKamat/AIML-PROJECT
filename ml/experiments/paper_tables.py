@@ -58,7 +58,7 @@ def graph():
         sd = lambda v, k: f"{v[k]:.3f}" + (f"$\\pm${v[k + '_sd']:.3f}" if k + "_sd" in v else "")  # noqa: E731
         rows.append(f"{n.replace('Preferential Attachment', 'Pref.~attach.').replace('Common Neighbours', 'Common neigh.')} & {sd(h, 'roc_auc')} & {sd(h, 'ap')} & {f3(d['ap'])} & {d['P@100']:.2f} & {d['R@500']:.3f} \\\\")
     tex = (r"""\begin{table}[t]\centering\caption{E2A link prediction (synthetic, 5 seeds for learned models). A1: held-out observed edges vs.\ material-compatible negatives. A2: ranking all """ +
-           f"{a['A2_candidates']['n']:,} compatible unobserved pairs against {a['A2_candidates']['positives']:,} ground-truth hidden edges (base rate {a['A2_candidates']['base_rate']:.3f})" +
+           f"{a['A2_candidates']['n']:,} compatible unobserved pairs against {a['A2_candidates']['positives']:,} ground-truth hidden edges (base rate {a['A2_candidates']['base_rate']:.3f}" +
            r"""). Adamic--Adar equals common neighbours. P@100 = precision of top 100; R@500 = recall of top 500.}\label{tab:exp2a}\scriptsize\setlength{\tabcolsep}{2.6pt}\begin{tabular}{lccccc}\toprule
  & \multicolumn{2}{c}{A1 (held-out)} & \multicolumn{3}{c}{A2 (hidden-edge discovery)}\\\cmidrule(lr){2-3}\cmidrule(lr){4-6}
 Method & ROC-AUC & AP & AP & P@100 & R@500\\\midrule
@@ -239,7 +239,7 @@ def sens_table():
     for name in dict.fromkeys(d.setting):
         sv = d[(d.setting == name) & (d.severity == "Severe")].iloc[0]
         mi = d[(d.setting == name) & (d.severity == "Mild")].iloc[0]
-        nm = {"base": "Base (as Table~\\ref{tab:scen})", "overhead 0": "Mgmt.\\ overhead 0/day", "overhead 50k": "Mgmt.\\ overhead 50k/day",
+        nm = {"base": "Base (200 reps)", "overhead 0": "Mgmt.\\ overhead 0/day", "overhead 50k": "Mgmt.\\ overhead 50k/day",
               "penalty 5%": "Shortage penalty 5\\%", "penalty 30%": "Shortage penalty 30\\%", "interruption 25k": "Interruption 25k/plant-day",
               "interruption 150k": "Interruption 150k/plant-day", "duration 30 d": "Nominal duration 30 d", "duration 90 d": "Nominal duration 90 d",
               "spare capacity x0.5": "Alt.\\ spare capacity $\\times$0.5", "spare capacity x1.5": "Alt.\\ spare capacity $\\times$1.5",

@@ -34,8 +34,8 @@ A chocolate and malt-beverage manufacturer sees its Tier-1 suppliers but not the
 \emph{synthetic} supply network (500 suppliers, 69\,\% of links hidden) we test whether ranked estimates of hidden links improve recovery
 decisions. The system predicts supplier disruption, ranks candidate hidden links, simulates cascades and plans recovery with a mixed-integer linear
 program (MILP); two real datasets check transferable components only. Observed links
-understate Tier-2/3 exposure \GapTwo$\times$/\GapThree$\times$; logistic regression out-ranks the pre-specified XGBoost model; calibration and
-graph neural networks give no significant gain. In 500 paired simulations of a severe outage of the five largest cocoa traders, the
+understate Tier-2/3 exposure \GapTwo$\times$/\GapThree$\times$; logistic regression out-ranks the pre-specified XGBoost model; the calibration gain is not significant and
+graph neural networks did not beat tabular models. In 500 paired simulations of a severe outage of the five largest cocoa traders, the
 optimisation policy lowers simulated impact from INR~\SevA{} to \SevC{} crore. A factorial ablation attributes most of this to the predicted
 links: with the same MILP, the observed graph alone gives \AblCobs{} crore. For mild shocks doing nothing is cheapest in all \SensN{} sensitivity
 settings. All monetary results are simulated and assumption-conditional, not estimates of real-world savings.
