@@ -1,0 +1,14 @@
+\begin{table}[t]\centering\caption{Statistical tests. E1: supplier-cluster bootstrap ($B$=1,000, 500 suppliers, 3,000 test months); E3: order-line bootstrap ($B$=1,000); S: 500 paired CRN replications, 95\% CI of the mean saving and Wilcoxon signed-rank $p$, Holm-adjusted over nine comparisons. Win = share of replications in which the second policy is cheaper (L = INR lakh).}\label{tab:stats}
+\scriptsize\setlength{\tabcolsep}{2pt}\begin{tabular}{@{}llrccr@{}}\toprule
+ & Comparison & Effect & 95\% CI & Win & $p$\\\midrule
+E1 & LR $-$ XGBoost, ROC-AUC & +0.040 & [0.013, 0.068] & -- & 0.008\\
+E1 & LR $-$ XGBoost, PR-AUC & +0.026 & [0.002, 0.055] & -- & 0.044\\
+E1 & ECE reduction, XGB raw $-$ Platt & +0.0095 & [-0.0018, 0.0197] & -- & 0.108\\
+E3 & XGBoost $-$ mode baseline, ROC-AUC & +0.035 & [0.032, 0.039] & -- & $<$0.001\\
+\midrule
+S & Severe: saving of C over A (L) & +356.2 & [324.9, 387.4] & 80\% & $<$0.001\\
+S & Severe: saving of C over B (L) & +282.0 & [252.7, 311.4] & 73\% & $<$0.001\\
+S & Moderate: saving of C over A (L) & +16.7 & [9.1, 24.3] & 17\% & $<$0.001\\
+S & Moderate: saving of B over A (L) & +11.0 & [8.7, 13.3] & 18\% & 0.167\\
+S & Mild: saving of C over A (L) & -0.8 & [-0.8, -0.8] & 0\% & $<$0.001\\
+\bottomrule\end{tabular}\end{table}

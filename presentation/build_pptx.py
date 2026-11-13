@@ -183,7 +183,7 @@ s = slide("Experiment 1 — supplier disruption prediction", f"Test: {r1['splits
 rows = [[m, c, f"{v['roc_auc']:.3f}", f"{v['pr_auc']:.3f}", f"{v['brier']:.4f}", f"{v['ece_uniform10']:.4f}"] for m, d in r1["results"].items() for c, v in d.items() if c in ("none", "platt")]
 table(s, pd.DataFrame(rows, columns=["Model", "Calibration", "ROC-AUC", "PR-AUC", "Brier", "ECE"]), Inches(0.5), Inches(1.6), Inches(6.6), 12)
 img(s, FIG / "exp1_reliability.png", Inches(7.3), Inches(1.5), w=Inches(5.7))
-text(s, Inches(7.3), Inches(6.0), Inches(5.7), Inches(1.2), "Modest discrimination for rare, contagion-driven events; Platt calibration halves XGBoost's ECE.", 15, CYAN)
+text(s, Inches(7.3), Inches(6.0), Inches(5.7), Inches(1.2), "Modest discrimination for rare, contagion-driven events; LR significantly beats XGBoost (ROC +0.040, p=0.008); Platt ECE gain not significant.", 15, CYAN)
 
 # 9 decision rule
 s = slide("From probability to action: cost-based decision rule")

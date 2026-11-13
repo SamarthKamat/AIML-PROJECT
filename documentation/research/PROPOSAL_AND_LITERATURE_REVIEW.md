@@ -11,7 +11,7 @@ suppliers. (4) Simulate cascades and quantify inventory, production and financia
 (6) Explain recommendations and make them executable in an application.
 
 **Hypotheses tested** (outcomes are in brackets).
-* H1: Calibration improves decision quality. [Supported for probability quality (ECE halved). The realised-cost benefit is small because few actions are triggered.]
+* H1: Calibration improves decision quality. [Partly supported: Platt lowers XGBoost ECE 0.020 to 0.010, but the paired bootstrap difference is not significant (95% CI -0.002 to 0.020, p=0.11); it clearly helps the decision tree and worsens the already-calibrated random forest. Realised-cost benefit is small because few actions are triggered.]
 * H2: Message-passing GNNs outperform feature-based models for hidden-link discovery and risk classification. [**Not supported** on either the synthetic or the real data.]
 * H3: Network-aware optimisation reduces disruption impact compared with rule-based recovery. [Supported for moderate and severe shocks; not supported for mild shocks, where it over-hedges.]
 

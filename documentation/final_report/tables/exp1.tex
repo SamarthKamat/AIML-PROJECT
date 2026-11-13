@@ -1,16 +1,9 @@
-\begin{table}[t]\centering\caption{Exp.~1: 30-day supplier disruption prediction on the untouched test split (3,000 supplier-months, prevalence 7.4\%). Calibrators fitted on the calibration split only; shaded = deployed.}\label{tab:exp1}
-\scriptsize\setlength{\tabcolsep}{3.5pt}\begin{tabular}{llcccc}\toprule
-Model & Calib. & ROC-AUC & PR-AUC & Brier & ECE$_{10}$\\\midrule
-Logistic reg. & -- & 0.666 & 0.150 & 0.0669 & 0.0066 \\
-Logistic reg. & Platt & 0.666 & 0.150 & 0.0670 & 0.0059 \\
-Logistic reg. & Iso. & 0.659 & 0.126 & 0.0687 & 0.0070 \\
-Decision Tree & -- & 0.571 & 0.098 & 0.0704 & 0.0366 \\
-Decision Tree & Platt & 0.571 & 0.098 & 0.0689 & 0.0111 \\
-Decision Tree & Iso. & 0.569 & 0.094 & 0.0689 & 0.0124 \\
-Random Forest & -- & 0.657 & 0.140 & 0.0672 & 0.0046 \\
-Random Forest & Platt & 0.657 & 0.140 & 0.0675 & 0.0081 \\
-Random Forest & Iso. & 0.655 & 0.124 & 0.0673 & 0.0063 \\
-XGBoost & -- & 0.626 & 0.122 & 0.0689 & 0.0197 \\
-\rowcolor{gray!15}XGBoost & Platt & 0.626 & 0.122 & 0.0680 & 0.0104 \\
-XGBoost & Iso. & 0.620 & 0.113 & 0.0681 & 0.0109 \\
+\begin{table}[t]\centering\caption{E1: 30-day supplier disruption prediction on the untouched test split (3,000 supplier-months, prevalence 7.4\%). AUCs after Platt scaling (rank-preserving); calibrators fitted on the calibration split only; bold = lowest ECE per model; shaded = pre-specified primary model. 95\% CIs and tests in Table~\ref{tab:stats}.}\label{tab:exp1}
+\scriptsize\setlength{\tabcolsep}{2.4pt}\begin{tabular}{@{}lcccccccc@{}}\toprule
+ & & & \multicolumn{2}{c}{Brier} & \multicolumn{3}{c}{ECE$_{10}$}\\\cmidrule(lr){4-5}\cmidrule(lr){6-8}
+Model & ROC-AUC & PR-AUC & raw & Platt & raw & Platt & Iso.\\\midrule
+Logistic reg. & 0.666 & 0.150 & 0.0669 & 0.0670 & 0.0066 & \textbf{0.0059} & 0.0070\\
+Decision Tree & 0.571 & 0.098 & 0.0704 & 0.0689 & 0.0366 & \textbf{0.0111} & 0.0124\\
+Random Forest & 0.657 & 0.140 & 0.0672 & 0.0675 & \textbf{0.0046} & 0.0081 & 0.0063\\
+\rowcolor{gray!15}XGBoost & 0.626 & 0.122 & 0.0689 & 0.0680 & 0.0197 & \textbf{0.0104} & 0.0109\\
 \bottomrule\end{tabular}\end{table}

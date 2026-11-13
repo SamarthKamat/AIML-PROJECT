@@ -1,0 +1,225 @@
+{
+  "exp1": {
+    "LR": {
+      "roc": [
+        0.626,
+        0.7047
+      ],
+      "pr": [
+        0.1173,
+        0.1922
+      ],
+      "brier": [
+        0.0588,
+        0.0753
+      ],
+      "ece": [
+        0.002,
+        0.0156
+      ]
+    },
+    "DT": {
+      "roc": [
+        0.5257,
+        0.6156
+      ],
+      "pr": [
+        0.0806,
+        0.1225
+      ],
+      "brier": [
+        0.0602,
+        0.0776
+      ],
+      "ece": [
+        0.0029,
+        0.0208
+      ]
+    },
+    "RF": {
+      "roc": [
+        0.6192,
+        0.6949
+      ],
+      "pr": [
+        0.1102,
+        0.1788
+      ],
+      "brier": [
+        0.0591,
+        0.0758
+      ],
+      "ece": [
+        0.0018,
+        0.0177
+      ]
+    },
+    "XGB": {
+      "roc": [
+        0.5872,
+        0.6639
+      ],
+      "pr": [
+        0.099,
+        0.1552
+      ],
+      "brier": [
+        0.0596,
+        0.0765
+      ],
+      "ece": [
+        0.0025,
+        0.0204
+      ]
+    },
+    "XGB_raw": {
+      "roc": [
+        0.5872,
+        0.6639
+      ],
+      "pr": [
+        0.099,
+        0.1552
+      ],
+      "brier": [
+        0.0609,
+        0.077
+      ],
+      "ece": [
+        0.0108,
+        0.0304
+      ]
+    },
+    "paired": {
+      "PR-AUC LR - XGB": {
+        "mean": 0.0265,
+        "ci": [
+          0.0022,
+          0.0548
+        ],
+        "p": 0.044
+      },
+      "ROC-AUC LR - XGB": {
+        "mean": 0.0401,
+        "ci": [
+          0.0131,
+          0.0678
+        ],
+        "p": 0.008
+      },
+      "Brier raw - Platt (XGB)": {
+        "mean": 0.00098,
+        "ci": [
+          -0.0003,
+          0.0024
+        ],
+        "p": 0.142
+      },
+      "ECE raw - Platt (XGB)": {
+        "mean": 0.0095,
+        "ci": [
+          -0.0018,
+          0.0197
+        ],
+        "p": 0.108
+      }
+    },
+    "design": {
+      "bootstrap": "cluster by supplier",
+      "B": 1000,
+      "n_test": 3000,
+      "n_suppliers": 500,
+      "positives": 223
+    }
+  },
+  "exp3": {
+    "xgb_auc_ci": [
+      0.7749,
+      0.784
+    ],
+    "delta_auc_xgb_minus_mode": {
+      "mean": 0.0354,
+      "ci": [
+        0.0322,
+        0.0388
+      ],
+      "p": 0.0
+    },
+    "B": 1000,
+    "n": 34554
+  },
+  "scenarios": [
+    {
+      "severity": "Mild",
+      "comparison": "A vs B",
+      "mean_saving": -134.14681511133537,
+      "p_raw": 0.10880943004054568,
+      "share_second_cheaper": 0.0,
+      "p_holm": 0.1666425066593378
+    },
+    {
+      "severity": "Mild",
+      "comparison": "A vs C",
+      "mean_saving": -82050.77076603501,
+      "p_raw": 1.2647189486921487e-83,
+      "share_second_cheaper": 0.0,
+      "p_holm": 1.1382470538229339e-82
+    },
+    {
+      "severity": "Mild",
+      "comparison": "B vs C",
+      "mean_saving": -81916.62395092369,
+      "p_raw": 1.2647189486921487e-83,
+      "share_second_cheaper": 0.0,
+      "p_holm": 1.1382470538229339e-82
+    },
+    {
+      "severity": "Moderate",
+      "comparison": "A vs B",
+      "mean_saving": 1097474.038602611,
+      "p_raw": 0.0833212533296689,
+      "share_second_cheaper": 0.176,
+      "p_holm": 0.1666425066593378
+    },
+    {
+      "severity": "Moderate",
+      "comparison": "A vs C",
+      "mean_saving": 1670393.7133435311,
+      "p_raw": 2.2028089109329198e-16,
+      "share_second_cheaper": 0.168,
+      "p_holm": 6.60842673279876e-16
+    },
+    {
+      "severity": "Moderate",
+      "comparison": "B vs C",
+      "mean_saving": 572919.6747409202,
+      "p_raw": 1.53818640520595e-36,
+      "share_second_cheaper": 0.104,
+      "p_holm": 6.1527456208238e-36
+    },
+    {
+      "severity": "Severe",
+      "comparison": "A vs B",
+      "mean_saving": 7411631.890904123,
+      "p_raw": 3.941098533180042e-74,
+      "share_second_cheaper": 0.83,
+      "p_holm": 2.7587689732260294e-73
+    },
+    {
+      "severity": "Severe",
+      "comparison": "A vs C",
+      "mean_saving": 35615432.25667342,
+      "p_raw": 1.4486149984954527e-63,
+      "share_second_cheaper": 0.8,
+      "p_holm": 8.691689990972716e-63
+    },
+    {
+      "severity": "Severe",
+      "comparison": "B vs C",
+      "mean_saving": 28203800.36576929,
+      "p_raw": 3.592932460857464e-52,
+      "share_second_cheaper": 0.726,
+      "p_holm": 1.796466230428732e-51
+    }
+  ]
+}

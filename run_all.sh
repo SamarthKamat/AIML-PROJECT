@@ -16,6 +16,8 @@ step "7. Exp 2A link prediction";                   python -m ml.experiments.exp
 step "8. Exp 2B graph risk classification";         python -m ml.experiments.exp2b_graph_risk
 step "9. Exp 4/5 nine scenarios + disruption types"; python -m ml.simulation.scenarios
 step "10. Independent verification";                python -m ml.experiments.verify_results
+step "10b. Statistical tests (bootstrap, Wilcoxon-Holm)"; python -m ml.experiments.statistics
+step "10c. Sensitivity: LR risk in scenarios";       python -m ml.experiments.sensitivity_lr_risk
 step "11. Report figures, tables, diagrams, dictionary"; python -m ml.experiments.report_figures && python -m ml.experiments.paper_figures && python -m ml.experiments.paper_tables && python documentation/diagrams/make_diagrams.py && python -m ml.data_engineering.data_dictionary
 step "12. Database (DATABASE_URL or SQLite)";       python -m backend.database_setup --drop && python -m backend.data_import
 step "13. Tests";                                   python -m pytest tests -q

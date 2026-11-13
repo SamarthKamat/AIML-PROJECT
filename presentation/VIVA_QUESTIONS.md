@@ -118,3 +118,30 @@ Run `bash run_all.sh`. It performs pinned, hash-verified downloads, regenerates 
 
 **35. What would you do with more time or real data?**
 Label hidden links with bills of lading or supplier surveys; validate on a real supplier network; replace the static MILP with a stochastic/rolling-horizon policy to avoid over-hedging; and calibrate the economics with company data.
+
+## Added after the faculty review (statistics, integrity, novelty)
+
+**Q. Logistic regression beats XGBoost on test. Why is XGBoost still the primary model?**
+A. XGBoost was fixed as the primary model in the experiment code before any result was seen. Switching to the test-set winner would be
+test-set model selection. We disclose that LR is significantly better (ROC-AUC +0.040, supplier-cluster bootstrap 95% CI 0.013–0.068,
+p = 0.008) and re-ran all nine scenarios with LR risk: severe-C impact 1.17 vs 1.16 crore, C-over-A saving 3.67 vs 3.56 crore, so the
+business conclusion does not change.
+
+**Q. Is the calibration improvement statistically significant?**
+A. Not for XGBoost: ECE fell 0.020 → 0.010, but the paired bootstrap difference has 95% CI −0.002 to 0.020 (p = 0.11). Calibration clearly
+helps the decision tree (0.037 → 0.011) and makes the already-calibrated random forest slightly worse.
+
+**Q. Why a cluster bootstrap?**
+A. The 3,000 test rows are 500 suppliers × 6 months; months of the same supplier are correlated, so we resample suppliers, not rows.
+
+**Q. What exactly is new compared with Brintrup et al. and Kosasih & Brintrup?**
+A. They predict hidden links. We use the predicted links downstream (exposure and MILP availability de-rating) and measure their money
+value against a policy that only sees the observed graph. We do not claim new algorithms.
+
+**Q. Why does optimisation lose under mild shocks?**
+A. Mild-shock impact is almost entirely the assumed recovery-management overhead; C pre-books alternates it does not need, costing INR 0.82
+lakh more than doing nothing in every replication. Hence the recommended tiered policy.
+
+**Q. Were any changes made after seeing results?**
+A. Yes, disclosed in the paper: three simulator corrections (storage cap discarding deliveries, policy C excluding instead of de-rating
+suspect alternates, horizon extended to 180 days), and the statistical tests and sensitivity run added after review of the first draft.

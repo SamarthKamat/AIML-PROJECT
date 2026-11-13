@@ -1,21 +1,11 @@
-\begin{table}[t]\centering\caption{Exp.~2B: graph vs.\ tabular risk classification (test split, Platt-calibrated; mean$\pm$sd over 5 seeds). Synthetic: 30-day disruption (prevalence 7.4\%); SupplyGraph (real FMCG): 7-day service shortfall (prevalence 28.8\%).}\label{tab:exp2b}\scriptsize\setlength{\tabcolsep}{2.4pt}\begin{tabular}{llccc}\toprule
-Data & Model [graph] & PR-AUC & ROC-AUC & Brier\\\midrule
-Synthetic & XGBoost (tabular) & 0.122$\pm$0.000 & 0.626 & 0.0680\\
-Synthetic & MLP (no graph) & 0.104$\pm$0.011 & 0.580 & 0.0685\\
-Synthetic & GCN [observed] & 0.104$\pm$0.005 & 0.590 & 0.0684\\
-Synthetic & GCN [obs.+pred.] & 0.111$\pm$0.011 & 0.591 & 0.0683\\
-Synthetic & GCN [oracle] & 0.107$\pm$0.004 & 0.594 & 0.0684\\
-Synthetic & GraphSAGE [observed] & 0.105$\pm$0.004 & 0.588 & 0.0685\\
-Synthetic & GraphSAGE [obs.+pred.] & 0.106$\pm$0.007 & 0.579 & 0.0685\\
-Synthetic & GraphSAGE [oracle] & 0.099$\pm$0.006 & 0.587 & 0.0685\\
-Synthetic & GAT [observed] & 0.100$\pm$0.009 & 0.585 & 0.0686\\
-Synthetic & GAT [obs.+pred.] & 0.098$\pm$0.010 & 0.585 & 0.0686\\
-Synthetic & GAT [oracle] & 0.108$\pm$0.005 & 0.598 & 0.0683\\
-\midrule
-SupplyGraph & Logistic Regression & 0.488$\pm$0.000 & 0.701 & 0.1841\\
-SupplyGraph & XGBoost (tabular) & 0.454$\pm$0.000 & 0.668 & 0.1905\\
-SupplyGraph & MLP (no graph) & 0.475$\pm$0.007 & 0.701 & 0.1905\\
-SupplyGraph & GCN & 0.459$\pm$0.030 & 0.633 & 0.1961\\
-SupplyGraph & GraphSAGE & 0.461$\pm$0.017 & 0.607 & 0.1975\\
-SupplyGraph & GAT & 0.443$\pm$0.040 & 0.660 & 0.1932\\
+\begin{table}[t]\centering\caption{E2B: PR-AUC of graph vs.\ tabular risk models on the test split (Platt-calibrated; mean$\pm$sd over 5 seeds). Synthetic: 30-day disruption, prevalence 7.4\%; SupplyGraph (real FMCG): 7-day service shortfall, prevalence 28.8\%. The best GNN variant is reported to favour graph models.}\label{tab:exp2b}\scriptsize\setlength{\tabcolsep}{3pt}\begin{tabular}{lcc}\toprule
+Model [graph] & Synthetic & SupplyGraph (real)\\\midrule
+Logistic regression (tabular) & -- & 0.488\\
+XGBoost (tabular) & 0.122 & 0.454\\
+MLP (features, no graph) & 0.104$\pm$0.011 & 0.475$\pm$0.007\\
+GCN [observed graph] & 0.104$\pm$0.005 & 0.459$\pm$0.030\\
+GraphSAGE [observed graph] & 0.105$\pm$0.004 & 0.461$\pm$0.017\\
+GAT [observed graph] & 0.100$\pm$0.009 & 0.443$\pm$0.040\\
+Best GNN [obs.+predicted links] (GCN) & 0.111$\pm$0.011 & --\\
+Best GNN [oracle true graph] (GAT) & 0.108$\pm$0.005 & --\\
 \bottomrule\end{tabular}\end{table}

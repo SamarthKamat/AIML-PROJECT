@@ -33,12 +33,15 @@ def scenario_suppliers(net, k=5):
     return list(c.index[:k])
 
 
+RISK_MODEL = "exp1_xgboost.joblib"  # pre-specified primary model; sensitivity analysis swaps in logistic regression
+
+
 def latest_risk(net) -> pd.Series:
-    """Calibrated 30-day disruption probability per supplier at the scenario start (Exp 1 primary model)."""
+    """Calibrated 30-day disruption probability per supplier at the scenario start (Exp 1 risk model)."""
     import joblib
     from ml.data_engineering.features_supplier import build_snapshot_features, load_tables
     A = load_assumptions()
-    bundle = joblib.load(MODELS / "exp1_xgboost.joblib")
+    bundle = joblib.load(MODELS / RISK_MODEL)
     f = build_snapshot_features(load_tables(), [pd.Timestamp(A["scenario_start_date"])])
     p = bundle["calibrator"].predict(bundle["model"].predict_proba(f[bundle["features"]])[:, 1])
     return pd.Series(p, index=f.supplier_id.values)

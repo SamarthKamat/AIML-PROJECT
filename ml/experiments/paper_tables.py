@@ -26,17 +26,20 @@ def exp1():
     r = j("exp1_supplier_disruption")
     rows = []
     for m, d in r["results"].items():
-        for cal, lab in [("none", "--"), ("platt", "Platt"), ("isotonic", "Iso.")]:
-            v = d[cal]
-            bold = m == r["primary_model"] and cal == r["primary_calibration"]
-            line = f"{m.replace('Logistic Regression', 'Logistic reg.')} & {lab} & {f3(v['roc_auc'])} & {f3(v['pr_auc'])} & {v['brier']:.4f} & {v['ece_uniform10']:.4f} \\\\"
-            rows.append(("\\rowcolor{gray!15}" if bold else "") + line)
+        n, p_, i_ = d["none"], d["platt"], d["isotonic"]
+        eces = {"none": n["ece_uniform10"], "platt": p_["ece_uniform10"], "isotonic": i_["ece_uniform10"]}
+        best = min(eces, key=eces.get)
+        e = {k: (f"\\textbf{{{v:.4f}}}" if k == best else f"{v:.4f}") for k, v in eces.items()}
+        line = (f"{m.replace('Logistic Regression', 'Logistic reg.')} & {f3(p_['roc_auc'])} & {f3(p_['pr_auc'])} & {n['brier']:.4f} & {p_['brier']:.4f} & "
+                f"{e['none']} & {e['platt']} & {e['isotonic']}\\\\")
+        rows.append(("\\rowcolor{gray!15}" if m == r["primary_model"] else "") + line)
     s = r["splits"]
-    tex = (r"""\begin{table}[t]\centering\caption{Exp.~1: 30-day supplier disruption prediction on the untouched test split (""" +
+    tex = (r"""\begin{table}[t]\centering\caption{E1: 30-day supplier disruption prediction on the untouched test split (""" +
            f"{s['test']['rows']:,} supplier-months, prevalence {100 * s['test']['prevalence']:.1f}\\%" +
-           r"""). Calibrators fitted on the calibration split only; shaded = deployed.}\label{tab:exp1}
-\scriptsize\setlength{\tabcolsep}{3.5pt}\begin{tabular}{llcccc}\toprule
-Model & Calib. & ROC-AUC & PR-AUC & Brier & ECE$_{10}$\\\midrule
+           r"""). AUCs after Platt scaling (rank-preserving); calibrators fitted on the calibration split only; bold = lowest ECE per model; shaded = pre-specified primary model. 95\% CIs and tests in Table~\ref{tab:stats}.}\label{tab:exp1}
+\scriptsize\setlength{\tabcolsep}{2.4pt}\begin{tabular}{@{}lcccccccc@{}}\toprule
+ & & & \multicolumn{2}{c}{Brier} & \multicolumn{3}{c}{ECE$_{10}$}\\\cmidrule(lr){4-5}\cmidrule(lr){6-8}
+Model & ROC-AUC & PR-AUC & raw & Platt & raw & Platt & Iso.\\\midrule
 """ + "\n".join(rows) + r"""
 \bottomrule\end{tabular}\end{table}""")
     (OUT / "exp1.tex").write_text(tex)
@@ -52,7 +55,7 @@ def graph():
         d = a["A2_results"][n]
         sd = lambda v, k: f"{v[k]:.3f}" + (f"$\\pm${v[k + '_sd']:.3f}" if k + "_sd" in v else "")  # noqa: E731
         rows.append(f"{n.replace('Preferential Attachment', 'Pref.~attach.').replace('Common Neighbours', 'Common neigh.')} & {sd(h, 'roc_auc')} & {sd(h, 'ap')} & {f3(d['ap'])} & {d['P@100']:.2f} & {d['R@500']:.3f} \\\\")
-    tex = (r"""\begin{table}[t]\centering\caption{Exp.~2A link prediction (synthetic, 5 seeds for learned models). A1: held-out observed edges vs.\ material-compatible negatives. A2: ranking all """ +
+    tex = (r"""\begin{table}[t]\centering\caption{E2A link prediction (synthetic, 5 seeds for learned models). A1: held-out observed edges vs.\ material-compatible negatives. A2: ranking all """ +
            f"{a['A2_candidates']['n']:,} compatible unobserved pairs against {a['A2_candidates']['positives']:,} ground-truth hidden edges (base rate {a['A2_candidates']['base_rate']:.3f})" +
            r""".}\label{tab:exp2a}\scriptsize\setlength{\tabcolsep}{2.6pt}\begin{tabular}{lccccc}\toprule
  & \multicolumn{2}{c}{A1 (held-out)} & \multicolumn{3}{c}{A2 (hidden-edge discovery)}\\\cmidrule(lr){2-3}\cmidrule(lr){4-6}
@@ -60,17 +63,21 @@ Method & ROC-AUC & AP & AP & P@100 & R@500\\\midrule
 """ + "\n".join(rows) + r"""
 \bottomrule\end{tabular}\end{table}""")
     (OUT / "exp2a.tex").write_text(tex)
-    rows = []
     p1, p2 = b["part1_synthetic"]["results"], b["part2_supplygraph_real"]["results"]
-    for k, v in p1.items():
-        rows.append(f"Synthetic & {k.replace('observed+predicted(top500)', 'obs.+pred.').replace('true graph (oracle)', 'oracle').replace('(tabular, no graph)', '(no graph)')} & {v['pr_auc']:.3f}$\\pm${v['pr_auc_sd']:.3f} & {f3(v['roc_auc'])} & {v['brier']:.4f}\\\\")
-    rows.append("\\midrule")
-    for k, v in p2.items():
-        rows.append(f"SupplyGraph & {k} & {v['pr_auc']:.3f}$\\pm${v['pr_auc_sd']:.3f} & {f3(v['roc_auc'])} & {v['brier']:.4f}\\\\")
-    tex = (r"""\begin{table}[t]\centering\caption{Exp.~2B: graph vs.\ tabular risk classification (test split, Platt-calibrated; mean$\pm$sd over 5 seeds). Synthetic: 30-day disruption (prevalence """ +
-           f"{100 * b['part1_synthetic']['info']['test_prevalence']:.1f}\\%); SupplyGraph (real FMCG): 7-day service shortfall (prevalence {100 * b['part2_supplygraph_real']['info']['prevalence']['test']:.1f}\\%)" +
-           r""".}\label{tab:exp2b}\scriptsize\setlength{\tabcolsep}{2.4pt}\begin{tabular}{llccc}\toprule
-Data & Model [graph] & PR-AUC & ROC-AUC & Brier\\\midrule
+    fmt = lambda v: f"{v['pr_auc']:.3f}" + (f"$\\pm${v['pr_auc_sd']:.3f}" if v.get("pr_auc_sd", 0) > 0 else "")  # noqa: E731
+    best = lambda tag: max(((k, v) for k, v in p1.items() if tag in k), key=lambda kv: kv[1]["pr_auc"])  # noqa: E731
+    rows = [f"Logistic regression (tabular) & -- & {fmt(p2['Logistic Regression'])}\\\\",
+            f"XGBoost (tabular) & {fmt(p1['XGBoost (tabular)'])} & {fmt(p2['XGBoost (tabular)'])}\\\\",
+            f"MLP (features, no graph) & {fmt(p1['MLP (tabular, no graph)'])} & {fmt(p2['MLP (no graph)'])}\\\\"]
+    for g in ["GCN", "GraphSAGE", "GAT"]:
+        rows.append(f"{g} [observed graph] & {fmt(p1[g + ' [observed]'])} & {fmt(p2[g])}\\\\")
+    for tag, lab in [("obs", "Best GNN [obs.+predicted links]"), ("oracle", "Best GNN [oracle true graph]")]:
+        k, v = best("observed+predicted" if tag == "obs" else "oracle")
+        rows.append(f"{lab} ({k.split()[0]}) & {fmt(v)} & --\\\\")
+    tex = (r"""\begin{table}[t]\centering\caption{E2B: PR-AUC of graph vs.\ tabular risk models on the test split (Platt-calibrated; mean$\pm$sd over 5 seeds). Synthetic: 30-day disruption, prevalence """ +
+           f"{100 * b['part1_synthetic']['info']['test_prevalence']:.1f}\\%; SupplyGraph (real FMCG): 7-day service shortfall, prevalence {100 * b['part2_supplygraph_real']['info']['prevalence']['test']:.1f}\\%" +
+           r""". The best GNN variant is reported to favour graph models.}\label{tab:exp2b}\scriptsize\setlength{\tabcolsep}{3pt}\begin{tabular}{lcc}\toprule
+Model [graph] & Synthetic & SupplyGraph (real)\\\midrule
 """ + "\n".join(rows) + r"""
 \bottomrule\end{tabular}\end{table}""")
     (OUT / "exp2b.tex").write_text(tex)
@@ -84,7 +91,7 @@ def exp3():
         rows.append(f"{k.replace('Baseline: shipping-mode late rate', 'Shipping-mode rate')} & {f3(v['roc_auc'])} & {f3(v['pr_auc'])} & {f3(v['f1'])} & {v['brier']:.4f}\\\\")
     reg = r["regression"]
     rr = " ; ".join(f"{k.replace('Baseline: ', '')}: {v['mae']:.3f}/{v['r2']:.3f}" for k, v in reg.items())
-    tex = (r"""\begin{table}[t]\centering\caption{Exp.~3 (REAL DataCo): late-delivery prediction, chronological test split (""" +
+    tex = (r"""\begin{table}[t]\centering\caption{E3 (real DataCo): late-delivery prediction, chronological test split (""" +
            f"{r['splits']['test']['rows']:,} order lines, late rate {100 * r['splits']['test']['late_rate']:.1f}\\%" +
            r"""), threshold 0.5.}\label{tab:exp3}\scriptsize\setlength{\tabcolsep}{3.5pt}\begin{tabular}{lcccc}\toprule
 Model & ROC-AUC & PR-AUC & F1 & Brier\\\midrule
@@ -104,7 +111,7 @@ def scen():
                     f"{cr(r.financial_impact_inr)} [{cr(r['financial_impact_inr_p2.5'])}, {cr(r['financial_impact_inr_p97.5'])}] & {r.recovery_time_days:.0f} & "
                     f"{100 * r.alt_supplier_utilisation:.0f} & {100 * r.feasibility_full_recovery_share:.0f}\\\\" + ("\\midrule" if r.scenario in ("S3", "S6") else ""))
     tex = (r"""\begin{table*}[t]\centering\caption{Nine-scenario evaluation (means of """ + f"{int(s.replications.iloc[0])}" +
-           r""" common-random-number replications; simulated INR on synthetic data). Severity = capacity loss of the five largest Tier-2 cocoa-bean traders for a nominal 60 days (log-normal). Policy A none, B rule-based, C optimisation. Disrupted capacity (time-averaged over the horizon) is identical across policies within a severity.}\label{tab:scen}
+           r""" common-random-number replications; simulated INR on synthetic data). Severity = capacity loss of the five largest Tier-2 cocoa-bean traders for a nominal 60 days (log-normal). Policies: A none, B rule-based, C optimisation. L = lakh, Cr = crore; PI = 2.5--97.5th percentile over replications; Full rec.\ = replications with zero unmet demand; Alt.\ util.\ = share of alternates' spare capacity used.}\label{tab:scen}
 \scriptsize\setlength{\tabcolsep}{3pt}\begin{tabular}{lllrrrrrrlrrr}\toprule
 Scen. & Sev. & Pol. & Aff.\ sup. & Aff.\ mat. & Unmet (k units) & Inv.\ short.\ (L) & Procure.\ (L) & Transport (L) & Impact, Cr [95\% PI] & Recov.\ d & Alt.\ util.\ \% & Full rec.\ \%\\\midrule
 """ + "\n".join(rows) + r"""
@@ -167,6 +174,50 @@ def macros():
     (OUT / "numbers.tex").write_text("\n".join(f"\\newcommand{{\\{k}}}{{{v}}}" for k, v in m.items()) + "\n")
 
 
+def stats_table():
+    st = json.loads((EXPERIMENTS / "statistics.json").read_text())
+    e1, e3 = st["exp1"]["paired"], st["exp3"]["delta_auc_xgb_minus_mode"]
+    sc = {(r["severity"], r["comparison"]): r for r in st["scenarios"]}
+    pf = lambda p: "$<$0.001" if p < 0.001 else f"{p:.3f}"  # noqa: E731
+    rows = [f"E1 & LR $-$ XGBoost, ROC-AUC & {e1['ROC-AUC LR - XGB']['mean']:+.3f} & [{e1['ROC-AUC LR - XGB']['ci'][0]:.3f}, {e1['ROC-AUC LR - XGB']['ci'][1]:.3f}] & -- & {pf(e1['ROC-AUC LR - XGB']['p'])}\\\\",
+            f"E1 & LR $-$ XGBoost, PR-AUC & {e1['PR-AUC LR - XGB']['mean']:+.3f} & [{e1['PR-AUC LR - XGB']['ci'][0]:.3f}, {e1['PR-AUC LR - XGB']['ci'][1]:.3f}] & -- & {pf(e1['PR-AUC LR - XGB']['p'])}\\\\",
+            f"E1 & ECE reduction, XGB raw $-$ Platt & {e1['ECE raw - Platt (XGB)']['mean']:+.4f} & [{e1['ECE raw - Platt (XGB)']['ci'][0]:.4f}, {e1['ECE raw - Platt (XGB)']['ci'][1]:.4f}] & -- & {pf(e1['ECE raw - Platt (XGB)']['p'])}\\\\",
+            f"E3 & XGBoost $-$ mode baseline, ROC-AUC & {e3['mean']:+.3f} & [{e3['ci'][0]:.3f}, {e3['ci'][1]:.3f}] & -- & {pf(e3['p'])}\\\\",
+            "\\midrule"]
+    cmp = pd.read_csv(EXPERIMENTS / "scenario_comparison.csv")
+    for sev, key, lab in [("Severe", "A vs C", "A: No intervention minus C: Optimisation"), ("Severe", "B vs C", "B: Rule-based minus C: Optimisation"),
+                          ("Moderate", "A vs C", "A: No intervention minus C: Optimisation"), ("Moderate", "A vs B", "A: No intervention minus B: Rule-based"),
+                          ("Mild", "A vs C", "A: No intervention minus C: Optimisation")]:
+        c = cmp[(cmp.severity == sev) & (cmp.comparison == lab)].iloc[0]
+        rows.append(f"S & {sev}: saving of {key.split(' vs ')[1]} over {key.split(' vs ')[0]} (L) & {c.mean_saving_inr / 1e5:+.1f} & [{c.ci95_low / 1e5:.1f}, {c.ci95_high / 1e5:.1f}] & {100 * sc[(sev, key)]['share_second_cheaper']:.0f}\\% & {pf(sc[(sev, key)]['p_holm'])}\\\\")
+    tex = (r"""\begin{table}[t]\centering\caption{Statistical tests. E1: supplier-cluster bootstrap ($B$=1,000, 500 suppliers, 3,000 test months); E3: order-line bootstrap ($B$=1,000); S: 500 paired CRN replications, 95\% CI of the mean saving and Wilcoxon signed-rank $p$, Holm-adjusted over nine comparisons. Win = share of replications in which the second policy is cheaper (L = INR lakh).}\label{tab:stats}
+\scriptsize\setlength{\tabcolsep}{2pt}\begin{tabular}{@{}llrccr@{}}\toprule
+ & Comparison & Effect & 95\% CI & Win & $p$\\\midrule
+""" + "\n".join(rows) + r"""
+\bottomrule\end{tabular}\end{table}""")
+    (OUT / "stats.tex").write_text(tex)
+
+
+def stats_macros():
+    st = json.loads((EXPERIMENTS / "statistics.json").read_text())
+    e1 = st["exp1"]
+    m = dict(CiLrRoc=f"{e1['LR']['roc'][0]:.3f}--{e1['LR']['roc'][1]:.3f}", CiXgbRoc=f"{e1['XGB']['roc'][0]:.3f}--{e1['XGB']['roc'][1]:.3f}",
+             CiLrPr=f"{e1['LR']['pr'][0]:.3f}--{e1['LR']['pr'][1]:.3f}", CiXgbPr=f"{e1['XGB']['pr'][0]:.3f}--{e1['XGB']['pr'][1]:.3f}",
+             DRoc=f"{e1['paired']['ROC-AUC LR - XGB']['mean']:.3f}", DRocP=f"{e1['paired']['ROC-AUC LR - XGB']['p']:.3f}",
+             DEce=f"{e1['paired']['ECE raw - Platt (XGB)']['mean']:.4f}", DEceL=f"{e1['paired']['ECE raw - Platt (XGB)']['ci'][0]:.3f}",
+             DEceH=f"{e1['paired']['ECE raw - Platt (XGB)']['ci'][1]:.3f}", DEceP=f"{e1['paired']['ECE raw - Platt (XGB)']['p']:.2f}",
+             DcCi=f"{st['exp3']['xgb_auc_ci'][0]:.3f}--{st['exp3']['xgb_auc_ci'][1]:.3f}", DcDelta=f"{st['exp3']['delta_auc_xgb_minus_mode']['mean']:.3f}")
+    sens = EXPERIMENTS / "sensitivity_lr_risk" / "scenario_results_lr_risk.csv"
+    if sens.exists():
+        sl = pd.read_csv(sens).set_index("scenario")
+        cp = pd.read_csv(EXPERIMENTS / "sensitivity_lr_risk" / "scenario_comparison_lr_risk.csv")
+        sv = cp[(cp.severity == "Severe") & (cp.comparison == "A: No intervention minus C: Optimisation")].iloc[0]
+        m.update(SensSevC=f"{sl.loc['S9', 'financial_impact_inr'] / 1e7:.2f}", SensSaveAC=f"{sv.mean_saving_inr / 1e7:.2f}",
+                 SensModC=f"{sl.loc['S6', 'financial_impact_inr'] / 1e5:.1f}")
+    with open(OUT / "numbers.tex", "a") as f:
+        f.write("".join(f"\\newcommand{{\\{k}}}{{{v}}}\n" for k, v in m.items()))
+
+
 def decision():
     """Worked decision example from experiments/decision_example.json (output of ml.decision.engine.evaluate)."""
     d = json.loads((EXPERIMENTS / "decision_example.json").read_text())
@@ -194,6 +245,8 @@ Action & Expected cost (INR '000)\\\midrule
 
 if __name__ == "__main__":
     macros()
+    stats_macros()
+    stats_table()
     decision()
     exp1()
     graph()
