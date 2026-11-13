@@ -37,8 +37,10 @@ def save(fig, name):
     plt.close(fig)
 
 
-def tag(ax, letter, x=-0.02, y=1.04):
-    ax.text(x, y, f"({letter})", transform=ax.transAxes, fontsize=8, fontweight="bold", va="bottom", ha="right")
+def tag(ax, letter, x=None, y=None):
+    """Prefix the panel title with its letter (avoids collisions between tag and title)."""
+    t = ax.get_title()
+    ax.set_title(f"({letter}) {t}" if t else f"({letter})", fontsize=7.5, fontweight="bold" if not t else None, loc="center")
 
 
 # ------------------------------------------------------------------ architecture
@@ -113,8 +115,8 @@ def blackbox():
     ax.set_xlim(-0.33, 1.02)
     ax.set_ylim(-0.12, 1.1)
     ax.axis("off")
-    ax.set_title("Cocoa sub-network around the five largest Tier-2 traders", fontsize=7.5)
-    tag(ax, "a", x=-0.25, y=1.0)
+    ax.set_title("Cocoa sub-network, five largest Tier-2 traders (synthetic)", fontsize=7.5)
+    tag(ax, "a")
     # exposure gap
     r1 = json.loads((EXPERIMENTS / "exp1_supplier_disruption" / "run.json").read_text())["exposure_summary"]
     ax2 = fig.add_subplot(gs[1])
@@ -123,13 +125,13 @@ def blackbox():
     tr = [r1["true_graph_mean_by_tier"][t] / 1e3 for t in tiers]
     x = np.arange(3)
     ax2.bar(x - 0.19, o, 0.36, color=BLUE, label="observed graph")
-    ax2.bar(x + 0.19, tr, 0.36, color=RED, label="true graph")
+    ax2.bar(x + 0.19, tr, 0.36, color=RED, label="true graph (synthetic)")
     for i in (1, 2):
         ax2.annotate(f"{tr[i] / o[i]:.1f}x", (x[i] + 0.19, tr[i]), xytext=(0, 2), textcoords="offset points", ha="center", fontsize=6.8, fontweight="bold", color=RED)
     ax2.set_xticks(x)
     ax2.set_xticklabels(["Tier 1", "Tier 2", "Tier 3"])
-    ax2.set_ylabel("mean exposure (INR '000)")
-    ax2.set_title("Exposure understated", fontsize=7.5)
+    ax2.set_ylabel("mean exposure $E_i$ (INR '000, simulated)")
+    ax2.set_title("Exposure by tier", fontsize=7.5)
     ax2.set_ylim(0, 140)
     ax2.legend(frameon=False, loc="upper right", fontsize=5.8)
     tag(ax2, "b")
@@ -142,8 +144,9 @@ def blackbox():
     for i, v in enumerate(share.values):
         ax3.text(i, v + 2, f"{v:.0f}%", ha="center", fontsize=6.8)
     ax3.set_ylim(0, 105)
-    ax3.set_ylabel("% of links invisible to buyer")
-    ax3.set_title("Visibility by tier", fontsize=7.5)
+    ax3.set_ylabel("% of links hidden from buyer")
+    ax3.set_title("Hidden links by tier", fontsize=7.5)
+    ax3.set_xlabel("tier of supplying firm")
     tag(ax3, "c")
     save(fig, "fig_blackbox")
 
@@ -207,31 +210,72 @@ def scenarios():
     s = pd.read_csv(EXPERIMENTS / "scenario_results.csv")
     reps = pd.read_csv(EXPERIMENTS / "exp4_5_scenarios" / "scenario_replications.csv")
     sev = ["Mild", "Moderate", "Severe"]
-    fig, axs = plt.subplots(1, 4, figsize=(7.16, 1.85), gridspec_kw={"wspace": 0.42})
+    fig, axs = plt.subplots(1, 4, figsize=(7.16, 2.1), gridspec_kw={"wspace": 0.42, "width_ratios": [1, 0.9, 1.15, 1.0]})
     w = 0.26
+    # (a) mean impact with 95 % CI of the mean
     for j, (p, c) in enumerate(POL.items()):
         g = s[s.policy == p].set_index("severity").reindex(sev)
         xs = np.arange(3) + (j - 1) * w
-        axs[0].bar(xs, g.financial_impact_inr / 1e7, w, color=c, label=p.split(": ")[1])
-        axs[1].bar(xs, g.unmet_demand_units / 1e3, w, color=c)
-        axs[2].bar(xs, 100 * g.min_service_level, w, color=c)
-    axs[0].set(ylabel="INR crore", title="Mean financial impact")
-    axs[1].set(ylabel="'000 units", title="Unmet demand")
-    axs[2].set(ylabel="%", title="Minimum service level", ylim=(50, 102))
-    axs[0].legend(frameon=False, loc="upper left", fontsize=5.8)
-    win = reps.loc[reps.groupby(["severity", "replication"]).financial_impact_inr.idxmin()].groupby("severity").policy.value_counts(normalize=True).unstack(fill_value=0).reindex(sev)
-    bottom = np.zeros(3)
-    for p, c in POL.items():
-        v = 100 * win.get(p, pd.Series(0, index=sev)).values
-        axs[3].bar(np.arange(3), v, 0.6, bottom=bottom, color=c)
-        for i in range(3):
-            if v[i] > 9:
-                axs[3].text(i, bottom[i] + v[i] / 2, f"{v[i]:.0f}", ha="center", va="center", fontsize=6, color="white", fontweight="bold")
-        bottom += v
-    axs[3].set(ylabel="% of replications", title="Cheapest policy", ylim=(0, 100))
+        axs[0].bar(xs, g.financial_impact_inr / 1e7, w, color=c, label=p.split(": ")[1],
+                   yerr=1.96 * g.financial_impact_inr_se / 1e7, error_kw=dict(lw=0.6, capsize=1.2, ecolor="black"))
+    axs[0].set(ylabel="simulated impact (INR crore)", title="Mean impact, 95% CI")
+    axs[0].set_xticks(range(3))
+    axs[0].set_xticklabels(["Mild", "Mod.", "Severe"])
+    axs[0].legend(frameon=False, loc="upper left", fontsize=5.0, handlelength=0.9, borderaxespad=0.1)
+    # (b) distribution of paired savings vs A
+    data, pos, cols = [], [], []
+    for i, sv in enumerate(["Moderate", "Severe"]):
+        piv = reps[reps.severity == sv].pivot(index="replication", columns="policy", values="financial_impact_inr")
+        for k, p in enumerate(["B: Rule-based", "C: Optimisation"]):
+            data.append((piv["A: No intervention"] - piv[p]).values / 1e7)
+            pos.append(i * 2.6 + k)
+            cols.append(POL[p])
+    bp = axs[1].boxplot(data, positions=pos, widths=0.75, whis=(5, 95), showfliers=False, patch_artist=True, medianprops=dict(color="black", lw=0.8))
+    for patch, c in zip(bp["boxes"], cols):
+        patch.set(facecolor=c, alpha=0.75, lw=0.5)
+    for d_, x_ in zip(data, pos):
+        axs[1].plot(x_, d_.mean(), marker="D", ms=2.4, color="black")
+    axs[1].axhline(0, color=GREY, lw=0.6, ls=":")
+    axs[1].set_xticks([0.5, 3.1])
+    axs[1].set_xticklabels(["Mod.", "Severe"])
+    axs[1].set(ylabel="paired saving vs. A (INR crore)", title="Savings of B, C vs. A")
+    # (c) link-information ablation
+    ab = EXPERIMENTS / "robustness" / "ablation_summary.csv"
+    if ab.exists():
+        a_ = pd.read_csv(ab)
+        arms = list(dict.fromkeys(a_.policy))
+        short = ["A", "B-obs", "B-pred", "C-obs", "C-pred", "C-orac."]
+        acol = [POL["A: No intervention"], "#F2A541", "#F7D488", "#2F5D9F", POL["C: Optimisation"], "#7CC6A4"]
+        for i, sv in enumerate(["Moderate", "Severe"]):
+            g = a_[a_.severity == sv].set_index("policy").reindex(arms)
+            xs = i * 7 + np.arange(len(arms))
+            axs[2].bar(xs, g.impact_inr / 1e7, 0.85, color=acol, yerr=1.96 * g.impact_se / 1e7, error_kw=dict(lw=0.6, capsize=1, ecolor="black"))
+        axs[2].set_xticks([2.5, 9.5])
+        axs[2].set_xticklabels(["Mod.", "Severe"])
+        handles = [plt.Rectangle((0, 0), 1, 1, color=c) for c in acol]
+        axs[2].legend(handles, short, frameon=False, fontsize=5.0, ncol=1, loc="upper left", handlelength=0.8, labelspacing=0.25, borderaxespad=0.1)
+        axs[2].set(ylabel="simulated impact (INR crore)", title="Ablation: graph vs. logic")
+    # (d) sensitivity of severe C-over-A saving
+    sp = EXPERIMENTS / "robustness" / "sensitivity.csv"
+    if sp.exists():
+        d_ = pd.read_csv(sp)
+        sv = d_[d_.severity == "Severe"].reset_index(drop=True)[::-1]
+        mild = d_[d_.severity == "Mild"].set_index("setting")
+        yy = np.arange(len(sv))
+        axs[3].errorbar(sv.save_C_over_A / 1e7, yy, xerr=[(sv.save_C_over_A - sv.save_lo) / 1e7, (sv.save_hi - sv.save_C_over_A) / 1e7],
+                        fmt="o", ms=2.2, color=POL["C: Optimisation"], ecolor=NAVY, elinewidth=0.6, capsize=1)
+        base = float(sv[sv.setting == "base"].save_C_over_A.iloc[0]) / 1e7
+        axs[3].axvline(base, color=GREY, lw=0.6, ls=":")
+        axs[3].axvline(0, color="black", lw=0.5)
+        axs[3].set_yticks(yy)
+        short = {"base": "base", "overhead 0": "overhead 0", "overhead 50k": "overhead 50k", "penalty 5%": "penalty 5%", "penalty 30%": "penalty 30%",
+                 "interruption 25k": "interrupt. 25k", "interruption 150k": "interrupt. 150k", "duration 30 d": "duration 30 d", "duration 90 d": "duration 90 d",
+                 "spare capacity x0.5": "spare cap. x0.5", "spare capacity x1.5": "spare cap. x1.5", "alternate risk x0.5": "alt. risk x0.5",
+                 "alternate risk x2": "alt. risk x2", "visibility -50% deep links": "known links -50%", "visibility +50% hidden links": "known links +50%"}
+        axs[3].set_yticklabels([short.get(t, t) for t in sv.setting], fontsize=5.2)
+        axs[3].set(xlabel="severe saving, C vs. A (INR crore)", title="Sensitivity (severe)")
+        axs[3].grid(axis="y", visible=False)
     for a, l in zip(axs, "abcd"):
-        a.set_xticks(range(3))
-        a.set_xticklabels(sev)
         tag(a, l)
     save(fig, "fig_scenarios")
 

@@ -251,6 +251,8 @@ sev_ac, mod_ac, sev_bc = g("Severe", "A: No intervention minus C: Optimisation")
 bullets(s, [f"Severe shock: optimisation saves ₹{sev_ac.mean_saving_inr / 1e7:.2f} Cr vs no intervention (95 % CI {sev_ac.ci95_low / 1e7:.2f}–{sev_ac.ci95_high / 1e7:.2f}) and ₹{sev_bc.mean_saving_inr / 1e7:.2f} Cr vs rule-based.",
             f"Moderate shock: ₹{mod_ac.mean_saving_inr / 1e5:.1f} L mean saving — tail protection; doing nothing is cheapest in most individual replications.",
             "Mild shock: buffers suffice; optimisation over-hedges (small extra cost) → use a tiered policy.",
+            "Ablation (same MILP): observed graph only 3.64 Cr vs observed+predicted links 1.16 Cr vs true graph 1.21 Cr → ~88 % of C's severe gain over B comes from predicted links; with the rule-based policy, predicted links hurt.",
+            "Sensitivity (15 settings): C best for severe and A best for mild in every setting; severe saving 0.21–7.74 Cr (driven by outage duration). All values simulated on synthetic data.",
             "Every number is reproducible from experiments/scenario_results.csv and checked by the verification script (61/61 checks).",
             "Financial values are simulated on synthetic data with illustrative assumptions — not observed company losses."], w=Inches(7.6), size=18)
 img(s, FIG / "scenarios_cost_vs_risk.png", Inches(8.4), Inches(1.8), w=Inches(4.7))
@@ -288,7 +290,7 @@ bullets(s, ["Supplier-level results rest on a synthetic generator we designed; r
 # 21 conclusion
 s = slide("Conclusion")
 bullets(s, ["Calibrated prediction makes thresholds defensible but rarely justifies supplier-level action when buffers are healthy.",
-            "The decisive value lies in exposing hidden dependencies and optimising recovery under severe network shocks (≈75 % lower simulated impact).",
+            "The decisive value lies in exposing hidden dependencies and optimising recovery under severe network shocks (≈75 % lower simulated impact on the synthetic network; assumption-conditional, not real-world savings).",
             "Every recommendation is traceable to a model output, an exposure calculation and a solver result — delivered in a tested, working application."], size=22)
 out = ROOT / "presentation" / "Supply_Chain_Black_Box.pptx"
 prs.save(out)

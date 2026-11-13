@@ -1,13 +1,11 @@
-\begin{table}[t]\centering\caption{E2A link prediction (synthetic, 5 seeds for learned models). A1: held-out observed edges vs.\ material-compatible negatives. A2: ranking all 8,863 compatible unobserved pairs against 1,039 ground-truth hidden edges (base rate 0.117).}\label{tab:exp2a}\scriptsize\setlength{\tabcolsep}{2.6pt}\begin{tabular}{lccccc}\toprule
+\begin{table}[t]\centering\caption{E2A link prediction (synthetic, 5 seeds for learned models). A1: held-out observed edges vs.\ material-compatible negatives. A2: ranking all 8,863 compatible unobserved pairs against 1,039 ground-truth hidden edges (base rate 0.117)). Adamic--Adar equals common neighbours. P@100 = precision of top 100; R@500 = recall of top 500.}\label{tab:exp2a}\scriptsize\setlength{\tabcolsep}{2.6pt}\begin{tabular}{lccccc}\toprule
  & \multicolumn{2}{c}{A1 (held-out)} & \multicolumn{3}{c}{A2 (hidden-edge discovery)}\\\cmidrule(lr){2-3}\cmidrule(lr){4-6}
 Method & ROC-AUC & AP & AP & P@100 & R@500\\\midrule
 Common neigh. & 0.500 & 0.500 & 0.117 & 0.06 & 0.042 \\
-Adamic-Adar & 0.500 & 0.500 & 0.117 & 0.06 & 0.042 \\
 Pref.~attach. & 0.733 & 0.763 & 0.166 & 0.34 & 0.120 \\
 Node2Vec & 0.638 & 0.609 & 0.146 & 0.24 & 0.084 \\
 MLP & 0.826$\pm$0.017 & 0.849$\pm$0.012 & 0.227 & 0.32 & 0.141 \\
 GCN & 0.807$\pm$0.020 & 0.837$\pm$0.010 & 0.176 & 0.25 & 0.109 \\
 GraphSAGE & 0.737$\pm$0.009 & 0.784$\pm$0.012 & 0.168 & 0.29 & 0.102 \\
 GAT & 0.796$\pm$0.005 & 0.811$\pm$0.018 & 0.177 & 0.26 & 0.103 \\
-GraphSAGE+skip & 0.792$\pm$0.014 & 0.827$\pm$0.006 & 0.166 & 0.29 & 0.102 \\
 \bottomrule\end{tabular}\end{table}

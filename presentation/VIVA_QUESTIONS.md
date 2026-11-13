@@ -145,3 +145,29 @@ lakh more than doing nothing in every replication. Hence the recommended tiered 
 **Q. Were any changes made after seeing results?**
 A. Yes, disclosed in the paper: three simulator corrections (storage cap discarding deliveries, policy C excluding instead of de-rating
 suspect alternates, horizon extended to 180 days), and the statistical tests and sensitivity run added after review of the first draft.
+
+## Added after the second review (ablation, sensitivity, statistics)
+
+**Q. How do you know the predicted links, and not just the optimiser, produce the saving?**
+A. A 2×2 factorial ablation with an oracle arm, holding costs, timing, candidates and random numbers fixed. Severe shock, same MILP:
+observed graph 3.64 Cr, observed + predicted links 1.16 Cr, true graph 1.21 Cr. The MILP alone (observed graph) saves only 0.34 Cr over the
+rule-based policy, so about 88 % of C's gain over B comes from the predicted links. With the rule-based policy, predicted links make things
+worse (4.73 vs 3.98 Cr), because hard exclusion of every linked alternate leaves no supplier. Links help only with quantitative de-rating.
+
+**Q. Moderate shock: mean saving is positive and p < 0.001, yet A is cheapest in most runs. Contradiction?**
+A. No. The mean saving (+16.7 L) comes from a few long outages; the median paired difference is −11.8 L (C costs more in the typical run).
+The two-sided Wilcoxon test detects that typical shift, which is *against* C. We report mean, median, win share, raw and Holm p for all nine
+comparisons.
+
+**Q. Mild C-vs-A CI looks like a single number (−0.82 L). Is it deterministic?**
+A. Not exactly: the paired difference has SD ≈ INR 3,200 because only C's pre-booked orders (premium, freight, holding) differ; the CI is
+[−0.823, −0.817] L.
+
+**Q. Are the money results real?**
+A. No. They are simulated on a synthetic network with illustrative costs. Sensitivity over 15 settings keeps the ranking (C best for severe,
+A best for mild) but the severe saving ranges 0.21–7.74 Cr, mostly with outage duration. CIs reflect simulation noise, not parameter uncertainty.
+
+**Q. Why is the novelty claim bounded?**
+A. A targeted (not systematic) search on 13 Nov 2026 found link prediction (Brintrup 2018; Kosasih & Brintrup 2022) and the value of *true*
+deep-tier visibility in simulation (Taghizadeh et al. 2021), but no study that feeds *predicted* links into a recovery optimiser and separates
+their value with observed/predicted/oracle arms. We state that as a bounded claim.

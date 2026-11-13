@@ -1,14 +1,14 @@
 # AI Use Declaration
 
-**Claude Code (Anthropic)** was used extensively in this project. Under the authors' direction it wrote most of the software
-(data generation, experiments, simulator, optimisation, Flask/React application), ran the experiments, and drafted and edited
-the text of the report.
+| Tool | Version / date | Used for |
+|---|---|---|
+| Claude Code (Anthropic) | 12–13 Nov 2026 | Under the authors' direction: wrote most of the software (synthetic data generator, experiments, simulator, MILP, statistics, robustness analyses, Flask/React application), ran the experiments, drafted and edited the report text, and ran a targeted literature search (13 Nov 2026). |
+| Google Gemini (API) | runtime, deployed app | Phrases answers in the in-app assistant solely from tool outputs (database queries, model inference, simulation, optimisation). Not used to write the report or code. |
 
-**The authors** — Shraddha Shete, Shirsodeep Biswas and Jayant Kumawat — defined the business problem, scope, datasets and
-evaluation requirements, reviewed the design and the outputs, and checked every reported number against the logged result files
-(`experiments/`), supported by the automated reconciliation checks and statistical tests in the repository.
+**The authors** (Shraddha Shete, Shirsodeep Biswas, Jayant Kumawat) defined the business problem, scope, datasets and evaluation
+requirements; reviewed the design and outputs; checked reported numbers against the logged result files (`experiments/`, including
+`experiments/VERIFICATION_REPORT.md` with 73 automated checks); verified the references against their sources; and take
+responsibility for the interpretation and the final text.
 
-**Google Gemini** runs only inside the deployed application's assistant, where it may phrase answers solely from tool outputs
-(database queries, model inference, simulation and optimisation).
-
-The authors take full responsibility for the content of the report and the accompanying code.
+**Provenance:** the project was built from scratch in this repository (first commit 12 Nov 2026; see git history). No earlier course
+project, prototype or repository of the authors was reused. This is an author declaration, not external verification.

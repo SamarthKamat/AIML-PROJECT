@@ -36,7 +36,7 @@ def exp1():
     s = r["splits"]
     tex = (r"""\begin{table}[t]\centering\caption{E1: 30-day supplier disruption prediction on the untouched test split (""" +
            f"{s['test']['rows']:,} supplier-months, prevalence {100 * s['test']['prevalence']:.1f}\\%" +
-           r"""). AUCs after Platt scaling (rank-preserving); calibrators fitted on the calibration split only; bold = lowest ECE per model; shaded = pre-specified primary model. 95\% CIs and tests in Table~\ref{tab:stats}.}\label{tab:exp1}
+           r"""). AUCs after Platt scaling; calibrators fitted on the calibration split; bold = lowest ECE; shaded = pre-specified model.}\label{tab:exp1}
 \scriptsize\setlength{\tabcolsep}{2.4pt}\begin{tabular}{@{}lcccccccc@{}}\toprule
  & & & \multicolumn{2}{c}{Brier} & \multicolumn{3}{c}{ECE$_{10}$}\\\cmidrule(lr){4-5}\cmidrule(lr){6-8}
 Model & ROC-AUC & PR-AUC & raw & Platt & raw & Platt & Iso.\\\midrule
@@ -51,13 +51,15 @@ def graph():
     names = list(a["A2_results"])
     rows = []
     for n in names:
+        if n in ("Adamic-Adar", "GraphSAGE+skip"):
+            continue
         h = a["A1_results"][n]["hard_compatible_negatives"]
         d = a["A2_results"][n]
         sd = lambda v, k: f"{v[k]:.3f}" + (f"$\\pm${v[k + '_sd']:.3f}" if k + "_sd" in v else "")  # noqa: E731
         rows.append(f"{n.replace('Preferential Attachment', 'Pref.~attach.').replace('Common Neighbours', 'Common neigh.')} & {sd(h, 'roc_auc')} & {sd(h, 'ap')} & {f3(d['ap'])} & {d['P@100']:.2f} & {d['R@500']:.3f} \\\\")
     tex = (r"""\begin{table}[t]\centering\caption{E2A link prediction (synthetic, 5 seeds for learned models). A1: held-out observed edges vs.\ material-compatible negatives. A2: ranking all """ +
            f"{a['A2_candidates']['n']:,} compatible unobserved pairs against {a['A2_candidates']['positives']:,} ground-truth hidden edges (base rate {a['A2_candidates']['base_rate']:.3f})" +
-           r""".}\label{tab:exp2a}\scriptsize\setlength{\tabcolsep}{2.6pt}\begin{tabular}{lccccc}\toprule
+           r"""). Adamic--Adar equals common neighbours. P@100 = precision of top 100; R@500 = recall of top 500.}\label{tab:exp2a}\scriptsize\setlength{\tabcolsep}{2.6pt}\begin{tabular}{lccccc}\toprule
  & \multicolumn{2}{c}{A1 (held-out)} & \multicolumn{3}{c}{A2 (hidden-edge discovery)}\\\cmidrule(lr){2-3}\cmidrule(lr){4-6}
 Method & ROC-AUC & AP & AP & P@100 & R@500\\\midrule
 """ + "\n".join(rows) + r"""
@@ -177,25 +179,80 @@ def macros():
 def stats_table():
     st = json.loads((EXPERIMENTS / "statistics.json").read_text())
     e1, e3 = st["exp1"]["paired"], st["exp3"]["delta_auc_xgb_minus_mode"]
-    sc = {(r["severity"], r["comparison"]): r for r in st["scenarios"]}
     pf = lambda p: "$<$0.001" if p < 0.001 else f"{p:.3f}"  # noqa: E731
-    rows = [f"E1 & LR $-$ XGBoost, ROC-AUC & {e1['ROC-AUC LR - XGB']['mean']:+.3f} & [{e1['ROC-AUC LR - XGB']['ci'][0]:.3f}, {e1['ROC-AUC LR - XGB']['ci'][1]:.3f}] & -- & {pf(e1['ROC-AUC LR - XGB']['p'])}\\\\",
-            f"E1 & LR $-$ XGBoost, PR-AUC & {e1['PR-AUC LR - XGB']['mean']:+.3f} & [{e1['PR-AUC LR - XGB']['ci'][0]:.3f}, {e1['PR-AUC LR - XGB']['ci'][1]:.3f}] & -- & {pf(e1['PR-AUC LR - XGB']['p'])}\\\\",
-            f"E1 & ECE reduction, XGB raw $-$ Platt & {e1['ECE raw - Platt (XGB)']['mean']:+.4f} & [{e1['ECE raw - Platt (XGB)']['ci'][0]:.4f}, {e1['ECE raw - Platt (XGB)']['ci'][1]:.4f}] & -- & {pf(e1['ECE raw - Platt (XGB)']['p'])}\\\\",
-            f"E3 & XGBoost $-$ mode baseline, ROC-AUC & {e3['mean']:+.3f} & [{e3['ci'][0]:.3f}, {e3['ci'][1]:.3f}] & -- & {pf(e3['p'])}\\\\",
-            "\\midrule"]
-    cmp = pd.read_csv(EXPERIMENTS / "scenario_comparison.csv")
-    for sev, key, lab in [("Severe", "A vs C", "A: No intervention minus C: Optimisation"), ("Severe", "B vs C", "B: Rule-based minus C: Optimisation"),
-                          ("Moderate", "A vs C", "A: No intervention minus C: Optimisation"), ("Moderate", "A vs B", "A: No intervention minus B: Rule-based"),
-                          ("Mild", "A vs C", "A: No intervention minus C: Optimisation")]:
-        c = cmp[(cmp.severity == sev) & (cmp.comparison == lab)].iloc[0]
-        rows.append(f"S & {sev}: saving of {key.split(' vs ')[1]} over {key.split(' vs ')[0]} (L) & {c.mean_saving_inr / 1e5:+.1f} & [{c.ci95_low / 1e5:.1f}, {c.ci95_high / 1e5:.1f}] & {100 * sc[(sev, key)]['share_second_cheaper']:.0f}\\% & {pf(sc[(sev, key)]['p_holm'])}\\\\")
-    tex = (r"""\begin{table}[t]\centering\caption{Statistical tests. E1: supplier-cluster bootstrap ($B$=1,000, 500 suppliers, 3,000 test months); E3: order-line bootstrap ($B$=1,000); S: 500 paired CRN replications, 95\% CI of the mean saving and Wilcoxon signed-rank $p$, Holm-adjusted over nine comparisons. Win = share of replications in which the second policy is cheaper (L = INR lakh).}\label{tab:stats}
-\scriptsize\setlength{\tabcolsep}{2pt}\begin{tabular}{@{}llrccr@{}}\toprule
- & Comparison & Effect & 95\% CI & Win & $p$\\\midrule
+    L = lambda v: f"{v / 1e5:+.2f}" if abs(v) < 1e6 else f"{v / 1e5:+.1f}"  # noqa: E731
+    Lc = lambda c: f"[{c[0] / 1e5:.3f}, {c[1] / 1e5:.3f}]" if max(abs(c[0]), abs(c[1])) < 1e5 else f"[{c[0] / 1e5:.2f}, {c[1] / 1e5:.2f}]" if max(abs(c[0]), abs(c[1])) < 1e6 else f"[{c[0] / 1e5:.1f}, {c[1] / 1e5:.1f}]"  # noqa: E731
+    rows = [r"\multicolumn{8}{@{}l}{\textit{Models: bootstrap, $B$=1,000, two-sided}}\\",
+            f"E1 & LR$-$XGB, ROC-AUC & {e1['ROC-AUC LR - XGB']['mean']:+.3f} & [{e1['ROC-AUC LR - XGB']['ci'][0]:.3f}, {e1['ROC-AUC LR - XGB']['ci'][1]:.3f}] & -- & -- & {pf(e1['ROC-AUC LR - XGB']['p'])} & --\\\\",
+            f"E1 & LR$-$XGB, PR-AUC & {e1['PR-AUC LR - XGB']['mean']:+.3f} & [{e1['PR-AUC LR - XGB']['ci'][0]:.3f}, {e1['PR-AUC LR - XGB']['ci'][1]:.3f}] & -- & -- & {pf(e1['PR-AUC LR - XGB']['p'])} & --\\\\",
+            f"E1 & ECE, raw$-$Platt & {e1['ECE raw - Platt (XGB)']['mean']:+.4f} & [{e1['ECE raw - Platt (XGB)']['ci'][0]:.3f}, {e1['ECE raw - Platt (XGB)']['ci'][1]:.3f}] & -- & -- & {pf(e1['ECE raw - Platt (XGB)']['p'])} & --\\\\",
+            f"E3 & XGB$-$mode, AUC & {e3['mean']:+.3f} & [{e3['ci'][0]:.3f}, {e3['ci'][1]:.3f}] & -- & -- & {pf(e3['p'])} & --\\\\",
+            r"\midrule\multicolumn{8}{@{}l}{\textit{Policies: saving in INR lakh; two-sided Wilcoxon}}\\"]
+    for r in st["scenarios"]:
+        rows.append(f"{r['severity'][:3]}. & {r['comparison'].replace(' vs ', ' vs.\\ ')} & {L(r['mean_saving'])} & {Lc(r['ci'])} & {L(r['median'])} & {100 * r['share_second_cheaper']:.0f} & {pf(r['p_raw'])} & {pf(r['p_holm'])}\\\\")
+    tex = (r"""\begin{table}[t]\centering\caption{Statistical tests. E1: bootstrap over 500 suppliers; E3: over 16,840 orders. Policies: saving = impact(first)$-$impact(second) over 500 CRN pairs, Holm over 9; CI of the mean; Med.\ = median; Win = \% of replications where the second policy is cheaper.}\label{tab:stats}
+\scriptsize\setlength{\tabcolsep}{1.2pt}\begin{tabular}{@{}llrcrrrr@{}}\toprule
+ & Comparison & Mean & 95\% CI & Med. & Win\% & $p$ & $p_{\mathrm{Holm}}$\\\midrule
 """ + "\n".join(rows) + r"""
 \bottomrule\end{tabular}\end{table}""")
     (OUT / "stats.tex").write_text(tex)
+
+
+def ablation_table():
+    f = EXPERIMENTS / "robustness" / "ablation_summary.csv"
+    if not f.exists():
+        return
+    a = pd.read_csv(f)
+    st = {(r["severity"], r["first"], r["second"]): r for r in json.loads((EXPERIMENTS / "statistics.json").read_text())["ablation"]}
+    arms = list(dict.fromkeys(a.policy))
+    lab = {arms[0]: ("A", "--", "--"), arms[1]: ("B-obs", "rule", "observed"), arms[2]: ("B-pred", "rule", "obs.+pred."),
+           arms[3]: ("C-obs", "MILP", "observed"), arms[4]: ("C-pred = C", "MILP", "obs.+pred."), arms[5]: ("C-oracle", "MILP", "true")}
+    rows = []
+    for arm in arms:
+        cells = []
+        for sv in ["Mild", "Moderate", "Severe"]:
+            r = a[(a.severity == sv) & (a.policy == arm)].iloc[0]
+            cells.append(f"{r.impact_inr / 1e5:.1f}$\\pm${1.96 * r.impact_se / 1e5:.1f}")
+        n, lg, g = lab[arm]
+        rows.append(f"{n} & {lg} & {g} & " + " & ".join(cells) + r"\\")
+    pf = lambda p: "$<$.001" if p < 0.001 else f"{p:.3f}".lstrip("0")  # noqa: E731
+    con = []
+    for x, y, t in [(arms[3], arms[4], "Links, MILP: C-obs$-$C"), (arms[1], arms[2], "Links, rule: B-obs$-$B-pred"),
+                    (arms[1], arms[3], "MILP, observed: B-obs$-$C-obs")]:
+        v = [st[(sv, x, y)] for sv in ["Mild", "Moderate", "Severe"]]
+        con.append(f"\\multicolumn{{3}}{{@{{}}l}}{{{t}}} & " + " & ".join(f"{q['mean_saving'] / 1e5:+.1f}/{q['median'] / 1e5:+.1f}" for q in v) + r"\\")
+        con.append(r"\multicolumn{3}{@{}r}{\textit{$p_{\mathrm{Holm}}$}} & " + " & ".join(pf(q["p_holm"]) for q in v) + r"\\")
+    tex = (r"""\begin{table}[t]\centering\caption{Link-information ablation (RQ4b). Mean simulated impact, INR lakh $\pm$ 95\% CI (500 CRN replications); only logic or known graph changes. Lower block: paired saving, mean/median, Holm-adjusted Wilcoxon $p$ over 12 comparisons.}\label{tab:abl}
+\scriptsize\setlength{\tabcolsep}{2.2pt}\begin{tabular}{@{}lllrrr@{}}\toprule
+Arm & Logic & Graph known & Mild & Moderate & Severe\\\midrule
+""" + "\n".join(rows) + r"\midrule" + "\n" + "\n".join(con) + r"""
+\bottomrule\end{tabular}\end{table}""")
+    (OUT / "ablation.tex").write_text(tex)
+
+
+def sens_table():
+    f = EXPERIMENTS / "robustness" / "sensitivity.csv"
+    if not f.exists():
+        return
+    d = pd.read_csv(f)
+    rows = []
+    for name in dict.fromkeys(d.setting):
+        sv = d[(d.setting == name) & (d.severity == "Severe")].iloc[0]
+        mi = d[(d.setting == name) & (d.severity == "Mild")].iloc[0]
+        nm = {"base": "Base (as Table~\\ref{tab:scen})", "overhead 0": "Mgmt.\\ overhead 0/day", "overhead 50k": "Mgmt.\\ overhead 50k/day",
+              "penalty 5%": "Shortage penalty 5\\%", "penalty 30%": "Shortage penalty 30\\%", "interruption 25k": "Interruption 25k/plant-day",
+              "interruption 150k": "Interruption 150k/plant-day", "duration 30 d": "Nominal duration 30 d", "duration 90 d": "Nominal duration 90 d",
+              "spare capacity x0.5": "Alt.\\ spare capacity $\\times$0.5", "spare capacity x1.5": "Alt.\\ spare capacity $\\times$1.5",
+              "alternate risk x0.5": "Alt.\\ failure risk $\\times$0.5$^\\dagger$", "alternate risk x2": "Alt.\\ failure risk $\\times$2$^\\dagger$",
+              "visibility -50% deep links": "Known deep links $-$50\\%", "visibility +50% hidden links": "Known hidden links $+$50\\%"}.get(name, name)
+        rows.append(f"{nm} & {sv.save_C_over_A / 1e7:.2f} [{sv.save_lo / 1e7:.2f}, {sv.save_hi / 1e7:.2f}] & {sv.best} & {mi.save_C_over_A / 1e5:+.2f} & {mi.best}\\\\")
+    tex = (r"""\begin{table}[t]\centering\caption{One-at-a-time sensitivity (200 CRN replications per cell). Saving = impact(A)$-$impact(C); ties go to A. Known-link rows change what B and C know, not the true network. $^\dagger$Changes the random stream; compare within row.}\label{tab:sens}
+\scriptsize\setlength{\tabcolsep}{2pt}\begin{tabular}{@{}lccrc@{}}\toprule
+ & \multicolumn{2}{c}{Severe} & \multicolumn{2}{c}{Mild}\\\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Setting & C$-$A saving, Cr [95\% CI] & Best & Saving, L & Best\\\midrule
+""" + "\n".join(rows) + r"""
+\bottomrule\end{tabular}\end{table}""")
+    (OUT / "sens.tex").write_text(tex)
 
 
 def stats_macros():
@@ -214,6 +271,35 @@ def stats_macros():
         sv = cp[(cp.severity == "Severe") & (cp.comparison == "A: No intervention minus C: Optimisation")].iloc[0]
         m.update(SensSevC=f"{sl.loc['S9', 'financial_impact_inr'] / 1e7:.2f}", SensSaveAC=f"{sv.mean_saving_inr / 1e7:.2f}",
                  SensModC=f"{sl.loc['S6', 'financial_impact_inr'] / 1e5:.1f}")
+    m["DcCi"] = f"{st['exp3']['xgb_auc_ci'][0]:.3f}--{st['exp3']['xgb_auc_ci'][1]:.3f}"
+    m["DcOrders"] = f"{st['exp3']['n_orders']:,}"
+    sc = {(r["severity"], r["comparison"]): r for r in st["scenarios"]}
+    m.update(ModACmed=f"{-sc[('Moderate', 'A vs C')]['median'] / 1e5:.1f}", ModACwin=f"{100 * sc[('Moderate', 'A vs C')]['share_second_cheaper']:.0f}",
+             SevACmed=f"{sc[('Severe', 'A vs C')]['median'] / 1e7:.2f}", SevACwin=f"{100 * sc[('Severe', 'A vs C')]['share_second_cheaper']:.0f}",
+             MildACsd=f"{1e-3 * 0:.0f}")
+    ab = EXPERIMENTS / "robustness" / "ablation_summary.csv"
+    if ab.exists():
+        a = pd.read_csv(ab).set_index(["severity", "policy"])["impact_inr"]
+        g = lambda sv, k: a[[i for i in a.index if i[0] == sv and i[1].startswith(k)][0]]  # noqa: E731
+        abl = {(r["severity"], r["first"][:6], r["second"][:6]): r for r in st["ablation"]}
+        lv = abl[("Severe", "C-obs:", "C-pred")]
+        lm = abl[("Moderate", "C-obs:", "C-pred")]
+        mv = abl[("Severe", "B-obs:", "C-obs:")]
+        m.update(AblCobs=f"{g('Severe', 'C-obs') / 1e7:.2f}", AblCpred=f"{g('Severe', 'C-pred') / 1e7:.2f}", AblOracle=f"{g('Severe', 'C-oracle') / 1e7:.2f}",
+                 AblBpred=f"{g('Severe', 'B-pred') / 1e7:.2f}", AblBobs=f"{g('Severe', 'B-obs') / 1e7:.2f}",
+                 AblLinkVal=f"{lv['mean_saving'] / 1e7:.2f}", AblLinkValL=f"{lv['ci'][0] / 1e7:.2f}", AblLinkValH=f"{lv['ci'][1] / 1e7:.2f}",
+                 AblLinkShare=f"{100 * lv['mean_saving'] / (g('Severe', 'B-obs') - g('Severe', 'C-pred')):.0f}",
+                 AblMilpVal=f"{mv['mean_saving'] / 1e7:.2f}", AblModMean=f"{lm['mean_saving'] / 1e5:.1f}", AblModMed=f"{-lm['median'] / 1e5:.1f}",
+                 AblModOracle=f"{g('Moderate', 'C-oracle') / 1e5:.1f}", AblModCpred=f"{g('Moderate', 'C-pred') / 1e5:.1f}", AblModCobs=f"{g('Moderate', 'C-obs') / 1e5:.1f}")
+    sp = EXPERIMENTS / "robustness" / "sensitivity.csv"
+    if sp.exists():
+        d = pd.read_csv(sp)
+        sv = d[d.severity == "Severe"]
+        nd = sv[~sv.setting.str.startswith("duration")]
+        m.update(SensLo=f"{sv.save_C_over_A.min() / 1e7:.2f}", SensHi=f"{sv.save_C_over_A.max() / 1e7:.2f}",
+                 SensNdLo=f"{nd.save_C_over_A.min() / 1e7:.2f}", SensNdHi=f"{nd.save_C_over_A.max() / 1e7:.2f}",
+                 SensN=str(d.setting.nunique()), SensSevCbest=str(int((sv.best == "C").sum())),
+                 SensMildAbest=str(int((d[d.severity == "Mild"].best == "A").sum())))
     with open(OUT / "numbers.tex", "a") as f:
         f.write("".join(f"\\newcommand{{\\{k}}}{{{v}}}\n" for k, v in m.items()))
 
@@ -247,6 +333,8 @@ if __name__ == "__main__":
     macros()
     stats_macros()
     stats_table()
+    ablation_table()
+    sens_table()
     decision()
     exp1()
     graph()

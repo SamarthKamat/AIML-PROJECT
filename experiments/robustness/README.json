@@ -1,0 +1,5 @@
+{
+ "ablation_reps": 500,
+ "sensitivity_reps": 200,
+ "note": "simulated INR on synthetic data; assumption-conditional"
+}

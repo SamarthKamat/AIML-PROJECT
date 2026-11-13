@@ -11,7 +11,6 @@
 \usepackage[most]{tcolorbox}
 \newcommand{\cmark}{\ding{51}}
 \newcommand{\pmark}{$\circ$}
-\newcommand{\xmark}{\ding{55}}
 \makeatletter\newcommand{\settabcaptype}{\def\@captype{table}}\makeatother
 \definecolor{navy}{HTML}{1B2A4A}
 \definecolor{boxbg}{HTML}{EEF3FA}
@@ -89,11 +88,39 @@
 \newcommand{\DEceL}{-0.002}
 \newcommand{\DEceH}{0.020}
 \newcommand{\DEceP}{0.11}
-\newcommand{\DcCi}{0.775--0.784}
+\newcommand{\DcCi}{0.771--0.788}
 \newcommand{\DcDelta}{0.035}
 \newcommand{\SensSevC}{1.17}
 \newcommand{\SensSaveAC}{3.67}
 \newcommand{\SensModC}{45.7}
+\newcommand{\DcOrders}{16,840}
+\newcommand{\ModACmed}{11.8}
+\newcommand{\ModACwin}{17}
+\newcommand{\SevACmed}{2.83}
+\newcommand{\SevACwin}{80}
+\newcommand{\MildACsd}{0}
+\newcommand{\AblCobs}{3.64}
+\newcommand{\AblCpred}{1.16}
+\newcommand{\AblOracle}{1.21}
+\newcommand{\AblBpred}{4.73}
+\newcommand{\AblBobs}{3.98}
+\newcommand{\AblLinkVal}{2.48}
+\newcommand{\AblLinkValL}{2.21}
+\newcommand{\AblLinkValH}{2.78}
+\newcommand{\AblLinkShare}{88}
+\newcommand{\AblMilpVal}{0.34}
+\newcommand{\AblModMean}{3.9}
+\newcommand{\AblModMed}{11.7}
+\newcommand{\AblModOracle}{38.3}
+\newcommand{\AblModCpred}{44.8}
+\newcommand{\AblModCobs}{48.6}
+\newcommand{\SensLo}{0.21}
+\newcommand{\SensHi}{7.74}
+\newcommand{\SensNdLo}{2.58}
+\newcommand{\SensNdHi}{4.35}
+\newcommand{\SensN}{15}
+\newcommand{\SensSevCbest}{15}
+\newcommand{\SensMildAbest}{15}
 % ---- end ----
 
 \begin{document}
@@ -108,149 +135,143 @@ Student IDs: \{B2026102, B2026100, B2026078\}\\
 \maketitle
 
 \begin{abstract}
-A chocolate and malt-beverage manufacturer sees its Tier-1 suppliers but not the Tier-2/3 suppliers they share. We ask whether this hidden
-structure can be estimated and turned into better recovery decisions. An end-to-end system (i)~predicts 30-day supplier disruption with calibrated probabilities, (ii)~ranks candidate hidden links, (iii)~propagates
-shocks through a daily material-flow simulator and (iv)~converts predictions into cost-minimising actions and a mixed-integer recovery plan.
-Supplier-level experiments use a documented synthetic ecosystem (500 suppliers, 69\,\% of links hidden); two real public datasets test the
-transferable components. Using only observed links understates Tier-2/Tier-3 exposure \GapTwo$\times$/\GapThree$\times$. Logistic regression
-out-ranks the pre-specified XGBoost model (ROC-AUC $+$\DRoc, $p$=\DRocP); calibration gains are small and not significant; graph neural networks
-did not beat tabular models. Over \Reps{} paired replications of a predefined nine-scenario design, optimisation-based recovery cuts the simulated
-impact of a severe cocoa-trader outage from INR~\SevA{} to \SevC{} crore (saving \SaveAC{} crore, 95\,\% CI \SaveACl--\SaveACh, Holm $p<$0.001)
-but costs more than doing nothing under mild shocks.
+A chocolate and malt-beverage manufacturer sees its Tier-1 suppliers but not the Tier-2/3 suppliers they share. In a documented
+\emph{synthetic} supply network (500 suppliers, 69\,\% of links hidden) we test whether ranked estimates of hidden links improve recovery
+decisions. The system predicts supplier disruption, ranks candidate hidden links, simulates cascades and plans recovery with a mixed-integer linear
+program (MILP); two real datasets check transferable components only. Observed links
+understate Tier-2/3 exposure \GapTwo$\times$/\GapThree$\times$; logistic regression out-ranks the pre-specified XGBoost model; calibration and
+graph neural networks give no significant gain. In 500 paired simulations of a severe outage of the five largest cocoa traders, the
+optimisation policy lowers simulated impact from INR~\SevA{} to \SevC{} crore. A factorial ablation attributes most of this to the predicted
+links: with the same MILP, the observed graph alone gives \AblCobs{} crore. For mild shocks doing nothing is cheapest in all \SensN{} sensitivity
+settings. All monetary results are simulated and assumption-conditional, not estimates of real-world savings.
 \end{abstract}
 
 \begin{IEEEkeywords}
-supply chain risk, link prediction, graph neural networks, probability calibration, cascading disruption, recovery optimisation, FMCG
+supply chain risk, link prediction, probability calibration, cascading disruption, recovery optimisation, ablation, FMCG
 \end{IEEEkeywords}
 
 \section{Introduction}
 \subsection{Business Problem}
-Disruptions are followed by significantly lower long-run stock returns~\cite{hendricks2005}. A malt-beverage jar needs malt, milk powder,
-cocoa, sugar, premix and PET jars; each Tier-1 input depends on Tier-2 traders that procurement rarely maps, so shocks ``ripple'' through
-invisible links~\cite{ivanov2019}. We support two executable decisions:
-\emph{(D1) each month, which mitigation action to take for each supplier; (D2) when a shock is reported, which alternates receive which
-quantities, by which mode.}
+Disruptions are followed by significantly lower long-run stock returns~\cite{hendricks2005}. Each Tier-1 input of a malt beverage (malt,
+milk powder, cocoa, sugar, packaging) depends on Tier-2 traders that procurement rarely maps, so shocks ripple through invisible links~\cite{ivanov2019}. We support two decisions: \emph{(D1) each month, which mitigation action to take for each supplier;
+(D2) when a shock is reported, which alternates receive which quantities, by which transport mode.}
 
-\subsection{Research Gap, Novelty and Increment}
-Hidden-link prediction has been shown on real automotive networks~\cite{brintrup2018,kosasih2022}, GNN risk prediction on the SupplyGraph FMCG
-benchmark~\cite{wasi2024}, and disruption mitigation in OR/MS~\cite{snyder2016}; reviews note that AI studies rarely close the loop from
-prediction to response~\cite{baryannis2019}. \emph{No study we found asks what the hidden links cost in money once a recovery decision is
-made, nor whether predicted links improve that decision.} Our increment over~\cite{brintrup2018,kosasih2022} is to (a)~use predicted links
-downstream---as exposure inputs and MILP availability de-rating---and (b)~measure their value against a rule-based policy that sees only the
-observed graph. Over~\cite{wasi2024} we add calibration and a cost-based decision rule. \textbf{Not claimed:} new learning algorithms, new
-calibration methods or a new MILP formulation; all components are standard and cited. This is a new, stand-alone project; no code, data
-or text is reused from earlier work of the authors.
+\subsection{Related Work, Novelty and Provenance}
+\textbf{Search.} On 13 Nov 2026 we searched a general web search engine, RePEc/IDEAS, SSRN and arXiv for ``hidden link prediction supply
+chain'', ``deep-tier visibility resilience simulation'', ``link prediction disruption mitigation optimisation'' and ``supplier disruption
+prediction''. The search was targeted, not systematic. \textbf{Closest work} (Table~\ref{tab:prior}): link prediction recovers hidden
+supplier links~\cite{brintrup2018,kosasih2022}; deep-tier \emph{true} visibility improves simulated resilience assessment~\cite{taghizadeh2021};
+ML predicts first-tier disruption~\cite{brintrup2020}; GNNs are benchmarked on SupplyGraph~\cite{wasi2024}; OR/MS and ripple-effect work
+models mitigation and propagation~\cite{snyder2016,ivanov2019}; few AI studies reach the response stage~\cite{baryannis2019}. \textbf{Differentiator.} We found no study that feeds \emph{predicted} (uncertain) links into a recovery optimiser
+and separates their value from the optimiser's by comparing observed-graph, predicted-graph and true-graph arms under identical conditions.
+The contribution is systems integration plus a controlled synthetic decision experiment, not new methods or real-world savings. \textbf{Provenance} (author declaration, not external verification): the project was
+built from scratch in the public repository (first commit 12~Nov~2026, dated git history); no earlier course project, prototype or repository
+of the authors was reused.
 
-\subsection{Research Questions and Hypotheses}
-\textbf{RQ1/H1}: point-in-time features give discriminative 30-day risk, and post-hoc calibration lowers ECE. \textbf{RQ2/H2}: the observed
-network understates upstream exposure, and link prediction ranks hidden links above chance. \textbf{RQ3/H3}: message passing over the supply
-graph improves risk classification over tabular models. \textbf{RQ4/H4}: network-aware optimisation (C) has lower expected impact than
-rule-based (B) and no intervention (A) at every severity. Table~\ref{tab:map} links each question to its experiment, data, test and
-downstream use.
-
-\begin{table}[t]\centering\caption{Research map: how the experiments connect (data flow left to right; ``Feeds'' = where the output is used).}\label{tab:map}
-\scriptsize\setlength{\tabcolsep}{2pt}\begin{tabular}{@{}lllll@{}}\toprule
-RQ & Exp.\ (data) & Metric; test & Verdict & Feeds into\\\midrule
-1 & E1 (synth.) & AUC, ECE; cl.\ bootstrap & partly & $q_i$: D1, MILP\\
-2 & E2A (synth.) & AP, gap ratio & supported & $E_i$; graph of C\\
-3 & E2B (both) & PR-AUC; 5 seeds & rejected & model choice\\
--- & E3 (DataCo) & AUC; bootstrap & transfer & delay API only\\
-4 & S1--S9 (sim.) & CRN; Wilcoxon--Holm & severe only & tiered policy\\
+\begin{table}[t]\centering\caption{Scope of related work. \cmark{} = primary focus; \pmark{} = partial coverage or review; blank = not addressed.
+HL hidden-link prediction; RP risk prediction; CA calibration; CS cascade propagation; RO recovery optimisation; PE policy evaluation.}\label{tab:prior}
+\scriptsize\setlength{\tabcolsep}{3.2pt}\begin{tabular}{@{}lcccccc@{}}\toprule
+Work & HL & RP & CA & CS & RO & PE\\\midrule
+Brintrup \emph{et al.} 2018~\cite{brintrup2018} & \cmark & & & & & \\
+Kosasih \& Brintrup 2022~\cite{kosasih2022} & \cmark & & & & & \\
+Brintrup \emph{et al.} 2020~\cite{brintrup2020} & & \cmark & & & & \\
+Wasi \emph{et al.} 2024~\cite{wasi2024} & & \cmark & & & & \\
+Taghizadeh \emph{et al.} 2021~\cite{taghizadeh2021} & \pmark & & & \cmark & & \cmark\\
+Snyder \emph{et al.} 2016~\cite{snyder2016} & & & & \pmark & \cmark & \pmark\\
+Ivanov \emph{et al.} 2019~\cite{ivanov2019} & & \pmark & & \cmark & & \\
+Baryannis \emph{et al.} 2019~\cite{baryannis2019} & & \pmark & & & \pmark & \\
+\rowcolor{gray!15}\textbf{This work (synthetic)} & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark\\
 \bottomrule\end{tabular}\end{table}
 
-\section{Related Work}
-Gradient boosting~\cite{chen2016} is a strong tabular baseline, and decision use requires calibrated probabilities~\cite{platt1999,zadrozny2002,niculescu2005}.
-Hidden-link work~\cite{brintrup2018,kosasih2022} uses heuristics~\cite{libennowell2007}, embeddings~\cite{grover2016} and GNNs~\cite{kipf2017,hamilton2017,velickovic2018},
-which are our comparators; ripple-effect~\cite{ivanov2019} and OR/MS~\cite{snyder2016} work covers propagation and mitigation. Table~\ref{tab:prior} shows that prior work treats these stages separately.
+\subsection{Research Questions, Hypotheses and Map}
+\textbf{RQ1/H1}: point-in-time features give above-chance 30-day risk ranking, and calibration lowers ECE (expected calibration error).
+\textbf{RQ2/H2}: the observed network understates upstream exposure, and link prediction ranks hidden links above the base rate.
+\textbf{RQ3/H3}: graph neural networks (GNNs) beat tabular models. \textbf{RQ4a/H4a}: the optimisation policy C has lower expected impact than
+rule-based B and no intervention A \emph{at every severity}. \textbf{RQ4b/H4b}: holding the MILP fixed, adding predicted links lowers impact.
+Table~\ref{tab:map} links each question to its experiment and verdict.
 
-\begin{table}[t]\centering\caption{Scope of related work (\cmark{} primary focus, \pmark{} partial / review).}\label{tab:prior}
-\scriptsize\setlength{\tabcolsep}{2.2pt}\begin{tabular}{lcccccc}\toprule
-Work & Hidden & Risk & Calib- & Cas- & Recovery & Policy\\
- & links & pred. & ration & cade & opt. & eval.\\\midrule
-Brintrup \emph{et al.}~\cite{brintrup2018} & \cmark & & & & & \\
-Kosasih \& Brintrup~\cite{kosasih2022} & \cmark & & & & & \\
-Wasi \emph{et al.}~\cite{wasi2024} & & \cmark & & & & \\
-Baryannis \emph{et al.}~\cite{baryannis2019} & & \pmark & & & \pmark & \\
-Snyder \emph{et al.}~\cite{snyder2016} & & & & \pmark & \cmark & \pmark\\
-Ivanov \emph{et al.}~\cite{ivanov2019} & & \pmark & & \cmark & & \\
-\rowcolor{gray!15}\textbf{This work} & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark\\
+\begin{table}[t]\centering\caption{Research map. E3 is a separate shipment-lateness task on real data; it does not validate the supplier-risk model.}\label{tab:map}
+\scriptsize\setlength{\tabcolsep}{1.8pt}\begin{tabular}{@{}lllll@{}}\toprule
+RQ & Exp.\ (data) & Test & Verdict & Output used in\\\midrule
+1 & E1 (synthetic) & bootstrap & partly & D1 action; MILP screen\\
+2 & E2A (synthetic) & AP vs.\ base & supported & exposure; C's graph\\
+3 & E2B (synth.+real) & 5 seeds & not supported & model choice\\
+-- & E3 (DataCo, real) & bootstrap & transfer only & lateness API\\
+4a & S1--S9 (simulated) & Wilcoxon--Holm & not supported & tiered policy\\
+4b & Ablation (simul.) & Wilcoxon--Holm & severe only & novelty claim\\
 \bottomrule\end{tabular}\end{table}
 
-\begin{figure*}[t]\centering\includegraphics[width=0.9\textwidth]{fig_architecture.pdf}
-\caption{System architecture. Real and synthetic data feed point-in-time features; calibrated risk, link discovery, delay and cascade models feed
-an exposure model, a cost-optimal action rule and a recovery MILP; results are served by a Flask API, a React control tower and a tool-calling
-Gemini assistant, deployed on Render.}\label{fig:arch}\end{figure*}
+\begin{figure*}[t]\centering\includegraphics[width=0.8\textwidth]{fig_architecture.pdf}
+\caption{System architecture. Real and synthetic data feed point-in-time features; risk, link, delay and cascade models feed an exposure model,
+a cost-based action rule and a recovery MILP, served by a Flask API, a React control tower and a tool-calling Gemini assistant (Render).}\label{fig:arch}\end{figure*}
 
 \section{Methodology}
-\subsection{Data and Provenance}
-\textbf{Synthetic ecosystem} (fictional, seed 42): 120/200/180 Tier-1/2/3 suppliers, 50 materials, 100 products, two plants,
-1,048 disruptions (782 qualifying) in 2024--2025, 4,929 POs, 9,579 shipments. A buyer of material $m$ picks
-$k\in\{2..6\}$ sources with probability $\propto$ size$^{1.6}e^{-d/2500\,\mathrm{km}}$; Tier-2/3 links are visible with probability 0.45/0.15
-(461 of 1,500 observed). The daily hazard combines latent financial risk, utilisation, regional geo-risk, monsoon seasonality, an unobserved
-frailty and contagion over the \emph{true} network; hidden links serve only as simulator ground truth and for evaluation.
-\textbf{DataCo}~\cite{constante2019} (CC~BY~4.0, SHA-256 recorded): 180,519 order lines, 7,754 cancelled removed. \textbf{SupplyGraph}~\cite{wasi2024}:
-40 products, 684 edges, 221 days. Real and synthetic identities are never merged; all tables pass 196 validation checks.
+\subsection{Data, Units and Provenance}
+\textbf{Synthetic ecosystem} (fictional, seed 42): 120/200/180 Tier-1/2/3 suppliers, 50 materials, 100 products, two plants, 1,048 disruptions
+(782 qualifying) in 2024--2025. A buyer of material $m$ picks $k\in\{2,\dots,6\}$ sources with probability $\propto$ size$^{1.6}e^{-d/2500\,\mathrm{km}}$;
+Tier-2/3 links are visible with probability 0.45/0.15 (461 of 1,500 observed). Disruption hazards include contagion over the \emph{true} network; hidden links serve only as ground truth.
+\textbf{DataCo}~\cite{constante2019} (real, CC~BY~4.0, SHA-256 recorded): 180,519 order lines, 7,754 cancelled removed; it has no supplier
+identities. \textbf{SupplyGraph}~\cite{wasi2024} (real FMCG): 40 products, 684 edges, 221 days.  Data pass 196 validation checks. Money is INR; 1~lakh (L) = $10^5$ and 1~crore (Cr) = $10^7$ INR.
 
 \subsection{Disruption Prediction and Leakage Control (RQ1)}
 The prediction timestamp $t$ is 00:00 on the first of each month. For supplier $i$,
 \begin{equation}
 y_i(t)=\mathbb{1}\big[\exists e:\ s_e\in(t,t+30\mathrm{d}],\ \ell_e\ge0.25,\ d_e\ge3\big],
 \end{equation}
-with start $s_e$, capacity loss $\ell_e$ and duration $d_e$. The 25 features use only disruptions reported, and deliveries completed, before $t$, the
-monthly risk forecast and \emph{observed} links. Splits: train 2024-04..2025-02 (5,500 rows), one-month embargo, calibration 2025-04..06 (1,500),
-test 2025-07..12 (\TestRows). Platt scaling $q=\sigma(a\,\mathrm{logit}\,\hat p+b)$ and isotonic regression are fitted on the calibration split only;
-we report Brier and $\mathrm{ECE}=\sum_b\frac{n_b}{N}|\bar y_b-\bar q_b|$ (10 equal-width bins). XGBoost was fixed as the primary model in the
-experiment code before any result was seen and was not re-selected on test data.
+with start $s_e$, capacity loss $\ell_e$ and duration $d_e$ (days). The 25 features use only information available before $t$ and \emph{observed}
+links. Splits: train 2024-04..2025-02 (5,500 supplier-months), one-month embargo, calibration 2025-04..06 (1,500), test 2025-07..12 (\TestRows).
+Logistic regression, a decision tree, a random forest and XGBoost~\cite{chen2016} are compared; Platt scaling~\cite{platt1999} and isotonic
+regression~\cite{zadrozny2002,niculescu2005} are fitted on the calibration split; the method is chosen by 5-fold cross-validated Brier score
+\emph{within} that split, never on test data. XGBoost was fixed as the primary model in the code before any result was seen; its Platt-calibrated
+probability $q_i$ feeds D1, the MILP risk screen and the simulated failure chance of alternates.
 
-\subsection{Graph Learning (RQ2, RQ3)}
-$G=(V,E)$ has 501 nodes with 131 observable attributes. GraphSAGE updates $h_v^{(l+1)}=\mathrm{ReLU}(W_1h_v^{(l)}+W_2\,\mathrm{mean}_{u\in N(v)}h_u^{(l)})$
-and a decoder scores $\sigma(\mathrm{MLP}[z_u\odot z_v,|z_u-z_v|])$. \textbf{A1}: observed links split 70/10/20 with test links removed from message
-passing. \textbf{A2}: train on all observed links and rank all \LinkCand{} material-compatible unobserved pairs against \LinkHid{} hidden links; the
-downstream model is chosen by validation AP only. \textbf{E2B} feeds E1 features through GCN/GraphSAGE/GAT on observed, observed+top-500 predicted
-and oracle graphs, and predicts a 7-day service shortfall on SupplyGraph.
+\subsection{Link Prediction and Graph Models (RQ2, RQ3)}
+The graph has 501 nodes: 500 suppliers and the manufacturer; supplier-level results use the 500 suppliers. \emph{Link prediction} scores
+candidate pairs; \emph{hidden-link discovery} evaluates those scores against the synthetic ground truth. \textbf{A1}: observed links split
+70/10/20 with test links removed from message passing. Comparators: heuristics~\cite{libennowell2007}, node2vec~\cite{grover2016}, an MLP and GNNs. \textbf{A2}: rank all \LinkCand{} material-compatible unobserved pairs against
+\LinkHid{} hidden links; the model is chosen by validation average precision (AP). \textbf{E2B} feeds E1 features through GCN~\cite{kipf2017}, GraphSAGE~\cite{hamilton2017} and
+GAT~\cite{velickovic2018} on observed, observed+top-500 predicted and true graphs, and predicts a 7-day shortfall on SupplyGraph.
 
-\subsection{Exposure, Cascade Simulation and Decision Rule (D1)}
-Supplier $i$'s reach $r_{im}$ multiplies dependency shares along paths to the manufacturer, and
+\subsection{Exposure, Simulation and Decision Rule (D1)}
+Exposure $E_i$ (INR) is the expected contribution-margin loss at the manufacturer if supplier $i$ is disrupted:
 \begin{equation}
 E_i=\textstyle\sum_m r_{im}\,\mathrm{CM}_m\,\mathbb{E}\big[S\max(0,D-c_m-10(\tau_i-1))\big],
 \end{equation}
-with daily contribution margin $\mathrm{CM}_m$, cover $c_m$, tier $\tau_i$ and empirical severity/duration $(S,D)$. The simulator propagates
-availability daily over the true network, $a_b(t)=\min\big(1-\ell_b(t),\min_i\min(1,A_{bi}(t))\big)$ with $A_{bi}(t)=I_{bi}(t)+\sum_u w_{ub}a_u(t-L_{ub})$,
-10-day buffers, lead times $L_{ub}$ and BOM-bottleneck production. The executable action is
-\begin{equation}
-a^*=\arg\min_a\ C_a+q_i(1-\rho_a)E_i,
-\end{equation}
-over four actions ($C_a$=0/5k/20k/60k INR, $\rho_a$=0/0.15/0.45/0.70), Bayes-optimal if $q_i$ is calibrated, with thresholds $q^*=\Delta C/(E_i\Delta\rho)$.
+with reach $r_{im}$ (product of dependency shares along paths), daily contribution margin $\mathrm{CM}_m$, cover $c_m$ (days), tier $\tau_i$ and
+empirical severity/duration $(S,D)$. The simulator propagates availability daily over the true network. The action is $a^*=\arg\min_a C_a+q_i(1-\rho_a)E_i$ over four actions with cost $C_a$ = 0/5k/20k/60k INR and
+assumed risk reduction $\rho_a$ = 0/0.15/0.45/0.70; it is Bayes-optimal only if $q_i$ is calibrated, with break-even $q^*=\Delta C/(E_i\Delta\rho)$.
 
-\subsection{Recovery Optimisation and Nine-Scenario Design (RQ4, D2)}
+\subsection{Recovery MILP, Scenarios and Robustness Design (RQ4)}
 For deficits $\delta_m$ the MILP (PuLP/CBC) chooses quantities $x_{jk}$ from candidate $j$ by mode $k$, onboarding $z_j$ and shortage $s_m$:
 \begin{align}
 \min\ &\textstyle\sum_{jk}p_j(1+f_{jk}+hW/2)x_{jk}+\sum_jFz_j+\sum_m\pi_ms_m\\
 \text{s.t. }&\textstyle\sum_{jk}\rho_j(1-q_j)\kappa_j\alpha_jx_{jk}+s_m\ge\delta_m,\nonumber\\
-&x_{jk}\le u_j(W-L_{jk})^+,\ \ \textstyle\sum_kx_{jk}\le0.6\,\delta_m,\nonumber\\
-&x_{jk}=0\ \text{if}\ q_j>0.35,\ \ \textstyle\sum_kx_{jk}\le Mz_j,\nonumber
+&x_{jk}\le u_j(W-L_{jk})^+,\ \ \textstyle\sum_kx_{jk}\le0.6\,\delta_m,\ \ q_j\le0.35,\nonumber
 \end{align}
-with compatibility $\kappa_j$, spare capacity $u_j$, deadline $W$, freight $f_{jk}$, holding rate $h$, penalty $\pi_m$ and availability $\alpha_j$
-de-rated by estimated dependency on the disrupted suppliers. The shock hits the five largest Tier-2 cocoa-bean traders (\HubObs{} observed,
-\HubHid{} hidden links) with 25/50/100\,\% capacity loss for a nominal 60 days. Policies: \textbf{A} none; \textbf{B} rule-based (observed graph,
-same-material alternates by reliability, reactive at 10 days of cover); \textbf{C} optimisation (observed+predicted graph, MILP at detection plus
-the same trigger). All policies share network, demand, inventory and economics; the design and the 13 outcome metrics were fixed before any
-scenario was run. Economics (INR, illustrative): premium 6\,\%, onboarding 1.5\,L, freight 2.5/4\,\% (expedited $3\times$), holding 24\,\%/yr,
-shortage penalty 15\,\% of price, interruption 75k per plant-day, recovery management 25k/day.
+with price $p_j$, freight $f_{jk}$, holding rate $h$, deadline $W$, onboarding cost $F$, penalty $\pi_m$, compatibility $\kappa_j$, spare capacity
+$u_j$ and availability $\alpha_j$ de-rated by estimated dependency on the disrupted suppliers. The shock removes 25/50/100\,\% of the capacity of
+the five largest Tier-2 cocoa traders for a nominal 60 days. \textbf{A} does nothing; \textbf{B} uses the observed graph, excludes any alternate
+linked to the failed traders and allocates by reliability when cover falls below 10 days; \textbf{C} uses the observed+predicted graph and the
+MILP at detection plus the same trigger. All arms share network, demand, inventory and illustrative economics, and replication $r$ uses seed
+$s_0+r$ for every arm (common random numbers, CRN; 180-day horizon). \textbf{Ablation (RQ4b):} a $2\times2$ factorial \{rule, MILP\}$\times$\{observed,
+observed+predicted graph\} plus an oracle arm (MILP, true graph) isolates the value of predicted links. \textbf{Sensitivity:} one at a time, we
+vary management overhead, shortage penalty, interruption cost, duration, alternates' spare capacity and failure risk, and how many links the
+buyer knows (200 CRN replications per cell).
 
 \subsection{Statistical Analysis}
-Supplier-months of one supplier are dependent, so E1 uses a \emph{cluster} bootstrap over the 500 suppliers ($B$=1,000, percentile 95\,\% CIs,
-paired differences on the same resample). E3 bootstraps order lines. Scenario policies are compared with common random numbers (replication $r$
-uses seed $s_0+r$ for every policy, 180-day horizon); we report the mean paired saving with a 95\,\% CI and a Wilcoxon signed-rank test,
-Holm-adjusted over the nine policy comparisons. GNN results are mean$\pm$sd over five seeds. Significance level $\alpha$=0.05.
+Bootstraps ($B$=1,000, percentile CIs, two-sided) resample suppliers in E1 (their months are dependent) and orders in E3. Policies: the estimand is the mean paired saving
+$\Delta$ = impact(first) $-$ impact(second), so $\Delta>0$ means the second arm is cheaper; we report a bootstrap CI of the mean, the median,
+the share of replications in which the second arm is cheaper, and a two-sided Wilcoxon signed-rank test, Holm-adjusted within each family
+(9 policy comparisons; 12 ablation comparisons). $\alpha$=0.05. Pre-specified before any scenario
+run: policies, shock, 13 outcome metrics, CRN and replication count. Added after the first draft: the tests, ablation and sensitivity analysis.
 
 \section{Results}
-\begin{figure*}[t]\centering\includegraphics[width=0.9\textwidth]{fig_exp1.pdf}
-\caption{E1 on the untouched test split (3,000 supplier-months): (a) ROC and (b) precision--recall of the four calibrated models,
-(c) XGBoost reliability before/after Platt scaling fitted on the calibration split, (d) global SHAP attributions.}\label{fig:exp1}\end{figure*}
+\begin{figure*}[t]\centering\includegraphics[width=0.84\textwidth]{fig_exp1.pdf}
+\caption{E1 on the untouched test split (3,000 supplier-months, synthetic): (a) ROC and (b) precision--recall of the four calibrated models,
+(c) XGBoost reliability before/after Platt scaling, (d) mean absolute SHAP value of the top XGBoost features.}\label{fig:exp1}\end{figure*}
 
 % ---- tables/exp1.tex (generated by ml/experiments/paper_tables.py) ----
-\begin{table}[t]\centering\caption{E1: 30-day supplier disruption prediction on the untouched test split (3,000 supplier-months, prevalence 7.4\%). AUCs after Platt scaling (rank-preserving); calibrators fitted on the calibration split only; bold = lowest ECE per model; shaded = pre-specified primary model. 95\% CIs and tests in Table~\ref{tab:stats}.}\label{tab:exp1}
+\begin{table}[t]\centering\caption{E1: 30-day supplier disruption prediction on the untouched test split (3,000 supplier-months, prevalence 7.4\%). AUCs after Platt scaling; calibrators fitted on the calibration split; bold = lowest ECE; shaded = pre-specified model.}\label{tab:exp1}
 \scriptsize\setlength{\tabcolsep}{2.4pt}\begin{tabular}{@{}lcccccccc@{}}\toprule
  & & & \multicolumn{2}{c}{Brier} & \multicolumn{3}{c}{ECE$_{10}$}\\\cmidrule(lr){4-5}\cmidrule(lr){6-8}
 Model & ROC-AUC & PR-AUC & raw & Platt & raw & Platt & Iso.\\\midrule
@@ -262,109 +283,69 @@ Random Forest & 0.657 & 0.140 & 0.0672 & 0.0675 & \textbf{0.0046} & 0.0081 & 0.0
 % ---- end ----
 
 % ---- tables/stats.tex (generated by ml/experiments/paper_tables.py) ----
-\begin{table}[t]\centering\caption{Statistical tests. E1: supplier-cluster bootstrap ($B$=1,000, 500 suppliers, 3,000 test months); E3: order-line bootstrap ($B$=1,000); S: 500 paired CRN replications, 95\% CI of the mean saving and Wilcoxon signed-rank $p$, Holm-adjusted over nine comparisons. Win = share of replications in which the second policy is cheaper (L = INR lakh).}\label{tab:stats}
-\scriptsize\setlength{\tabcolsep}{2pt}\begin{tabular}{@{}llrccr@{}}\toprule
- & Comparison & Effect & 95\% CI & Win & $p$\\\midrule
-E1 & LR $-$ XGBoost, ROC-AUC & +0.040 & [0.013, 0.068] & -- & 0.008\\
-E1 & LR $-$ XGBoost, PR-AUC & +0.026 & [0.002, 0.055] & -- & 0.044\\
-E1 & ECE reduction, XGB raw $-$ Platt & +0.0095 & [-0.0018, 0.0197] & -- & 0.108\\
-E3 & XGBoost $-$ mode baseline, ROC-AUC & +0.035 & [0.032, 0.039] & -- & $<$0.001\\
-\midrule
-S & Severe: saving of C over A (L) & +356.2 & [324.9, 387.4] & 80\% & $<$0.001\\
-S & Severe: saving of C over B (L) & +282.0 & [252.7, 311.4] & 73\% & $<$0.001\\
-S & Moderate: saving of C over A (L) & +16.7 & [9.1, 24.3] & 17\% & $<$0.001\\
-S & Moderate: saving of B over A (L) & +11.0 & [8.7, 13.3] & 18\% & 0.167\\
-S & Mild: saving of C over A (L) & -0.8 & [-0.8, -0.8] & 0\% & $<$0.001\\
+\begin{table}[t]\centering\caption{Statistical tests. E1: bootstrap over 500 suppliers; E3: over 16,840 orders. Policies: saving = impact(first)$-$impact(second) over 500 CRN pairs, Holm over 9; CI of the mean; Med.\ = median; Win = \% of replications where the second policy is cheaper.}\label{tab:stats}
+\scriptsize\setlength{\tabcolsep}{1.2pt}\begin{tabular}{@{}llrcrrrr@{}}\toprule
+ & Comparison & Mean & 95\% CI & Med. & Win\% & $p$ & $p_{\mathrm{Holm}}$\\\midrule
+\multicolumn{8}{@{}l}{\textit{Models: bootstrap, $B$=1,000, two-sided}}\\
+E1 & LR$-$XGB, ROC-AUC & +0.040 & [0.013, 0.068] & -- & -- & 0.008 & --\\
+E1 & LR$-$XGB, PR-AUC & +0.026 & [0.002, 0.055] & -- & -- & 0.044 & --\\
+E1 & ECE, raw$-$Platt & +0.0095 & [-0.002, 0.020] & -- & -- & 0.108 & --\\
+E3 & XGB$-$mode, AUC & +0.035 & [0.030, 0.041] & -- & -- & $<$0.001 & --\\
+\midrule\multicolumn{8}{@{}l}{\textit{Policies: saving in INR lakh; two-sided Wilcoxon}}\\
+Mil. & A vs.\ B & -0.00 & [-0.003, 0.000] & +0.00 & 0 & 0.109 & 0.167\\
+Mil. & A vs.\ C & -0.82 & [-0.823, -0.817] & -0.83 & 0 & $<$0.001 & $<$0.001\\
+Mil. & B vs.\ C & -0.82 & [-0.822, -0.816] & -0.83 & 0 & $<$0.001 & $<$0.001\\
+Mod. & A vs.\ B & +11.0 & [8.6, 13.6] & +0.00 & 18 & 0.083 & 0.167\\
+Mod. & A vs.\ C & +16.7 & [9.3, 24.7] & -11.8 & 17 & $<$0.001 & $<$0.001\\
+Mod. & B vs.\ C & +5.73 & [0.3, 11.4] & -11.7 & 10 & $<$0.001 & $<$0.001\\
+Sev. & A vs.\ B & +74.1 & [70.8, 77.4] & +93.3 & 83 & $<$0.001 & $<$0.001\\
+Sev. & A vs.\ C & +356.2 & [322.1, 386.4] & +283.4 & 80 & $<$0.001 & $<$0.001\\
+Sev. & B vs.\ C & +282.0 & [254.7, 310.9] & +186.0 & 73 & $<$0.001 & $<$0.001\\
 \bottomrule\end{tabular}\end{table}
 % ---- end ----
 
-\subsection{Calibrated Disruption Prediction (RQ1, H1 partly supported)}
-Discrimination is modest for these rare, partly contagion-driven events (prevalence \TestPrev\,\%; Table~\ref{tab:exp1}). Logistic
-regression ranks best (ROC-AUC \LrAUC, 95\,\% CI \CiLrRoc; PR-AUC \LrPR, twice the base rate) and is significantly better than the
-pre-specified XGBoost (\XgbAUC, CI \CiXgbRoc; Table~\ref{tab:stats}); the validation split also favoured it. We keep XGBoost to avoid
-test-set model selection and test the consequence in a sensitivity run (Sec.~\ref{sec:scen}). Platt scaling lowered XGBoost's ECE from \XgbRaw{}
-to \XgbCal{}, but the paired reduction is not significant (CI \DEceL{} to \DEceH, $p$=\DEceP); for the decision tree it fell from \DtRaw{} to
-\DtCal, while for the already-calibrated random forest Platt scaling \emph{raised} ECE. On the test months the cost rule raised \PolAlerts{}
-contingency alerts, none followed by a qualifying disruption, and realised cost (\BizCal{} lakh) was close to monitor-only (\BizNone) and
-far below review-all (\BizAll), against a perfect-foresight bound of \BizOracle. With 3--4 weeks of cover, single-supplier events are mostly
-absorbed, so value shifts to network-level response.
+\subsection{Disruption Prediction (RQ1: partly supported)}
+Ranking is modest (prevalence \TestPrev\,\%; Table~\ref{tab:exp1}). Logistic regression is best (ROC-AUC \LrAUC, 95\,\% CI \CiLrRoc; PR-AUC
+\LrPR) and significantly better than XGBoost (\XgbAUC, CI \CiXgbRoc; Table~\ref{tab:stats}); validation data also favoured it. We keep
+XGBoost to avoid test-set model choice; using logistic-regression risk moves severe C impact only from \SevC{} to \SensSevC{} Cr. Platt scaling lowered XGBoost's ECE from \XgbRaw{} to \XgbCal, not significantly ($p$=\DEceP); it helped the
+decision tree (\DtRaw$\rightarrow$\DtCal) and worsened the already-calibrated random forest. D1 probabilities rank above chance but are not shown to be operationally calibrated. On the test months the cost rule raised \PolAlerts{} alerts, none followed by a qualifying
+disruption; realised cost (\BizCal{} L) was close to monitor-only (\BizNone{} L). This is a small retrospective demonstration, not validation.
 
 \begin{figure*}[t]\centering\includegraphics[width=0.82\textwidth]{fig_blackbox.pdf}
-\caption{The black-box gap (synthetic ground truth): (a) cocoa sub-network around the five largest Tier-2 traders---dashed links are invisible to
-the buyer; (b) mean exposure on the observed vs.\ true network; (c) share of links invisible by supplier tier.}\label{fig:gap}\end{figure*}
+\caption{The black-box gap in the synthetic network: (a) cocoa sub-network---dashed links exist in the synthetic ground truth but are hidden
+from the buyer; (b) mean exposure $E_i$ (expected margin loss, Eq.~2) per supplier on the observed vs.\ true graph; (c) share of hidden links by tier.}\label{fig:gap}\end{figure*}
 
-\subsection{Black-Box Gap and Link Discovery (RQ2 supported; RQ3 rejected)}
-Observed links understate Tier-2/3 exposure \GapTwo$\times$/\GapThree$\times$ (Fig.~\ref{fig:gap}). In discovery
-(Table~\ref{tab:exp2a}) common-neighbour heuristics are uninformative on the layered network; the validation-selected \LinkSel{} pair model
-attains AP \LinkSelAP{} against a base rate of \LinkBase{} (P@100 = \LinkSelP), GraphSAGE \LinkSAGEAP. Graph structure did not improve risk
-classification (Table~\ref{tab:exp2b}): even the best GNN variant---including one given the oracle true graph---stays below XGBoost on synthetic
-data, and on real SupplyGraph logistic regression is best. Predicted links are therefore used as \emph{verification leads}, not as facts.
+\subsection{Exposure Gap and Link Prediction (RQ2: supported; RQ3: not supported)}
+Observed links understate Tier-2/3 exposure \GapTwo$\times$/\GapThree$\times$ (Fig.~\ref{fig:gap}). This is an exposure-measurement result,
+not a prediction score. The validation-selected \LinkSel{} pair model reaches AP \LinkSelAP{} against a base rate of \LinkBase{} (precision
+\LinkSelP{} in its top 100; Table~\ref{tab:exp2a}): useful ranking inside this synthetic candidate set, not proof that recovered links are real
+suppliers. GNNs did not improve risk classification: on synthetic data the best GNN reaches PR-AUC 0.111$\pm$0.011 (observed+predicted graph) and 0.108 with the true graph vs.\ 0.122 for XGBoost; on real SupplyGraph logistic regression (0.488) beats the best GNN (0.461$\pm$0.017; 5 seeds).
 
 % ---- tables/exp2a.tex (generated by ml/experiments/paper_tables.py) ----
-\begin{table}[t]\centering\caption{E2A link prediction (synthetic, 5 seeds for learned models). A1: held-out observed edges vs.\ material-compatible negatives. A2: ranking all 8,863 compatible unobserved pairs against 1,039 ground-truth hidden edges (base rate 0.117).}\label{tab:exp2a}\scriptsize\setlength{\tabcolsep}{2.6pt}\begin{tabular}{lccccc}\toprule
+\begin{table}[t]\centering\caption{E2A link prediction (synthetic, 5 seeds for learned models). A1: held-out observed edges vs.\ material-compatible negatives. A2: ranking all 8,863 compatible unobserved pairs against 1,039 ground-truth hidden edges (base rate 0.117)). Adamic--Adar equals common neighbours. P@100 = precision of top 100; R@500 = recall of top 500.}\label{tab:exp2a}\scriptsize\setlength{\tabcolsep}{2.6pt}\begin{tabular}{lccccc}\toprule
  & \multicolumn{2}{c}{A1 (held-out)} & \multicolumn{3}{c}{A2 (hidden-edge discovery)}\\\cmidrule(lr){2-3}\cmidrule(lr){4-6}
 Method & ROC-AUC & AP & AP & P@100 & R@500\\\midrule
 Common neigh. & 0.500 & 0.500 & 0.117 & 0.06 & 0.042 \\
-Adamic-Adar & 0.500 & 0.500 & 0.117 & 0.06 & 0.042 \\
 Pref.~attach. & 0.733 & 0.763 & 0.166 & 0.34 & 0.120 \\
 Node2Vec & 0.638 & 0.609 & 0.146 & 0.24 & 0.084 \\
 MLP & 0.826$\pm$0.017 & 0.849$\pm$0.012 & 0.227 & 0.32 & 0.141 \\
 GCN & 0.807$\pm$0.020 & 0.837$\pm$0.010 & 0.176 & 0.25 & 0.109 \\
 GraphSAGE & 0.737$\pm$0.009 & 0.784$\pm$0.012 & 0.168 & 0.29 & 0.102 \\
 GAT & 0.796$\pm$0.005 & 0.811$\pm$0.018 & 0.177 & 0.26 & 0.103 \\
-GraphSAGE+skip & 0.792$\pm$0.014 & 0.827$\pm$0.006 & 0.166 & 0.29 & 0.102 \\
 \bottomrule\end{tabular}\end{table}
 % ---- end ----
 
-% ---- tables/exp2b.tex (generated by ml/experiments/paper_tables.py) ----
-\begin{table}[t]\centering\caption{E2B: PR-AUC of graph vs.\ tabular risk models on the test split (Platt-calibrated; mean$\pm$sd over 5 seeds). Synthetic: 30-day disruption, prevalence 7.4\%; SupplyGraph (real FMCG): 7-day service shortfall, prevalence 28.8\%. The best GNN variant is reported to favour graph models.}\label{tab:exp2b}\scriptsize\setlength{\tabcolsep}{3pt}\begin{tabular}{lcc}\toprule
-Model [graph] & Synthetic & SupplyGraph (real)\\\midrule
-Logistic regression (tabular) & -- & 0.488\\
-XGBoost (tabular) & 0.122 & 0.454\\
-MLP (features, no graph) & 0.104$\pm$0.011 & 0.475$\pm$0.007\\
-GCN [observed graph] & 0.104$\pm$0.005 & 0.459$\pm$0.030\\
-GraphSAGE [observed graph] & 0.105$\pm$0.004 & 0.461$\pm$0.017\\
-GAT [observed graph] & 0.100$\pm$0.009 & 0.443$\pm$0.040\\
-Best GNN [obs.+predicted links] (GCN) & 0.111$\pm$0.011 & --\\
-Best GNN [oracle true graph] (GAT) & 0.108$\pm$0.005 & --\\
-\bottomrule\end{tabular}\end{table}
-% ---- end ----
-
-% ---- tables/exp3.tex (generated by ml/experiments/paper_tables.py) ----
-\begin{table}[t]\centering\caption{E3 (real DataCo): late-delivery prediction, chronological test split (34,554 order lines, late rate 57.3\%), threshold 0.5.}\label{tab:exp3}\scriptsize\setlength{\tabcolsep}{3.5pt}\begin{tabular}{lcccc}\toprule
-Model & ROC-AUC & PR-AUC & F1 & Brier\\\midrule
-Logistic Regression & 0.749 & 0.839 & 0.682 & 0.1878\\
-Random Forest & 0.777 & 0.855 & 0.710 & 0.1768\\
-XGBoost & 0.780 & 0.858 & 0.713 & 0.1768\\
-Shipping-mode rate & 0.744 & 0.785 & 0.670 & 0.1881\\
-\bottomrule\end{tabular}\end{table}
-% ---- end ----
-
-\subsection{Transfer to Real Shipment Data (DataCo)}
-On \DcTest{} chronologically held-out order lines XGBoost reaches ROC-AUC \DcXgbAUC{} (CI \DcCi; PR-AUC \DcXgbPR) vs.\ \DcBaseAUC{} for a
-shipping-mode baseline, a small but significant gain ($+$\DcDelta, $p<$0.001); delay-days regression adds nothing ($R^2$ \DcRegR{} vs.\ \DcBaseR).
-DataCo has no supplier identities, so E3 is a transfer check that serves the shipment-lateness API; it does not feed the simulator.
-
-% ---- tables/decision.tex (generated by ml/experiments/paper_tables.py) ----
-\begin{table}[t]\centering\caption{Worked decision for supplier S0065 (Tier-1, synthetic) at $t$=2025-12-01, produced end-to-end by the decision engine.}\label{tab:decision}
-\scriptsize\setlength{\tabcolsep}{3pt}\begin{tabular}{@{}p{0.47\columnwidth}p{0.47\columnwidth}@{}}\toprule
-\multicolumn{2}{@{}p{0.97\columnwidth}@{}}{Raw / calibrated 30-day risk: 40.8\,\% / \textbf{15.2\,\%} \quad Exposure $E_i$: INR 4.41 lakh}\\
-\multicolumn{2}{@{}p{0.97\columnwidth}@{}}{Break-even $q^*$: 7.6\,\% / 11.3\,\% / 36.3\,\% \quad Cover: 24 d}\\
-\multicolumn{2}{@{}p{0.97\columnwidth}@{}}{SHAP drivers: capacity utilisation (+0.67), mean delay (90 d) (+0.41), dependency share (+0.30)}\\\midrule
-Action & Expected cost (INR '000)\\\midrule
-Routine monitoring & 66.9\\
-Enhanced monitoring & 61.9\\
-Contingency review & 56.8 $\leftarrow$\\
-Escalate \& recover & 80.1\\
-\midrule\multicolumn{2}{@{}p{0.97\columnwidth}@{}}{Recovery MILP: Optimal, cost INR 15.1k}\\
-\bottomrule\end{tabular}\end{table}
-% ---- end ----
+\subsection{Transfer to Real Shipments (DataCo)}
+On \DcTest{} chronologically held-out order lines (\DcOrders{} orders) XGBoost reaches ROC-AUC \DcXgbAUC{} (CI \DcCi; PR-AUC \DcXgbPR) vs.\
+\DcBaseAUC{} for a shipping-mode baseline ($+$\DcDelta, $p<$0.001); delay-days regression adds nothing ($R^2$ \DcRegR{} vs.\ \DcBaseR). This
+checks a separate lateness task; it does not validate the network-level results.
 
 \subsection{Executable Decision Example (D1, D2)}
-Table~\ref{tab:decision} traces one recommendation: calibrated probability, exposure and break-even thresholds select a contingency review as
-the minimum expected-cost action, and the MILP returns an optimal standby allocation. The API reproduces every value and logs it.
+For supplier S0065 (Tier-1) at $t$=2025-12-01, XGBoost gives 40.8\,\% raw and 15.2\,\% Platt-calibrated 30-day risk and $E_i$ = INR 4.41~L.
+Break-even thresholds of 7.6/11.3/36.3\,\% give expected costs of 66.9/61.9/56.8/80.1 thousand INR for the four actions, so a contingency review
+is chosen; the MILP returns an optimal standby plan costing INR 15.1k. This shows software traceability. The API reproduces and logs every value. It does not show that the rule improves outcomes.
 
-\begin{figure*}[!t]\centering
+\begin{figure*}[!tp]\centering
 {\renewenvironment{table*}[1][]{\settabcaptype}{}% ---- tables/scenarios.tex (generated by ml/experiments/paper_tables.py) ----
 \begin{table*}[t]\centering\caption{Nine-scenario evaluation (means of 500 common-random-number replications; simulated INR on synthetic data). Severity = capacity loss of the five largest Tier-2 cocoa-bean traders for a nominal 60 days (log-normal). Policies: A none, B rule-based, C optimisation. L = lakh, Cr = crore; PI = 2.5--97.5th percentile over replications; Full rec.\ = replications with zero unmet demand; Alt.\ util.\ = share of alternates' spare capacity used.}\label{tab:scen}
 \scriptsize\setlength{\tabcolsep}{3pt}\begin{tabular}{lllrrrrrrlrrr}\toprule
@@ -380,81 +361,130 @@ S8 & Sev. & B & 19.8 & 4.0 & 605.3 & 38.9 & 18.3 & 0.73 & 3.98 [0.24, 15.19] & 1
 S9 & Sev. & C & 19.8 & 3.7 & 39.2 & 5.3 & 461.9 & 24.20 & 1.16 [0.93, 3.84] & 125 & 23 & 88\\
 \bottomrule\end{tabular}\end{table*}
 % ---- end ----
-}\par\vspace{5pt}
-\includegraphics[width=0.84\textwidth]{fig_scenarios.pdf}
-\caption{Nine-scenario outcomes over \Reps{} common-random-number replications (simulated INR on synthetic data): (a) mean financial impact,
-(b) unmet demand, (c) minimum service level, (d) share of replications in which each policy is cheapest.}\label{fig:scen}\end{figure*}
+}\par\vspace{4pt}
+\includegraphics[width=0.86\textwidth]{fig_scenarios.pdf}
+\caption{Simulated outcomes on the synthetic network (not real-world savings), 500 CRN replications unless stated: (a) mean impact with 95\,\%
+CI of the mean; (b) paired savings of B and C vs.\ A (box 25--75th, whiskers 5--95th percentile, diamond = mean); (c) link-information ablation
+(Table~\ref{tab:abl}); (d) severe C-vs-A saving under one-at-a-time assumption changes (200 replications; Table~\ref{tab:sens}).}\label{fig:scen}\end{figure*}
 
-\subsection{Nine-Scenario Evaluation (RQ4, H4 supported for severe shocks only)}\label{sec:scen}
-Tables~\ref{tab:scen}, \ref{tab:stats} and Fig.~\ref{fig:scen}. \emph{Severe}: no intervention leaves
-\SevUnmetA{}k units unmet (minimum service \SevSvcA\,\%, \SevA{} crore); rule-based reaches \SevUnmetB{}k (\SevB{} crore) because it can exclude
-only processors with \emph{observed} links to the failed traders. Optimisation pre-books de-rated alternates, cutting unmet demand to \SevUnmetC{}k
-units (\SevC{} crore, full recovery in \FullRecC\,\% of replications); it saves \SaveAC{} crore over A and \SaveBC{} crore over B and is cheaper than A in 80\,\%
-and cheapest of all three in \SevCWins\,\% of replications. \emph{Moderate}: mean savings of C (\ModSaveAC{} lakh over A) come from a minority of tail replications---A is
-cheapest in \ModAWins\,\% of them, and B vs.\ A is not significant (Holm $p$=0.17). \emph{Mild}: impact is almost entirely the assumed
-management overhead, and C costs \MildExtraC{} lakh \emph{more} than A in every replication. Severe-mean relative SE is \McSE\,\%;
-recovery time is censored in $\le$\Censored\,\% of replications. \textbf{Sensitivity:} re-running all nine scenarios with logistic-regression risk
-in place of XGBoost (risk also sets the simulated failure chance of alternates, so all policies shift slightly) gives a severe-C impact of
-\SensSevC{} crore and a C-over-A saving of \SensSaveAC{} crore; the RQ4 conclusion does not depend on the risk model.
+\subsection{Nine-Scenario Evaluation (RQ4a: not supported overall)}\label{sec:scen}
+\emph{Severe}: A leaves \SevUnmetA{}k units unmet (\SevA{} Cr), B \SevUnmetB{}k (\SevB{} Cr) and C \SevUnmetC{}k (\SevC{} Cr). C saves
+\SaveAC{} Cr over A (95\,\% CI \SaveACl--\SaveACh; median \SevACmed{} Cr) and is cheaper in \SevACwin\,\% of replications.
+\emph{Moderate}: C saves \ModSaveAC{} L over A on the mean, yet in the median replication C costs \ModACmed{} L \emph{more} and is cheaper in
+only \ModACwin\,\%; the significant Wilcoxon test reflects that typical shift against C, while the mean is driven by rare long outages.
+\emph{Mild}: impact is mostly assumed management overhead; C costs \MildExtraC{} L more than A in every replication (small spread: only its
+pre-booked orders differ). H4a is therefore not supported; C is preferable only for severe shocks.
 
-\begin{findings}{Key findings}
-\textbf{1}~Hidden links matter: observed-only exposure is \GapTwo$\times$ (Tier-2) and \GapThree$\times$ (Tier-3) too low.
-\textbf{2}~Simple beats complex: logistic regression $>$ XGBoost $\ge$ GNNs for risk; link prediction is useful only as a ranked lead list.
-\textbf{3}~Calibration helps poorly calibrated learners; its gain for XGBoost is not statistically significant.
-\textbf{4}~Optimisation pays only for severe shocks (\SevRed\,\% lower impact); for mild shocks it over-hedges $\Rightarrow$ a tiered policy.
+% ---- tables/ablation.tex (generated by ml/experiments/paper_tables.py) ----
+\begin{table}[t]\centering\caption{Link-information ablation (RQ4b). Mean simulated impact, INR lakh $\pm$ 95\% CI (500 CRN replications); only logic or known graph changes. Lower block: paired saving, mean/median, Holm-adjusted Wilcoxon $p$ over 12 comparisons.}\label{tab:abl}
+\scriptsize\setlength{\tabcolsep}{2.2pt}\begin{tabular}{@{}lllrrr@{}}\toprule
+Arm & Logic & Graph known & Mild & Moderate & Severe\\\midrule
+A & -- & -- & 25.7$\pm$1.2 & 61.5$\pm$8.6 & 472.1$\pm$35.7\\
+B-obs & rule & observed & 25.7$\pm$1.2 & 50.5$\pm$6.8 & 398.0$\pm$33.9\\
+B-pred & rule & obs.+pred. & 25.7$\pm$1.2 & 62.0$\pm$8.6 & 472.6$\pm$35.7\\
+C-obs & MILP & observed & 25.7$\pm$1.2 & 48.6$\pm$6.4 & 363.6$\pm$32.1\\
+C-pred = C & MILP & obs.+pred. & 26.5$\pm$1.2 & 44.8$\pm$1.3 & 115.9$\pm$6.6\\
+C-oracle & MILP & true & 25.7$\pm$1.2 & 38.3$\pm$2.1 & 120.7$\pm$8.1\\\midrule
+\multicolumn{3}{@{}l}{Links, MILP: C-obs$-$C} & -0.8/-0.8 & +3.9/-11.7 & +247.7/+148.5\\
+\multicolumn{3}{@{}r}{\textit{$p_{\mathrm{Holm}}$}} & $<$.001 & $<$.001 & $<$.001\\
+\multicolumn{3}{@{}l}{Links, rule: B-obs$-$B-pred} & +0.0/+0.0 & -11.5/-0.5 & -74.6/-93.8\\
+\multicolumn{3}{@{}r}{\textit{$p_{\mathrm{Holm}}$}} & .109 & $<$.001 & $<$.001\\
+\multicolumn{3}{@{}l}{MILP, observed: B-obs$-$C-obs} & -0.0/+0.0 & +1.9/+0.0 & +34.3/+36.4\\
+\multicolumn{3}{@{}r}{\textit{$p_{\mathrm{Holm}}$}} & .004 & .005 & $<$.001\\
+\bottomrule\end{tabular}\end{table}
+% ---- end ----
+
+% ---- tables/sens.tex (generated by ml/experiments/paper_tables.py) ----
+\begin{table}[t]\centering\caption{One-at-a-time sensitivity (200 CRN replications per cell). Saving = impact(A)$-$impact(C); ties go to A. Known-link rows change what B and C know, not the true network. $^\dagger$Changes the random stream; compare within row.}\label{tab:sens}
+\scriptsize\setlength{\tabcolsep}{2pt}\begin{tabular}{@{}lccrc@{}}\toprule
+ & \multicolumn{2}{c}{Severe} & \multicolumn{2}{c}{Mild}\\\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Setting & C$-$A saving, Cr [95\% CI] & Best & Saving, L & Best\\\midrule
+Base (as Table~\ref{tab:scen}) & 3.28 [2.77, 3.79] & C & -0.82 & A\\
+Mgmt.\ overhead 0/day & 3.27 [2.76, 3.78] & C & -0.82 & A\\
+Mgmt.\ overhead 50k/day & 3.28 [2.78, 3.79] & C & -0.82 & A\\
+Shortage penalty 5\% & 2.58 [2.17, 3.00] & C & -0.82 & A\\
+Shortage penalty 30\% & 4.35 [3.66, 5.05] & C & -0.82 & A\\
+Interruption 25k/plant-day & 2.94 [2.46, 3.42] & C & -0.82 & A\\
+Interruption 150k/plant-day & 3.79 [3.23, 4.34] & C & -0.82 & A\\
+Nominal duration 30 d & 0.21 [0.07, 0.35] & C & +0.00 & A\\
+Nominal duration 90 d & 7.74 [7.08, 8.39] & C & -5.12 & A\\
+Alt.\ spare capacity $\times$0.5 & 2.96 [2.48, 3.43] & C & -0.81 & A\\
+Alt.\ spare capacity $\times$1.5 & 3.33 [2.80, 3.86] & C & -0.83 & A\\
+Alt.\ failure risk $\times$0.5$^\dagger$ & 4.20 [3.71, 4.68] & C & -0.82 & A\\
+Alt.\ failure risk $\times$2$^\dagger$ & 3.47 [2.95, 3.99] & C & -0.82 & A\\
+Known deep links $-$50\% & 3.25 [2.77, 3.74] & C & -0.82 & A\\
+Known hidden links $+$50\% & 3.23 [2.71, 3.75] & C & -0.83 & A\\
+\bottomrule\end{tabular}\end{table}
+% ---- end ----
+
+\subsection{Value of Predicted Links (RQ4b: severe shocks only)}
+Holding the MILP fixed, adding predicted links cuts severe impact from \AblCobs{} to \AblCpred{} Cr (saving \AblLinkVal{} Cr, CI
+\AblLinkValL--\AblLinkValH; Table~\ref{tab:abl}), about \AblLinkShare\,\% of C's gain over B; the MILP alone on the observed graph saves only
+\AblMilpVal{} Cr. Predicted links match the oracle graph here (\AblOracle{} Cr). They are not universally helpful: under the moderate shock
+the MILP gains on the mean but loses in the median replication (\AblModMed{} L), and under the mild shock the predicted links cause the
+over-hedging. With the rule-based policy predicted links make outcomes worse (\AblBpred{} vs.\ \AblBobs{} Cr): hard exclusion of every linked alternate
+leaves no usable supplier, so predicted links pay only with quantitative de-rating.
+
+\subsection{Assumption Sensitivity}
+C has the lowest severe impact in all \SensN{} settings and A the lowest mild impact in all \SensN{} (Table~\ref{tab:sens}, Fig.~\ref{fig:scen}d).
+The severe saving ranges from \SensNdLo{} to \SensNdHi{} Cr across cost, capacity, risk and visibility settings, but from \SensLo{} to \SensHi{}
+Cr when the outage lasts 30 or 90 days. The ranking is robust; the amount is not. CIs reflect simulation noise only, not parameter uncertainty.
+
+\begin{findings}{Key findings (synthetic network; simulated INR)}
+\textbf{1}~Observed links understate Tier-2/3 exposure \GapTwo$\times$/\GapThree$\times$.
+\textbf{2}~Logistic regression $>$ XGBoost $\ge$ GNNs for risk ranking; calibration gains are not significant.
+\textbf{3}~Optimisation pays only for severe shocks; for mild shocks doing nothing is cheapest $\Rightarrow$ a severity-contingent policy.
+\textbf{4}~About \AblLinkShare\,\% of the severe-shock gain over the rule-based policy comes from predicted links, but only when the optimiser de-rates rather than excludes.
 \end{findings}
 
-\begin{figure*}[t]\centering\includegraphics[width=0.94\textwidth]{fig_app.pdf}
-\caption{Deployed application (React control tower, Flask API, MySQL/SQLite, Gemini tool-calling assistant; 35 automated tests pass, all pages
-browser-tested): (a) executive dashboard, (b) network explorer with predicted links, (c) disruption simulator, (d) evidence-backed assistant.}\label{fig:app}\end{figure*}
 
 \section{Discussion}
-\textbf{Relevance and significance.} The system gives an auditable action and allocation (Table~\ref{tab:decision}, Fig.~\ref{fig:app});
-value concentrates in rare severe shocks, supporting a tiered policy---monitor routinely, optimise only for large reported shocks. \textbf{Originality.} The increment is measuring the monetary value of hidden-link estimates
-inside a recovery decision (Sec.~I-B); the negative GNN and calibration results are reported as findings, not hidden.
-\textbf{Threats to validity.} \emph{Internal:} the authors designed the generator, so a model matched to it could look better than it
-would on real data; we mitigate this with leakage controls, fixed seeds and two real datasets, but cannot remove it. \emph{Construct:} the
-financial impact depends on illustrative unit costs; the 25k/day overhead drives the mild results. \emph{External:} supplier-level results are
-synthetic, and real-network transfer is untested beyond DataCo and SupplyGraph. \emph{Statistical:} E1 has 223 test positives, so CIs are
-wide; scenario CIs reflect simulation noise only, not parameter uncertainty.
+\textbf{Established} (synthetic network, assumed costs): a MILP with predicted links lowers simulated severe-shock impact, mostly because of the
+links. \textbf{Not established:} real-world savings, real-network link quality, decision benefit of the D1 rule. \textbf{Threats to validity.} \emph{Internal:} the authors wrote the
+generator, so methods matched to it may look better than on real data. \emph{Construct:} impact uses illustrative unit costs. \emph{External:} the
+network-level results are synthetic; DataCo and SupplyGraph test components only. \emph{Statistical:} E1 has 223 test positives; scenario CIs
+ignore parameter uncertainty, which Table~\ref{tab:sens} explores one factor at a time only.
 
 \section{Research Integrity, AI Use and Reproducibility}
-\textbf{Integrity.} Nothing was tuned on test data; every table, figure and number here is regenerated
-from saved result files by script, and 61 automated checks recompute the reported metrics. Disclosed deviations: (i)~three simulator corrections were made after initial
-scenario runs (inventory storage cap that discarded deliveries, policy C excluding rather than de-rating suspect alternates, horizon extended
-to 180 days to limit censoring); all results use the corrected code; (ii)~the statistical tests and the sensitivity run were added after review of the first draft. \textbf{AI use declaration.} Claude Code (Anthropic) was used extensively: under the authors' direction it wrote most of the software, ran the
-experiments and drafted and edited this paper's text. The authors defined the problem, scope, datasets and evaluation requirements, reviewed
-the design and outputs, and checked every reported number against the logged result files. Google Gemini runs only inside the application's
-assistant and may phrase answers solely from tool outputs. The authors take full responsibility for the content.
-\textbf{Reproducibility.} Code, data, configurations and logged runs: \url{https://github.com/SamarthKamat/AIML-PROJECT}; live demo:
-\url{https://supply-chain-black-box.onrender.com}. \texttt{bash run\_all.sh} downloads both real datasets at pinned commits with hash checks,
-regenerates data (seed 42), runs all experiments (GNN seeds 0--4), the statistics and checks, and rebuilds this paper's tables and figures.
-Software versions are pinned in the repository.
+\textbf{Integrity.} No choice was tuned on test data. A script rebuilds every table, figure and quoted number from saved result files, and 73
+logged checks (\texttt{experiments/VERIFICATION\_REPORT.md}) recompute splits, prevalence, AUCs, confusion matrices, CRN integrity, scenario
+means and impact components, and confirm that the ablation arms reproduce A, B and C exactly. Disclosed deviations: (i)~three simulator corrections after the first scenario runs (a storage cap that discarded deliveries, C excluding
+rather than de-rating alternates, horizon extended to 180 days); (ii)~the tests, ablation and sensitivity analysis were added after a review of
+the first draft showed that significance and the separate value of predicted links had not been established.
+\textbf{AI use declaration.} Claude Code (Anthropic), 12--13~Nov~2026: under the authors' direction it wrote most of the code (data generation,
+experiments, simulator, MILP, web application), ran the experiments and drafted the text. The authors set the problem, scope, datasets and
+evaluation requirements, reviewed the design, checked reported numbers against the logs, verified the references against their sources, and
+take responsibility for the interpretation and final text. Google Gemini (API) runs only inside the deployed assistant and answers solely from
+tool outputs.
+\textbf{Reproducibility.} Code, data, logs: \url{https://github.com/SamarthKamat/AIML-PROJECT}; deployed
+application (React, Flask, MySQL, Gemini assistant; 35 automated tests): \url{https://supply-chain-black-box.onrender.com}. \texttt{bash run\_all.sh} re-downloads both real datasets with hash checks, regenerates all
+data (seed 42), experiments, statistics, robustness runs, checks, tables and figures.
 
 \section{Conclusion}
-\textbf{RQ1} partly: risk ranking is modest, logistic regression is best and calibration helps poorly calibrated learners. \textbf{RQ2} yes:
-hidden links multiply upstream exposure and can be ranked at about twice the base rate. \textbf{RQ3} no. \textbf{RQ4} for severe shocks only
-(\SevRed\,\% lower impact). Next: validate on real supplier maps (bills of lading, UN Comtrade cocoa flows) and learn rolling-horizon
-policies that avoid over-hedging.
+RQ1 partly supported, RQ2 supported, RQ3 not supported, RQ4a not supported overall and RQ4b supported for severe shocks only
+(Table~\ref{tab:map}). Next: validate on real supplier maps (bills of lading, UN Comtrade cocoa flows) and learn severity-contingent,
+rolling-horizon policies.
 
 \balance
 \begin{thebibliography}{99}\footnotesize
 \bibitem{hendricks2005} K.~B. Hendricks and V.~R. Singhal, ``An empirical analysis of the effect of supply chain disruptions on long-run stock price performance and equity risk of the firm,'' \emph{Prod. Oper. Manag.}, vol.~14, no.~1, pp.~35--52, 2005.
 \bibitem{ivanov2019} D.~Ivanov, A.~Dolgui, and B.~Sokolov, ``The impact of digital technology and Industry 4.0 on the ripple effect and supply chain risk analytics,'' \emph{Int. J. Prod. Res.}, vol.~57, no.~3, pp.~829--846, 2019, doi:10.1080/00207543.2018.1488086.
+\bibitem{brintrup2018} A.~Brintrup, P.~Wichmann, P.~Woodall, D.~McFarlane, E.~Nicks, and W.~Krechel, ``Predicting hidden links in supply networks,'' \emph{Complexity}, vol.~2018, Art.~9104387, 2018, doi:10.1155/2018/9104387.
+\bibitem{kosasih2022} E.~E. Kosasih and A.~Brintrup, ``A machine learning approach for predicting hidden links in supply chain with graph neural networks,'' \emph{Int. J. Prod. Res.}, vol.~60, no.~17, pp.~5380--5393, 2022, doi:10.1080/00207543.2021.1956697.
+\bibitem{taghizadeh2021} E.~Taghizadeh, S.~Venkatachalam, and R.~B. Chinnam, ``Impact of deep-tier visibility on effective resilience assessment of supply networks,'' \emph{Int. J. Prod. Econ.}, vol.~241, Art.~108254, 2021, doi:10.1016/j.ijpe.2021.108254.
+\bibitem{brintrup2020} A.~Brintrup, J.~Pak, D.~Ratiney, T.~Pearce, P.~Wichmann, P.~Woodall, and D.~McFarlane, ``Supply chain data analytics for predicting supplier disruptions: a case study in complex asset manufacturing,'' \emph{Int. J. Prod. Res.}, vol.~58, no.~11, pp.~3330--3341, 2020.
+\bibitem{wasi2024} A.~T. Wasi, M.~S. Islam, and A.~R. Akib, ``SupplyGraph: A benchmark dataset for supply chain planning using graph neural networks,'' arXiv:2401.15299, 2024.
+\bibitem{snyder2016} L.~V. Snyder, Z.~Atan, P.~Peng, Y.~Rong, A.~J. Schmitt, and B.~Sinsoysal, ``OR/MS models for supply chain disruptions: a review,'' \emph{IIE Trans.}, vol.~48, no.~2, pp.~89--109, 2016, doi:10.1080/0740817X.2015.1067735.
 \bibitem{baryannis2019} G.~Baryannis, S.~Validi, S.~Dani, and G.~Antoniou, ``Supply chain risk management and artificial intelligence: state of the art and future research directions,'' \emph{Int. J. Prod. Res.}, vol.~57, no.~7, pp.~2179--2202, 2019, doi:10.1080/00207543.2018.1530476.
 \bibitem{chen2016} T.~Chen and C.~Guestrin, ``XGBoost: A scalable tree boosting system,'' in \emph{Proc. ACM KDD}, 2016, pp.~785--794, doi:10.1145/2939672.2939785.
 \bibitem{platt1999} J.~Platt, ``Probabilistic outputs for support vector machines and comparisons to regularized likelihood methods,'' in \emph{Advances in Large Margin Classifiers}, MIT Press, 1999, pp.~61--74.
 \bibitem{zadrozny2002} B.~Zadrozny and C.~Elkan, ``Transforming classifier scores into accurate multiclass probability estimates,'' in \emph{Proc. ACM KDD}, 2002, pp.~694--699, doi:10.1145/775047.775151.
 \bibitem{niculescu2005} A.~Niculescu-Mizil and R.~Caruana, ``Predicting good probabilities with supervised learning,'' in \emph{Proc. ICML}, 2005, pp.~625--632, doi:10.1145/1102351.1102430.
-\bibitem{brintrup2018} A.~Brintrup, P.~Wichmann, P.~Woodall, D.~McFarlane, E.~Nicks, and W.~Krechel, ``Predicting hidden links in supply networks,'' \emph{Complexity}, vol.~2018, Art.~9104387, 2018, doi:10.1155/2018/9104387.
-\bibitem{kosasih2022} E.~E. Kosasih and A.~Brintrup, ``A machine learning approach for predicting hidden links in supply chain with graph neural networks,'' \emph{Int. J. Prod. Res.}, vol.~60, no.~17, pp.~5380--5393, 2022, doi:10.1080/00207543.2021.1956697.
 \bibitem{libennowell2007} D.~Liben-Nowell and J.~Kleinberg, ``The link-prediction problem for social networks,'' \emph{J. Amer. Soc. Inf. Sci. Technol.}, vol.~58, no.~7, pp.~1019--1031, 2007, doi:10.1002/asi.20591.
 \bibitem{grover2016} A.~Grover and J.~Leskovec, ``node2vec: Scalable feature learning for networks,'' in \emph{Proc. ACM KDD}, 2016, pp.~855--864, doi:10.1145/2939672.2939754.
 \bibitem{kipf2017} T.~N. Kipf and M.~Welling, ``Semi-supervised classification with graph convolutional networks,'' in \emph{Proc. ICLR}, 2017.
 \bibitem{hamilton2017} W.~L. Hamilton, R.~Ying, and J.~Leskovec, ``Inductive representation learning on large graphs,'' in \emph{Proc. NeurIPS}, 2017, pp.~1024--1034.
 \bibitem{velickovic2018} P.~Veli\v{c}kovi\'{c}, G.~Cucurull, A.~Casanova, A.~Romero, P.~Li\`{o}, and Y.~Bengio, ``Graph attention networks,'' in \emph{Proc. ICLR}, 2018.
-\bibitem{wasi2024} A.~T. Wasi, M.~S. Islam, and A.~R. Akib, ``SupplyGraph: A benchmark dataset for supply chain planning using graph neural networks,'' arXiv:2401.15299, 2024.
-\bibitem{snyder2016} L.~V. Snyder, Z.~Atan, P.~Peng, Y.~Rong, A.~J. Schmitt, and B.~Sinsoysal, ``OR/MS models for supply chain disruptions: a review,'' \emph{IIE Trans.}, vol.~48, no.~2, pp.~89--109, 2016, doi:10.1080/0740817X.2015.1067735.
 \bibitem{constante2019} F.~Constante, F.~Silva, and A.~Pereira, ``DataCo smart supply chain for big data analysis,'' Mendeley Data, V5, 2019, doi:10.17632/8gx2fvg2k6.5.
 \end{thebibliography}
 \end{document}

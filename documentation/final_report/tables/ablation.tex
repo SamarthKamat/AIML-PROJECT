@@ -1,0 +1,16 @@
+\begin{table}[t]\centering\caption{Link-information ablation (RQ4b). Mean simulated impact, INR lakh $\pm$ 95\% CI (500 CRN replications); only logic or known graph changes. Lower block: paired saving, mean/median, Holm-adjusted Wilcoxon $p$ over 12 comparisons.}\label{tab:abl}
+\scriptsize\setlength{\tabcolsep}{2.2pt}\begin{tabular}{@{}lllrrr@{}}\toprule
+Arm & Logic & Graph known & Mild & Moderate & Severe\\\midrule
+A & -- & -- & 25.7$\pm$1.2 & 61.5$\pm$8.6 & 472.1$\pm$35.7\\
+B-obs & rule & observed & 25.7$\pm$1.2 & 50.5$\pm$6.8 & 398.0$\pm$33.9\\
+B-pred & rule & obs.+pred. & 25.7$\pm$1.2 & 62.0$\pm$8.6 & 472.6$\pm$35.7\\
+C-obs & MILP & observed & 25.7$\pm$1.2 & 48.6$\pm$6.4 & 363.6$\pm$32.1\\
+C-pred = C & MILP & obs.+pred. & 26.5$\pm$1.2 & 44.8$\pm$1.3 & 115.9$\pm$6.6\\
+C-oracle & MILP & true & 25.7$\pm$1.2 & 38.3$\pm$2.1 & 120.7$\pm$8.1\\\midrule
+\multicolumn{3}{@{}l}{Links, MILP: C-obs$-$C} & -0.8/-0.8 & +3.9/-11.7 & +247.7/+148.5\\
+\multicolumn{3}{@{}r}{\textit{$p_{\mathrm{Holm}}$}} & $<$.001 & $<$.001 & $<$.001\\
+\multicolumn{3}{@{}l}{Links, rule: B-obs$-$B-pred} & +0.0/+0.0 & -11.5/-0.5 & -74.6/-93.8\\
+\multicolumn{3}{@{}r}{\textit{$p_{\mathrm{Holm}}$}} & .109 & $<$.001 & $<$.001\\
+\multicolumn{3}{@{}l}{MILP, observed: B-obs$-$C-obs} & -0.0/+0.0 & +1.9/+0.0 & +34.3/+36.4\\
+\multicolumn{3}{@{}r}{\textit{$p_{\mathrm{Holm}}$}} & .004 & .005 & $<$.001\\
+\bottomrule\end{tabular}\end{table}

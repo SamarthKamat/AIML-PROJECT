@@ -101,6 +101,37 @@ export default function Scenarios() {
           </dl>
         </Card>
       </div>
+      <div className="callout warn" style={{ marginTop: 18 }}>All values on this page are <b>simulated INR on a synthetic network</b> under illustrative economics. They are assumption-conditional demonstrations, not estimates of real-world savings; DataCo has no supplier identities and does not validate these network-level results.</div>
+      {data.tests && <Card title="Statistical tests · full nine-comparison family" sub="Saving = impact(first) − impact(second); positive ⇒ second policy cheaper. Two-sided Wilcoxon signed-rank on 500 CRN pairs, Holm-adjusted over 9 comparisons; CI = bootstrap of the mean (B = 1,000)" style={{ marginTop: 18 }}>
+        <div className="table-wrap"><table><thead><tr><th>Severity</th><th>Comparison</th><th className="num">Mean saving</th><th className="num">95% CI</th><th className="num">Median</th><th className="num">10th–90th pct</th><th className="num">2nd cheaper</th><th className="num">p (raw)</th><th className="num">p (Holm)</th></tr></thead>
+          <tbody>{data.tests.map((r, i) => <tr key={i}><td>{r.severity}</td><td>{r.comparison}</td>
+            <td className="num"><b style={{ color: r.mean_saving > 0 ? '#34d399' : r.mean_saving < 0 ? '#f87171' : '' }}>{compactInr(r.mean_saving)}</b></td>
+            <td className="num small">{compactInr(r.ci[0])} – {compactInr(r.ci[1])}</td><td className="num">{compactInr(r.median)}</td>
+            <td className="num small">{compactInr(r.p10)} – {compactInr(r.p90)}</td><td className="num">{pct(r.share_second_cheaper, 0)}</td>
+            <td className="num small">{r.p_raw < 0.001 ? '<0.001' : r.p_raw.toFixed(3)}</td><td className="num small">{r.p_holm < 0.001 ? '<0.001' : r.p_holm.toFixed(3)}</td></tr>)}</tbody></table></div>
+        <p className="note">Moderate shocks: the mean favours C, but the median paired difference favours doing nothing — the mean is driven by a minority of long-tail replications.</p>
+      </Card>}
+      {data.ablation && <Card title="Link-information ablation" sub="Does knowing the predicted links help, holding the decision logic fixed? 2 × 2 factorial {rule, MILP} × {observed, observed + predicted graph} plus an oracle (true graph) upper bound; identical costs, timing, candidates and random numbers; 500 replications" style={{ marginTop: 18 }}>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={['Mild', 'Moderate', 'Severe'].map((sv) => { const o = { severity: sv }; data.ablation.filter((r) => r.severity === sv).forEach((r) => { o[r.policy] = r.impact_inr; o[r.policy + '_err'] = 1.96 * r.impact_se }); return o })}>
+            <CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="severity" /><YAxis width={78} tick={{ fontSize: 10 }} tickFormatter={compactInr} />
+            <Tooltip {...tooltipStyle} formatter={(v) => (Array.isArray(v) ? '' : compactInr(v))} /><Legend wrapperStyle={{ fontSize: 11 }} />
+            {[...new Set(data.ablation.map((r) => r.policy))].map((p, i) => <Bar key={p} dataKey={p} fill={['#64748b', '#f59e0b', '#fcd34d', '#2563eb', '#22d3ee', '#34d399'][i]} radius={[5, 5, 0, 0]} animationDuration={1200}>
+              <ErrorBar dataKey={p + '_err'} width={3} stroke="#e7eefb" strokeWidth={1} /></Bar>)}
+          </BarChart>
+        </ResponsiveContainer>
+        {data.ablation_tests && <div className="table-wrap" style={{ marginTop: 10 }}><table><thead><tr><th>Severity</th><th>From</th><th>To</th><th className="num">Mean saving</th><th className="num">95% CI</th><th className="num">Median</th><th className="num">"To" cheaper</th><th className="num">p (Holm, 12)</th></tr></thead>
+          <tbody>{data.ablation_tests.map((r, i) => <tr key={i}><td>{r.severity}</td><td className="small">{r.first}</td><td className="small">{r.second}</td>
+            <td className="num"><b style={{ color: r.mean_saving > 0 ? '#34d399' : r.mean_saving < 0 ? '#f87171' : '' }}>{compactInr(r.mean_saving)}</b></td>
+            <td className="num small">{compactInr(r.ci[0])} – {compactInr(r.ci[1])}</td><td className="num">{compactInr(r.median)}</td><td className="num">{pct(r.share_second_cheaper, 0)}</td>
+            <td className="num small">{r.p_holm < 0.001 ? '<0.001' : r.p_holm.toFixed(3)}</td></tr>)}</tbody></table></div>}
+      </Card>}
+      {data.sensitivity && <Card title="Assumption sensitivity (one at a time)" sub="Policy ranking and C-over-A saving when one assumption changes; 200 CRN replications per cell" style={{ marginTop: 18 }}>
+        <div className="table-wrap"><table><thead><tr><th>Setting</th><th>Severity</th><th className="num">A</th><th className="num">B</th><th className="num">C</th><th>Cheapest</th><th className="num">Saving C over A (95% CI)</th></tr></thead>
+          <tbody>{data.sensitivity.map((r, i) => <tr key={i}><td>{r.setting}</td><td>{r.severity}</td><td className="num">{compactInr(r.A)}</td><td className="num">{compactInr(r.B)}</td><td className="num">{compactInr(r.C)}</td>
+            <td><span className="legend-dot" style={{ background: POLICY_COLORS[{ A: 'A: No intervention', B: 'B: Rule-based', C: 'C: Optimisation' }[r.best]] }} />{r.best}</td>
+            <td className="num"><b style={{ color: r.save_C_over_A > 0 ? '#34d399' : '#f87171' }}>{compactInr(r.save_C_over_A)}</b> <span className="dim small">[{compactInr(r.save_lo)}, {compactInr(r.save_hi)}]</span></td></tr>)}</tbody></table></div>
+      </Card>}
       {rerun && <Card title={`Reproduction run (${rerun.replications} replications)`} sub="Fewer replications → wider uncertainty; ordering should match the stored 500-rep results" style={{ marginTop: 18 }}>
         <div className="table-wrap"><table><thead><tr><th>Scenario</th><th>Severity</th><th>Policy</th><th className="num">Impact</th><th className="num">Unmet</th></tr></thead>
           <tbody>{rerun.results.map((r) => <tr key={r.scenario}><td>{r.scenario}</td><td>{r.severity}</td><td>{r.policy}</td><td className="num">{inr(r.financial_impact_inr)}</td><td className="num">{num(r.unmet_demand_units)}</td></tr>)}</tbody></table></div>

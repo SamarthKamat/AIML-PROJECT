@@ -260,4 +260,15 @@ def nine_scenarios() -> dict:
     s = pd.read_csv(p)
     c = pd.read_csv(EXPERIMENTS / "scenario_comparison.csv")
     a = json.loads((EXPERIMENTS / "scenario_assumptions.json").read_text())
-    return dict(available=True, results=s.round(4).to_dict(orient="records"), paired=c.round(2).to_dict(orient="records"), assumptions=a)
+    out = dict(available=True, results=s.round(4).to_dict(orient="records"), paired=c.round(2).to_dict(orient="records"), assumptions=a)
+    st = EXPERIMENTS / "statistics.json"
+    if st.exists():
+        j = json.loads(st.read_text())
+        out["tests"] = j.get("scenarios", [])          # full nine-comparison family (Wilcoxon, Holm)
+        out["ablation_tests"] = j.get("ablation", [])  # link-information ablation family
+    rob = EXPERIMENTS / "robustness"
+    if (rob / "ablation_summary.csv").exists():
+        out["ablation"] = pd.read_csv(rob / "ablation_summary.csv").round(2).to_dict(orient="records")
+    if (rob / "sensitivity.csv").exists():
+        out["sensitivity"] = pd.read_csv(rob / "sensitivity.csv").round(2).to_dict(orient="records")
+    return out

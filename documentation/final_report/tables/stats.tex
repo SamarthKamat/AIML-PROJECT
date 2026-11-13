@@ -1,14 +1,19 @@
-\begin{table}[t]\centering\caption{Statistical tests. E1: supplier-cluster bootstrap ($B$=1,000, 500 suppliers, 3,000 test months); E3: order-line bootstrap ($B$=1,000); S: 500 paired CRN replications, 95\% CI of the mean saving and Wilcoxon signed-rank $p$, Holm-adjusted over nine comparisons. Win = share of replications in which the second policy is cheaper (L = INR lakh).}\label{tab:stats}
-\scriptsize\setlength{\tabcolsep}{2pt}\begin{tabular}{@{}llrccr@{}}\toprule
- & Comparison & Effect & 95\% CI & Win & $p$\\\midrule
-E1 & LR $-$ XGBoost, ROC-AUC & +0.040 & [0.013, 0.068] & -- & 0.008\\
-E1 & LR $-$ XGBoost, PR-AUC & +0.026 & [0.002, 0.055] & -- & 0.044\\
-E1 & ECE reduction, XGB raw $-$ Platt & +0.0095 & [-0.0018, 0.0197] & -- & 0.108\\
-E3 & XGBoost $-$ mode baseline, ROC-AUC & +0.035 & [0.032, 0.039] & -- & $<$0.001\\
-\midrule
-S & Severe: saving of C over A (L) & +356.2 & [324.9, 387.4] & 80\% & $<$0.001\\
-S & Severe: saving of C over B (L) & +282.0 & [252.7, 311.4] & 73\% & $<$0.001\\
-S & Moderate: saving of C over A (L) & +16.7 & [9.1, 24.3] & 17\% & $<$0.001\\
-S & Moderate: saving of B over A (L) & +11.0 & [8.7, 13.3] & 18\% & 0.167\\
-S & Mild: saving of C over A (L) & -0.8 & [-0.8, -0.8] & 0\% & $<$0.001\\
+\begin{table}[t]\centering\caption{Statistical tests. E1: bootstrap over 500 suppliers; E3: over 16,840 orders. Policies: saving = impact(first)$-$impact(second) over 500 CRN pairs, Holm over 9; CI of the mean; Med.\ = median; Win = \% of replications where the second policy is cheaper.}\label{tab:stats}
+\scriptsize\setlength{\tabcolsep}{1.2pt}\begin{tabular}{@{}llrcrrrr@{}}\toprule
+ & Comparison & Mean & 95\% CI & Med. & Win\% & $p$ & $p_{\mathrm{Holm}}$\\\midrule
+\multicolumn{8}{@{}l}{\textit{Models: bootstrap, $B$=1,000, two-sided}}\\
+E1 & LR$-$XGB, ROC-AUC & +0.040 & [0.013, 0.068] & -- & -- & 0.008 & --\\
+E1 & LR$-$XGB, PR-AUC & +0.026 & [0.002, 0.055] & -- & -- & 0.044 & --\\
+E1 & ECE, raw$-$Platt & +0.0095 & [-0.002, 0.020] & -- & -- & 0.108 & --\\
+E3 & XGB$-$mode, AUC & +0.035 & [0.030, 0.041] & -- & -- & $<$0.001 & --\\
+\midrule\multicolumn{8}{@{}l}{\textit{Policies: saving in INR lakh; two-sided Wilcoxon}}\\
+Mil. & A vs.\ B & -0.00 & [-0.003, 0.000] & +0.00 & 0 & 0.109 & 0.167\\
+Mil. & A vs.\ C & -0.82 & [-0.823, -0.817] & -0.83 & 0 & $<$0.001 & $<$0.001\\
+Mil. & B vs.\ C & -0.82 & [-0.822, -0.816] & -0.83 & 0 & $<$0.001 & $<$0.001\\
+Mod. & A vs.\ B & +11.0 & [8.6, 13.6] & +0.00 & 18 & 0.083 & 0.167\\
+Mod. & A vs.\ C & +16.7 & [9.3, 24.7] & -11.8 & 17 & $<$0.001 & $<$0.001\\
+Mod. & B vs.\ C & +5.73 & [0.3, 11.4] & -11.7 & 10 & $<$0.001 & $<$0.001\\
+Sev. & A vs.\ B & +74.1 & [70.8, 77.4] & +93.3 & 83 & $<$0.001 & $<$0.001\\
+Sev. & A vs.\ C & +356.2 & [322.1, 386.4] & +283.4 & 80 & $<$0.001 & $<$0.001\\
+Sev. & B vs.\ C & +282.0 & [254.7, 310.9] & +186.0 & 73 & $<$0.001 & $<$0.001\\
 \bottomrule\end{tabular}\end{table}
