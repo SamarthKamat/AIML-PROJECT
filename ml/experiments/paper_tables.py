@@ -56,10 +56,10 @@ def graph():
         h = a["A1_results"][n]["hard_compatible_negatives"]
         d = a["A2_results"][n]
         sd = lambda v, k: f"{v[k]:.3f}" + (f"$\\pm${v[k + '_sd']:.3f}" if k + "_sd" in v else "")  # noqa: E731
-        rows.append(f"{n.replace('Preferential Attachment', 'Pref.~attach.').replace('Common Neighbours', 'Common neigh.')} & {sd(h, 'roc_auc')} & {sd(h, 'ap')} & {f3(d['ap'])} & {d['P@100']:.2f} & {d['R@500']:.3f} \\\\")
+        rows.append(f"{n.replace('Preferential Attachment', 'Pref.~attach.').replace('Common Neighbours', 'Common neigh.')} & {sd(h, 'roc_auc')} & {sd(h, 'ap')} & {sd(d, 'ap')} & {d['P@100']:.2f} & {d['R@500']:.3f} \\\\")
     tex = (r"""\begin{table}[t]\centering\caption{E2A link prediction (synthetic, 5 seeds for learned models). A1: held-out observed edges vs.\ material-compatible negatives. A2: ranking all """ +
            f"{a['A2_candidates']['n']:,} compatible unobserved pairs against {a['A2_candidates']['positives']:,} ground-truth hidden edges (base rate {a['A2_candidates']['base_rate']:.3f}" +
-           r"""). Adamic--Adar equals common neighbours. P@100 = precision of top 100; R@500 = recall of top 500.}\label{tab:exp2a}\scriptsize\setlength{\tabcolsep}{2.6pt}\begin{tabular}{lccccc}\toprule
+           r"""). Learned models: mean$\pm$sd over 5 seeds; the seed-0 MLP list used downstream has AP 0.220 and P@100 0.29. Adamic--Adar equals common neighbours. P@100/R@500 = precision of top 100/recall of top 500.}\label{tab:exp2a}\scriptsize\setlength{\tabcolsep}{2.6pt}\begin{tabular}{lccccc}\toprule
  & \multicolumn{2}{c}{A1 (held-out)} & \multicolumn{3}{c}{A2 (hidden-edge discovery)}\\\cmidrule(lr){2-3}\cmidrule(lr){4-6}
 Method & ROC-AUC & AP & AP & P@100 & R@500\\\midrule
 """ + "\n".join(rows) + r"""

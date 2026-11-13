@@ -20,6 +20,7 @@ step "10b. Statistical tests (bootstrap, Wilcoxon-Holm)"; python -m ml.experimen
 step "10c. Sensitivity: LR risk in scenarios";       python -m ml.experiments.sensitivity_lr_risk
 step "10d. Independent verification";                python -m ml.experiments.verify_results
 step "11. Report figures, tables, diagrams, dictionary"; python -m ml.experiments.report_figures && python -m ml.experiments.paper_figures && python -m ml.experiments.paper_tables && python documentation/diagrams/make_diagrams.py && python -m ml.data_engineering.data_dictionary
+step "11b. Report-number audit";                  python -m ml.experiments.audit_report_numbers
 step "12. Database (DATABASE_URL or SQLite)";       python -m backend.database_setup --drop && python -m backend.data_import
 step "13. Tests";                                   python -m pytest tests -q
 echo; echo "All steps completed."

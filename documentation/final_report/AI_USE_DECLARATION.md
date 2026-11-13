@@ -1,14 +1,44 @@
 # AI Use Declaration
 
-| Tool | Version / date | Used for |
+## Declaration used in the report (Section V)
+
+> **AI assistance disclosure.** Generative AI (Claude Code, Anthropic; 12–13 Nov 2026) was used extensively as a development and writing
+> assistant: under the authors' direction it generated most of the code, executed the experiments and drafted the text, and all
+> repository commits were produced in AI-assisted sessions. The authors defined the problem, scope, datasets and evaluation
+> requirements, reviewed the report and directed its revisions after faculty review. All authors take responsibility for the submitted
+> work. The Gemini API is separately a functional component of the deployed assistant and was not used to write this report.
+
+## Types of AI use
+
+| Type | Tool | Role |
 |---|---|---|
-| Claude Code (Anthropic) | 12–13 Nov 2026 | Under the authors' direction: wrote most of the software (synthetic data generator, experiments, simulator, MILP, statistics, robustness analyses, Flask/React application), ran the experiments, drafted and edited the report text, and ran a targeted literature search (13 Nov 2026). |
-| Google Gemini (API) | runtime, deployed app | Phrases answers in the in-app assistant solely from tool outputs (database queries, model inference, simulation, optimisation). Not used to write the report or code. |
+| Development assistant | Claude Code (Anthropic) | Generated most of the source code (data generator, experiments, simulator, MILP, statistics, Flask/React app) and executed the experiments. |
+| Drafting and language | Claude Code (Anthropic) | Drafted the report, slides and viva notes, and revised them after each faculty or peer review. |
+| Debugging and checking | Claude Code (Anthropic) | Debugged code, wrote the 73 verification checks and the 87-item report-number audit, and checked references against publisher and index records. |
+| Functional component | Google Gemini API | Runtime only: phrases the in-app assistant's answers from tool outputs. Not used to write code or text. Not counted as authorship. |
 
-**The authors** (Shraddha Shete, Shirsodeep Biswas, Jayant Kumawat) defined the business problem, scope, datasets and evaluation
-requirements; reviewed the design and outputs; checked reported numbers against the logged result files (`experiments/`, including
-`experiments/VERIFICATION_REPORT.md` with 73 automated checks); verified the references against their sources; and take
-responsibility for the interpretation and the final text.
+## Evidence
 
-**Provenance:** the project was built from scratch in this repository (first commit 12 Nov 2026; see git history). No earlier course
-project, prototype or repository of the authors was reused. This is an author declaration, not external verification.
+- **Git history** (`git log`): 12 commits between 12 and 13 Nov 2026. Seven are attributed to "Supply Chain Black Box Team" and five to
+  "Claude". All 12 were created in Claude Code sessions, and each carries a `Co-Authored-By: Claude` trailer. No commit was made outside
+  an AI-assisted session.
+- **Session records**: the experiments, figures, tables and report text were generated and revised in those sessions.
+- **Human contributions on record**:
+  - the original project brief: problem, scope, required experiments, honesty rules and deliverables;
+  - team details;
+  - two faculty/peer review documents and the revision requests based on them;
+  - deployment configuration (Gemini key set by the user on Render).
+
+## Why no percentage is stated
+
+The available evidence does not support a claim that AI assistance was below 20% of the project work. On the git record it was the
+majority of code and text production. The declaration therefore describes the actual nature and extent of the assistance and states no
+percentage.
+
+To genuinely reduce AI dependence before submission, the authors could:
+
+1. Re-run `bash run_all.sh` themselves and check the outputs against `experiments/REPORT_NUMBER_AUDIT.md`.
+2. Rewrite sections of the report in their own words from their own understanding.
+3. Commit that work under their own git identities, so it appears in the history.
+
+If they do, update this declaration to describe exactly that work. Do not change it otherwise.

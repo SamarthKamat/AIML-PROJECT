@@ -162,7 +162,7 @@ d = pd.DataFrame([["DataCo Smart Supply Chain", "REAL (CC BY 4.0, Mendeley DOI; 
                  columns=["Dataset", "Provenance", "Size", "Use"])
 table(s, d, Inches(0.6), Inches(1.7), Inches(12.1), 14)
 bullets(s, ["Hidden edges are ground truth for the simulator and evaluation only — never model features.",
-            "196 validation checks pass (keys, foreign keys, dates, ranges, logical quantity rules); outliers flagged, not deleted.",
+            "178 validation checks pass (176 per-table across 14 tables + 2 cross-table) (keys, foreign keys, dates, ranges, logical quantity rules); outliers flagged, not deleted.",
             "AnonNet, SynDelay, UN Comtrade, NOAA investigated: not verifiable / not reachable — not used."], y=Inches(4.3), size=17)
 
 # 6 architecture

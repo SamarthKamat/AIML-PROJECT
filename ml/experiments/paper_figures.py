@@ -61,7 +61,7 @@ def architecture():
         ax.text(x + w / 2, y + 3.55, sub, ha="center", va="center", fontsize=5.7, color=NAVY, linespacing=1.15)
 
     data = [(4.5, "Synthetic FMCG ecosystem", "500 suppliers, 1,500 links\n(1,039 hidden), 14 tables"), (28.5, "DataCo (real)", "180,519 order lines\nshipment outcomes"),
-            (52.5, "SupplyGraph (real FMCG)", "40 products, 684 edges\n221 days"), (76.5, "MySQL + validation", "22 tables, 196 checks\npoint-in-time features")]
+            (52.5, "SupplyGraph (real FMCG)", "40 products, 684 edges\n221 days"), (76.5, "MySQL + validation", "22 tables, 178 checks\npoint-in-time features")]
     intel = [(4.5, "Calibrated risk (Exp 1)", "LR / DT / RF / XGBoost\n+ Platt / isotonic, SHAP"), (28.5, "Link discovery (Exp 2)", "CN, AA, node2vec, MLP,\nGCN, GraphSAGE, GAT"),
              (52.5, "Delay model (Exp 3)", "chronological split\nreal DataCo"), (76.5, "Cascade simulator (Exp 4)", "daily flows, buffers, lags\n500 CRN replications")]
     dec = [(4.5, "Network exposure", "reach x margin x\nuncovered days"),
@@ -207,75 +207,38 @@ def exp1():
 
 # ------------------------------------------------------------------ scenarios
 def scenarios():
+    """Fig. 4: (a) mean financial impact, (b) unmet demand, (c) minimum service level, (d) cheapest policy.
+    Ablation and sensitivity results are reported in Tables VII and VIII."""
     s = pd.read_csv(EXPERIMENTS / "scenario_results.csv")
     reps = pd.read_csv(EXPERIMENTS / "exp4_5_scenarios" / "scenario_replications.csv")
     sev = ["Mild", "Moderate", "Severe"]
-    fig, axs = plt.subplots(1, 4, figsize=(7.16, 2.1), gridspec_kw={"wspace": 0.42, "width_ratios": [1, 0.9, 1.15, 1.0]})
+    fig, axs = plt.subplots(1, 4, figsize=(7.16, 1.95), gridspec_kw={"wspace": 0.45})
     w = 0.26
-    # (a) mean impact with 95 % CI of the mean
+    ek = dict(lw=0.6, capsize=1.2, ecolor="black")
     for j, (p, c) in enumerate(POL.items()):
         g = s[s.policy == p].set_index("severity").reindex(sev)
         xs = np.arange(3) + (j - 1) * w
-        axs[0].bar(xs, g.financial_impact_inr / 1e7, w, color=c, label=p.split(": ")[1],
-                   yerr=1.96 * g.financial_impact_inr_se / 1e7, error_kw=dict(lw=0.6, capsize=1.2, ecolor="black"))
-    axs[0].set(ylabel="simulated impact (INR crore)", title="Mean impact, 95% CI")
-    axs[0].set_xticks(range(3))
-    axs[0].set_xticklabels(["Mild", "Mod.", "Severe"])
-    axs[0].legend(frameon=False, loc="upper left", fontsize=5.0, handlelength=0.9, borderaxespad=0.1)
-    # (b) distribution of paired savings vs A
-    data, pos, cols = [], [], []
-    for i, sv in enumerate(["Moderate", "Severe"]):
-        piv = reps[reps.severity == sv].pivot(index="replication", columns="policy", values="financial_impact_inr")
-        for k, p in enumerate(["B: Rule-based", "C: Optimisation"]):
-            data.append((piv["A: No intervention"] - piv[p]).values / 1e7)
-            pos.append(i * 2.6 + k)
-            cols.append(POL[p])
-    bp = axs[1].boxplot(data, positions=pos, widths=0.75, whis=(5, 95), showfliers=False, patch_artist=True, medianprops=dict(color="black", lw=0.8))
-    for patch, c in zip(bp["boxes"], cols):
-        patch.set(facecolor=c, alpha=0.75, lw=0.5)
-    for d_, x_ in zip(data, pos):
-        axs[1].plot(x_, d_.mean(), marker="D", ms=2.4, color="black")
-    axs[1].axhline(0, color=GREY, lw=0.6, ls=":")
-    axs[1].set_xticks([0.5, 3.1])
-    axs[1].set_xticklabels(["Mod.", "Severe"])
-    axs[1].set(ylabel="paired saving vs. A (INR crore)", title="Savings of B, C vs. A")
-    # (c) link-information ablation
-    ab = EXPERIMENTS / "robustness" / "ablation_summary.csv"
-    if ab.exists():
-        a_ = pd.read_csv(ab)
-        arms = list(dict.fromkeys(a_.policy))
-        short = ["A", "B-obs", "B-pred", "C-obs", "C-pred", "C-orac."]
-        acol = [POL["A: No intervention"], "#F2A541", "#F7D488", "#2F5D9F", POL["C: Optimisation"], "#7CC6A4"]
-        for i, sv in enumerate(["Moderate", "Severe"]):
-            g = a_[a_.severity == sv].set_index("policy").reindex(arms)
-            xs = i * 7 + np.arange(len(arms))
-            axs[2].bar(xs, g.impact_inr / 1e7, 0.85, color=acol, yerr=1.96 * g.impact_se / 1e7, error_kw=dict(lw=0.6, capsize=1, ecolor="black"))
-        axs[2].set_xticks([2.5, 9.5])
-        axs[2].set_xticklabels(["Mod.", "Severe"])
-        handles = [plt.Rectangle((0, 0), 1, 1, color=c) for c in acol]
-        axs[2].legend(handles, short, frameon=False, fontsize=5.0, ncol=1, loc="upper left", handlelength=0.8, labelspacing=0.25, borderaxespad=0.1)
-        axs[2].set(ylabel="simulated impact (INR crore)", title="Ablation: graph vs. logic")
-    # (d) sensitivity of severe C-over-A saving
-    sp = EXPERIMENTS / "robustness" / "sensitivity.csv"
-    if sp.exists():
-        d_ = pd.read_csv(sp)
-        sv = d_[d_.severity == "Severe"].reset_index(drop=True)[::-1]
-        mild = d_[d_.severity == "Mild"].set_index("setting")
-        yy = np.arange(len(sv))
-        axs[3].errorbar(sv.save_C_over_A / 1e7, yy, xerr=[(sv.save_C_over_A - sv.save_lo) / 1e7, (sv.save_hi - sv.save_C_over_A) / 1e7],
-                        fmt="o", ms=2.2, color=POL["C: Optimisation"], ecolor=NAVY, elinewidth=0.6, capsize=1)
-        base = float(sv[sv.setting == "base"].save_C_over_A.iloc[0]) / 1e7
-        axs[3].axvline(base, color=GREY, lw=0.6, ls=":")
-        axs[3].axvline(0, color="black", lw=0.5)
-        axs[3].set_yticks(yy)
-        short = {"base": "base", "overhead 0": "overhead 0", "overhead 50k": "overhead 50k", "penalty 5%": "penalty 5%", "penalty 30%": "penalty 30%",
-                 "interruption 25k": "interrupt. 25k", "interruption 150k": "interrupt. 150k", "duration 30 d": "duration 30 d", "duration 90 d": "duration 90 d",
-                 "spare capacity x0.5": "spare cap. x0.5", "spare capacity x1.5": "spare cap. x1.5", "alternate risk x0.5": "alt. risk x0.5",
-                 "alternate risk x2": "alt. risk x2", "visibility -50% deep links": "known links -50%", "visibility +50% hidden links": "known links +50%"}
-        axs[3].set_yticklabels([short.get(t, t) for t in sv.setting], fontsize=5.2)
-        axs[3].set(xlabel="severe saving, C vs. A (INR crore)", title="Sensitivity (severe)")
-        axs[3].grid(axis="y", visible=False)
+        axs[0].bar(xs, g.financial_impact_inr / 1e7, w, color=c, label=p.split(": ")[1], yerr=1.96 * g.financial_impact_inr_se / 1e7, error_kw=ek)
+        axs[1].bar(xs, g.unmet_demand_units / 1e3, w, color=c, yerr=1.96 * g.unmet_demand_units_se / 1e3, error_kw=ek)
+        axs[2].bar(xs, 100 * g.min_service_level, w, color=c)
+    axs[0].set(ylabel="INR crore (simulated)", title="Mean financial impact")
+    axs[1].set(ylabel="thousand units", title="Unmet demand")
+    axs[2].set(ylabel="% of demand met", title="Minimum service level", ylim=(50, 102))
+    axs[0].legend(frameon=False, loc="upper left", fontsize=5.4, handlelength=0.9, borderaxespad=0.1)
+    win = reps.loc[reps.groupby(["severity", "replication"]).financial_impact_inr.idxmin()].groupby("severity").policy.value_counts(normalize=True).unstack(fill_value=0).reindex(sev)
+    bottom = np.zeros(3)
+    for p, c in POL.items():
+        v = 100 * win.get(p, pd.Series(0, index=sev)).values
+        axs[3].bar(np.arange(3), v, 0.6, bottom=bottom, color=c)
+        for i in range(3):
+            if v[i] > 9:
+                axs[3].text(i, bottom[i] + v[i] / 2, f"{v[i]:.0f}", ha="center", va="center", fontsize=6, color="white", fontweight="bold")
+        bottom += v
+    axs[3].set(ylabel="% of replications", title="Cheapest policy", ylim=(0, 100))
     for a, l in zip(axs, "abcd"):
+        a.set_xticks(range(3))
+        a.set_xticklabels(["Mild", "Mod.", "Severe"])
+        a.set_xlabel("disruption severity", fontsize=6.5)
         tag(a, l)
     save(fig, "fig_scenarios")
 

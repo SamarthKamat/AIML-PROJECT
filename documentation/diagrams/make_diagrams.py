@@ -178,7 +178,7 @@ def d09_nine():
 def main():
     d01_system()
     flow("02_data_engineering", "Data engineering workflow",
-         ["Raw downloads\n(DataCo, SupplyGraph)\nnever modified", "Synthetic generator\nseed 42", "Validation\n196 checks\nFK, dates, ranges", "Processing &\npoint-in-time\nfeatures", "MySQL import\n+ data dictionary"],
+         ["Raw downloads\n(DataCo, SupplyGraph)\nnever modified", "Synthetic generator\nseed 42", "Validation\n178 checks\nFK, dates, ranges", "Processing &\npoint-in-time\nfeatures", "MySQL import\n+ data dictionary"],
          [C["data"]] * 5)
     d03_er()
     d04_network()
